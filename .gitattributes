@@ -1,0 +1,17 @@
+# 换行符规范化
+# ---------------------------------------------------------------------------
+# 强制以 LF 存入仓库。Windows 上如果提交了 CRLF，GitHub Actions 的 run: 块
+# 会带上 \r，Linux runner 执行时报 "$'\r': command not found"，整条流水线失败。
+* text=auto eol=lf
+
+# 二进制资源不做换行符转换
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.zip binary

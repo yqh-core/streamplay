@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>StreamPlay 流影 - M3U8 在线播放器</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件，纯前端实现。">
+    <meta name="keywords" content="m3u8播放器,HLS在线播放,在线视频播放器,mp4播放,m3u8在线播放">
+    <meta name="theme-color" content="#0e90d2">
+
+    <link rel="icon" href="./images/logo.ico">
+    <link rel="apple-touch-icon" href="./images/logo.png">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <header class="hd">
+        <div class="link-list">
+            <a class="brand" href="./index.html">
+                <img src="./images/logo.png" alt="StreamPlay 流影">
+                <span>StreamPlay 流影</span>
+            </a>
+            <nav>
+                <a href="./index.html" aria-current="page">首页</a>
+                <a href="./about.html">关于</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main">
+        <h1>StreamPlay 流影</h1>
+        <p class="subtitle">粘贴 m3u8 / HLS 或 mp4 地址，点击播放即可观看</p>
+
+        <!-- ① 地址输入：已预填一个可用的测试流，打开页面就能直接点播放 -->
+        <div class="form">
+            <input type="text" id="url" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+                placeholder="粘贴 m3u8 / HLS / mp4 播放地址" autocomplete="off" spellcheck="false">
+            <button type="button" id="play-btn" title="播放">
+                <img src="./images/ic-play.png" alt="">
+                <span>播放</span>
+            </button>
+        </div>
+
+        <p class="hint">
+            输入框里已经填好一个测试地址，<strong>直接点右边的「播放」按钮</strong>（或按回车）就能看到画面。
+            想播自己的视频，把地址换成你的 m3u8 链接，再点一次播放即可。
+        </p>
+
+        <!-- ② 示例流快捷按钮：没有地址时一键体验 -->
+        <div class="demo-bar">
+            <span class="demo-label">没有地址？点这里直接试：</span>
+            <button type="button" class="demo-btn" data-url="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">测试流① 多码率(10分钟)</button>
+            <button type="button" class="demo-btn" data-url="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8">测试流② Apple官方</button>
+            <button type="button" class="demo-btn" data-url="https://stream.mux.com/v69RSHhFelSm4701snP22dYz2jICy4E4FUyk02rW4gxRM.m3u8">测试流③ 短视频</button>
+        </div>
+
+        <div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+        <!-- ③ 播放器 -->
+        <div class="player-wrap">
+            <video id="player" preload="auto" playsinline webkit-playsinline controls></video>
+        </div>
+
+        <!-- ④ 使用说明 -->
+        <div class="card">
+            <p><strong>怎么播放？三步就够了</strong></p>
+            <ol class="steps">
+                <li><strong>拿到地址</strong> —— 在输入框里粘贴你的 m3u8 / HLS 播放链接，或直接点上面的「测试流」按钮自动填入。</li>
+                <li><strong>点播放</strong> —— 点右侧蓝色「播放」按钮，或直接按 <kbd>Enter</kbd> 回车。</li>
+                <li><strong>观看</strong> —— 画面出现后，鼠标移到播放器上，用底部控制条暂停、调音量、拖进度、全屏。手机浏览器横屏观看效果更好。</li>
+            </ol>
+            <p class="note">
+                提示：如果一直停在「正在加载」或提示失败，多半是地址本身打不开，或对方服务器不允许跨域访问。
+                可以先用浏览器新标签页直接打开这个地址验证一下 —— 能打开，播放器才能播。
+            </p>
+        </div>
+
+        <!-- ⑤ 开发者：嵌入到自己网站 -->
+        <div class="card dev-card">
+            <p><strong>嵌入到你的网站<span class="tag">开发者</span></strong></p>
+            <p>在页面地址后拼接 <code>?url=</code> 参数即可自动加载播放：</p>
+            <pre>&lt;iframe src="https://你的域名/?url=https://example.com/index.m3u8" width="100%" height="480" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
+        </div>
+
+        <!-- ⑥ 科普 -->
+        <div class="card">
+            <p>
+                StreamPlay 流影是一款纯前端的在线播放器，基于 HTML5 <code>&lt;video&gt;</code> 与开源
+                <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a>
+                实现。它无需安装任何浏览器插件或客户端，打开网页即可播放 .m3u8 HTTP Live Streaming (HLS)
+                流媒体，同时也支持浏览器原生的 mp4 等格式。其原理是把 MPEG-2 传输流与 AAC/MP3 音频流
+                转封装为 ISO BMFF (MP4) 分片后交给浏览器播放，并借助 Web Worker 异步完成转码，因此在
+                现代浏览器中可以流畅播放直播与点播内容。
+            </p>
+
+            <h2>什么是 m3u8 文件？</h2>
+            <p>
+                扩展名为 <a href="https://en.wikipedia.org/wiki/M3U#M3U8" target="_blank" rel="noopener">M3U8</a>
+                的文件是一种 UTF-8 编码的播放列表文件。它是纯文本文件，音视频播放器可以用它来描述媒体文件的位置。
+            </p>
+            <p>
+                例如，一个 M3U8 文件可能指向互联网电台的在线音频流；另一个文件可能是在本地创建的，用于为你的个人音乐或视频系列建立播放列表。
+            </p>
+            <p>
+                无论哪种方式，效果都相同：打开文件即可快速开始播放列表所指向的内容。如果你希望反复播放同一批内容，制作一个 M3U8 文件就是最便捷的方式。
+            </p>
+            <p>
+                文件内部的条目可以使用绝对路径、相对路径或完整 URL 来指向具体的媒体文件，甚至整个媒体文件夹；文件中的其他信息则可以作为描述内容的注释。
+            </p>
+            <p>
+                M3U8 最初是为播放 MP3 等音频文件而设计，如今越来越多的场景用它来承载视频播放列表，它同样可以指定在线流媒体的音视频源。目前主流的播放器与软件大多支持 M3U8 格式。
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>本站仅提供播放技术演示，不存储、不制作、不分发任何音视频内容。资源均来源于网络，如有侵权请联系删除。</p>
+            <p>&copy; 2026 StreamPlay 流影</p>
+        </div>
+    </div>
+
+    <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
+    <script src="./libs/hls.min.js"></script>
+    <script src="./js/player.js"></script>
+
+</body>
+
+</html>

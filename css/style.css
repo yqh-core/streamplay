@@ -1,0 +1,452 @@
+/* ==========================================================================
+   StreamPlay 流影 - 样式表
+   说明：全站零外部 CDN 依赖，样式全部本地化
+   ========================================================================== */
+
+:root {
+    --primary: #0e90d2;
+    --primary-dark: #0b76ae;
+    --primary-light: #e8f5fc;
+    --text: #222222;
+    --text-muted: #6b7280;
+    --border: #dfe3e8;
+    --bg: #ffffff;
+    --bg-soft: #f7f9fb;
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: var(--primary);
+}
+
+/* ---------------------------------------------------------------- 顶部导航 */
+.hd {
+    width: 100%;
+    background-color: var(--primary);
+}
+
+.hd .link-list {
+    padding: 0 16px;
+    height: 56px;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+}
+
+.hd .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.hd .brand img {
+    width: 26px;
+    height: 26px;
+    display: block;
+    border-radius: 5px;
+    background: #fff;
+    object-fit: contain;
+}
+
+.hd nav {
+    display: flex;
+    gap: 22px;
+    margin-left: auto;
+}
+
+.hd nav a {
+    font-size: 15px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: 0.92;
+    transition: opacity 0.15s ease;
+}
+
+.hd nav a:hover,
+.hd nav a[aria-current="page"] {
+    opacity: 1;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* ---------------------------------------------------------------- 主体布局 */
+.main {
+    padding: 24px 16px 48px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.main h1 {
+    text-align: center;
+    font-size: 30px;
+    color: var(--primary);
+    font-weight: 800;
+    margin: 8px 0 6px;
+    letter-spacing: 0.5px;
+}
+
+.main .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 24px;
+}
+
+/* ---------------------------------------------------------------- 地址输入 */
+.main .form {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 8px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(14, 144, 210, 0.12);
+}
+
+.main .form input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    font-size: 15px;
+    color: var(--text);
+    border: 1px solid var(--primary);
+    border-right: 0;
+    padding: 0 12px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: #fff;
+}
+
+.main .form input:focus {
+    outline: 2px solid var(--primary-light);
+    outline-offset: -1px;
+}
+
+.main .form button {
+    width: 96px;
+    height: 44px;
+    border: 0;
+    padding: 0;
+    background: var(--primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s ease;
+}
+
+.main .form button:hover {
+    background: var(--primary-dark);
+}
+
+.main .form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.main .form button img {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+/* 移动端：按钮收窄为图标 */
+@media screen and (max-width: 640px) {
+    .main .form button {
+        width: 52px;
+    }
+
+    .main .form button span {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------- 提示条 */
+.tip {
+    display: none;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    word-break: break-all;
+}
+
+.tip.is-visible {
+    display: block;
+}
+
+.tip.is-info {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.tip.is-warn {
+    background: #fff7e6;
+    color: #a15c00;
+}
+
+.tip.is-error {
+    background: #fdecec;
+    color: #b3261e;
+}
+
+/* ---------------------------------------------------------------- 播放器 */
+.player-wrap {
+    width: 100%;
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    aspect-ratio: 16 / 9;
+    min-height: 200px;
+}
+
+.player-wrap video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+}
+
+/* ---------------------------------------------------------------- 内容区 */
+.card {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 24px;
+}
+
+.card>p:first-child {
+    margin-top: 0;
+}
+
+.card>p:last-child {
+    margin-bottom: 0;
+}
+
+.card pre {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 8px 0 0;
+    overflow-x: auto;
+    font-size: 13px;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+    color: #374151;
+}
+
+.card h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 18px 0 6px;
+    color: var(--text);
+}
+
+.card p {
+    font-size: 15px;
+    color: #374151;
+}
+
+/* ---------------------------------------------------------------- 播放引导 */
+.hint {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0 0 14px;
+    line-height: 1.7;
+}
+
+.hint strong {
+    color: var(--primary-dark);
+}
+
+.demo-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.demo-label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.demo-btn {
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    padding: 7px 11px;
+    border: 1px solid var(--primary);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--primary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.demo-btn:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+/* ---------------------------------------------------------------- 使用说明 */
+.steps {
+    margin: 8px 0 12px;
+    padding-left: 22px;
+    color: #374151;
+}
+
+.steps li {
+    margin-bottom: 8px;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.steps strong {
+    color: var(--text);
+}
+
+.card kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+    font-size: 12px;
+    color: #374151;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+}
+
+.card .note {
+    font-size: 13px;
+    color: var(--text-muted);
+    background: #fff;
+    border-left: 3px solid var(--primary);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 0;
+}
+
+.tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--text-muted);
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
+.dev-card {
+    background: #fff;
+    border-style: dashed;
+}
+
+/* ---------------------------------------------------------------- 页脚 */
+.footer {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.footer p {
+    margin: 0 0 6px;
+}
+
+.footer .links a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.footer .links a:hover {
+    text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------- 关于页 */
+.about h1 {
+    font-size: 26px;
+    margin-bottom: 18px;
+}
+
+.about h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 26px 0 8px;
+    padding-left: 10px;
+    border-left: 3px solid var(--primary);
+}
+
+.about ul {
+    padding-left: 20px;
+    color: #374151;
+}
+
+.about li {
+    margin-bottom: 6px;
+}
+
+.about table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.about th,
+.about td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.about th {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 600;
+    width: 34%;
+}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>关于 - StreamPlay 流影</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="关于 StreamPlay 流影：一款纯前端、零外部依赖的 m3u8 / HLS 在线播放器，介绍技术实现、部署方式与常见问题排查。">
+    <meta name="theme-color" content="#0e90d2">
+
+    <link rel="icon" href="./images/logo.ico">
+    <link rel="apple-touch-icon" href="./images/logo.png">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <header class="hd">
+        <div class="link-list">
+            <a class="brand" href="./index.html">
+                <img src="./images/logo.png" alt="StreamPlay 流影">
+                <span>StreamPlay 流影</span>
+            </a>
+            <nav>
+                <a href="./index.html">首页</a>
+                <a href="./about.html" aria-current="page">关于</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main about">
+        <h1>关于 StreamPlay 流影</h1>
+        <p>
+            StreamPlay 流影是一款纯前端的在线播放器，用于播放 m3u8 / HLS 直播与点播地址，
+            同时兼容浏览器原生的 mp4 等格式。它不依赖任何后端服务，把整个目录丢到静态服务器上就能跑。
+        </p>
+
+        <h2>核心特性</h2>
+        <ul>
+            <li><strong>零外部依赖</strong>：不加载任何第三方 CDN 资源，hls.js 已本地化，断网 / CDN 故障也能正常打开。</li>
+            <li><strong>双引擎自动切换</strong>：m3u8 走 hls.js；mp4 等格式走浏览器原生播放；原生失败会自动降级到 hls.js 重试。</li>
+            <li><strong>移动端适配</strong>：响应式布局，支持 iOS 行内播放（playsinline）。</li>
+            <li><strong>深链播放</strong>：支持 <code>?url=</code> 参数直接指定播放地址，便于 iframe 嵌入。</li>
+            <li><strong>错误可见</strong>：加载中、网络异常、跨域受限、格式不支持等情况都会在页面上给出明确提示，不会静默失败。</li>
+        </ul>
+
+        <h2>技术栈</h2>
+        <table>
+            <tr>
+                <th>播放内核</th>
+                <td>hls.js 1.5.17（本地部署，用于 HLS 转封装）+ HTML5 <code>&lt;video&gt;</code></td>
+            </tr>
+            <tr>
+                <th>样式</th>
+                <td>原生 CSS（CSS 变量 + Flex 布局），无 UI 框架</td>
+            </tr>
+            <tr>
+                <th>脚本</th>
+                <td>原生 JavaScript，无 jQuery、无构建步骤</td>
+            </tr>
+            <tr>
+                <th>后端</th>
+                <td>无，纯静态站点</td>
+            </tr>
+        </table>
+
+        <h2>目录结构</h2>
+        <pre>streamplay/
+├── index.html          主页面
+├── about.html          关于页
+├── css/style.css       样式表
+├── js/player.js        播放逻辑
+├── libs/hls.min.js     HLS 播放内核（本地）
+└── images/             图标资源</pre>
+
+        <h2>部署方式</h2>
+        <ul>
+            <li><strong>直接部署</strong>：把整个目录上传到任意静态服务器的网站根目录，访问 <code>index.html</code> 即可。</li>
+            <li><strong>Nginx 示例</strong>：<code>root /var/www/streamplay;</code> 并确保 <code>.m3u8</code>、<code>.ts</code> 不被当作下载文件处理。</li>
+            <li><strong>本地预览</strong>：在本目录执行 <code>python -m http.server 8080</code>，浏览器打开 <code>http://localhost:8080</code>。</li>
+        </ul>
+
+        <h2>常见问题排查</h2>
+        <table>
+            <tr>
+                <th>页面提示「跨域被拦截」</th>
+                <td>目标 m3u8 所在服务器未开启 CORS。浏览器出于安全策略会阻止跨域拉流，需要在流媒体服务器上配置 <code>Access-Control-Allow-Origin</code>。</td>
+            </tr>
+            <tr>
+                <th>一直停在加载中</th>
+                <td>检查地址是否可直接访问（用浏览器新标签页打开该 m3u8），以及网络是否能直连到该域名。</td>
+            </tr>
+            <tr>
+                <th>黑屏但无报错</th>
+                <td>多为编码格式不受支持。播放器要求视频为 H.264 编码，H.265/HEVC 在多数浏览器中无法播放。</td>
+            </tr>
+            <tr>
+                <th>浏览器自动播放被拦截</th>
+                <td>这是浏览器的自动播放策略，属正常行为，点击播放器上的播放按钮即可。</td>
+            </tr>
+        </table>
+
+        <h2>免责声明</h2>
+        <p>
+            本项目仅提供播放技术演示，不存储、不制作、不分发任何音视频内容。
+            请确保你拥有所播放内容的合法授权，因使用本项目产生的任何法律责任由使用者自行承担。
+        </p>
+
+        <div class="footer">
+            <p class="links"><a href="./index.html">← 返回首页</a></p>
+            <p>&copy; 2026 StreamPlay 流影</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

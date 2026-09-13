@@ -1,0 +1,186 @@
+name: Deploy to Cloudflare Pages
+
+# 触发时机：
+#   1. push 到 main        -> 生产环境（https://<项目名>.pages.dev）
+#   2. 提交 Pull Request   -> 预览环境（https://pr-<编号>.<项目名>.pages.dev）
+#   3. 手动触发            -> 可指定部署到哪个分支环境
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 部署到哪个分支环境（默认 main，即生产）
+        required: false
+        default: main
+        type: string
+
+# 同一分支的并发部署只保留最新一次，避免旧提交覆盖新提交
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CF_PROJECT: streamplay        # Cloudflare Pages 项目名，改了这里要同步改仓库变量
+  WRANGLER_VERSION: '4'
+
+jobs:
+  # ------------------------------------------------------------------
+  # 第一步：校验源码、组装部署产物
+  # 这一步不碰 Cloudflare，纯粹尽早发现问题。站点是纯静态的，
+  # 「构建」的实质就是把要发布的那几个文件挑出来。
+  # ------------------------------------------------------------------
+  verify:
+    name: 校验并组装产物
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 校验站点必需文件是否齐全
+        run: |
+          set -euo pipefail
+          required="index.html about.html css/style.css js/player.js libs/hls.min.js images/logo.ico images/logo.png images/ic-play.png"
+          for f in $required; do
+            if [ ! -f "$f" ]; then
+              echo "::error file=$f::缺少站点必需文件"
+              exit 1
+            fi
+          done
+          echo "必需文件齐全（$(echo $required | wc -w | tr -d ' ') 个）"
+
+      - name: 校验页面上引用的本地资源都真实存在
+        run: |
+          set -euo pipefail
+          # 抽出 HTML 里的 src="./x" / href="./x"，以及 CSS 里的 url(./x)
+          grep -rhoE '(src|href)="\./[^"]+"' index.html about.html \
+            | sed -E 's/.*="\.\///; s/"$//' | sort -u > /tmp/refs.txt
+          grep -rhoE 'url\(\./[^)]+\)' css/style.css \
+            | sed -E 's/^url\(\.\///; s/\)$//' >> /tmp/refs.txt || true
+
+          fail=0
+          while IFS= read -r r; do
+            [ -z "$r" ] && continue
+            if [ ! -e "$r" ]; then
+              echo "::error file=$r::页面引用了不存在的文件"
+              fail=1
+            fi
+          done < /tmp/refs.txt
+          [ "$fail" -eq 0 ] || exit 1
+          echo "本地引用全部有效（$(grep -c . /tmp/refs.txt | tr -d ' ') 条）"
+
+      - name: 组装部署目录 dist
+        run: |
+          set -euo pipefail
+          rm -rf dist && mkdir -p dist
+          # 只发布站点运行必需的文件；README 等开发文件不进部署产物
+          cp -r index.html about.html css js libs images dist/
+
+          count=$(find dist -type f | wc -l | tr -d ' ')
+          echo "dist 文件数: $count"
+          echo "dist 体积: $(du -sh dist | cut -f1)"
+
+          # 提前卡住 Cloudflare 的两条硬限制，避免部署到一半被拒
+          if [ "$count" -gt 20000 ]; then
+            echo "::error::文件数 $count 超过 Cloudflare 上限 20000"
+            exit 1
+          fi
+          if find dist -type f -size +25M | grep -q .; then
+            echo "::error::存在超过 25MiB 的单文件，Cloudflare 会拒绝上传"
+            find dist -type f -size +25M
+            exit 1
+          fi
+          echo "产物符合 Cloudflare 限制（<=20000 文件，单文件 <=25MiB）"
+
+      - name: 上传产物供部署使用
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+          retention-days: 1
+
+  # ------------------------------------------------------------------
+  # 第二步：发布到 Cloudflare Pages
+  # ------------------------------------------------------------------
+  deploy:
+    name: 发布到 Cloudflare Pages
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'pull_request' && 'preview' || 'production' }}
+      url: ${{ steps.target.outputs.url }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 下载部署产物
+        uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 确定要部署的分支
+        id: target
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            branch="pr-${{ github.event.number }}"
+            env_name="预览"
+          else
+            branch="${{ github.event.inputs.branch }}"
+            [ -n "$branch" ] || branch="main"
+            env_name="生产"
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "url=https://${branch}.${CF_PROJECT}.pages.dev" >> "$GITHUB_OUTPUT"
+          echo "将部署到${env_name}环境，分支: $branch"
+
+      - name: 确认 Pages 项目存在（不存在则创建）
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          existing=$(npx --yes wrangler@${WRANGLER_VERSION} pages project list --json \
+            | tr -d ' \n' | grep -o "\"name\":\"${CF_PROJECT}\"" | head -1 || true)
+          if [ -z "$existing" ]; then
+            echo "项目 ${CF_PROJECT} 不存在，正在创建…"
+            npx --yes wrangler@${WRANGLER_VERSION} pages project create "${CF_PROJECT}" \
+              --production-branch=main
+          else
+            echo "项目 ${CF_PROJECT} 已存在"
+          fi
+
+      - name: 发布
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@${WRANGLER_VERSION} pages deploy dist \
+            --project-name="${CF_PROJECT}" \
+            --branch="${{ steps.target.outputs.branch }}" \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="$(git log -1 --pretty=%s 2>/dev/null || echo 'deploy from GitHub Actions')"
+
+      - name: 输出访问地址
+        run: |
+          {
+            echo "### 部署完成"
+            echo ""
+            echo "- 环境：\`${{ steps.target.outputs.branch }}\`"
+            echo "- 地址：${{ steps.target.outputs.url }}"
+            echo "- 提交：\`${GITHUB_SHA:0:7}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
