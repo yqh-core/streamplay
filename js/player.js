@@ -65,6 +65,12 @@
         return /\.m3u8(\?|#|$)/i.test(url);
     }
 
+    /* 明确的非 HLS 容器格式。这类地址加载失败就是真的失败了 ——
+       再拿 hls.js 去解析一个 mp4 只会白等 3 次重试，最后还报个不相关的错。 */
+    function isPlainMediaFile(url) {
+        return /\.(mp4|m4v|webm|ogv|ogg|mov|mkv|flv|avi|wmv)(\?|#|$)/i.test(url);
+    }
+
     function nativeHlsSupported() {
         return !!video.canPlayType('application/vnd.apple.mpegurl');
     }
@@ -225,6 +231,12 @@
         /* 地址本身是 m3u8，说明引擎已选对，此处只报告失败 */
         if (isHlsUrl(currentUrl)) {
             showTip('播放失败：m3u8 地址不可达，或该地址不允许跨域访问。', 'error');
+            return;
+        }
+
+        /* mp4 这类明确格式：直接给结论，不要再拿 HLS 引擎兜一圈 */
+        if (isPlainMediaFile(currentUrl)) {
+            showTip('播放失败：地址不可达，或该格式不受当前浏览器支持（建议用 mp4 / webm）。', 'error');
             return;
         }
 

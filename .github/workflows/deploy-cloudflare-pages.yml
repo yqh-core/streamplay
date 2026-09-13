@@ -53,7 +53,7 @@ jobs:
       - name: 校验站点必需文件是否齐全
         run: |
           set -euo pipefail
-          required="index.html about.html css/style.css js/player.js libs/hls.min.js images/logo.ico images/logo.png images/ic-play.png"
+          required="index.html about.html 404.html css/style.css js/player.js libs/hls.min.js images/logo.ico images/logo.png images/ic-play.png"
           for f in $required; do
             if [ ! -f "$f" ]; then
               echo "::error file=$f::缺少站点必需文件"
@@ -87,7 +87,9 @@ jobs:
           set -euo pipefail
           rm -rf dist && mkdir -p dist
           # 只发布站点运行必需的文件；README 等开发文件不进部署产物
-          cp -r index.html about.html css js libs images dist/
+          # 404.html 必须带上：Pages 只在根目录有它时才对未匹配路径返回真 404，
+          # 否则会当成 SPA 把所有路径兜底到 index.html（返回 200）
+          cp -r index.html about.html 404.html css js libs images dist/
 
           count=$(find dist -type f | wc -l | tr -d ' ')
           echo "dist 文件数: $count"

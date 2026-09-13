@@ -52,7 +52,9 @@
         <div class="demo-bar">
             <span class="demo-label">没有地址？点这里直接试：</span>
             <button type="button" class="demo-btn" data-url="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">测试流① 多码率(10分钟)</button>
-            <button type="button" class="demo-btn" data-url="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8">测试流② Apple官方</button>
+            <!-- 注意：示例流必须允许跨域（响应带 Access-Control-Allow-Origin），否则浏览器会拦截、
+                 播放器只能报「地址不可达」。Apple 的 devstreaming-cdn 就不带该头，实测播不了，已换掉。 -->
+            <button type="button" class="demo-btn" data-url="https://test-streams.mux.dev/tos_ismc/main.m3u8">测试流② 多码率(Tears of Steel)</button>
             <button type="button" class="demo-btn" data-url="https://stream.mux.com/v69RSHhFelSm4701snP22dYz2jICy4E4FUyk02rW4gxRM.m3u8">测试流③ 短视频</button>
         </div>
 
