@@ -37,13 +37,18 @@ streamplay/
 │   └── player.js       播放逻辑（双引擎、错误处理、深链解析）
 ├── libs/
 │   └── hls.min.js      HLS 播放内核（本地部署，1.5.17）
-└── images/
-    ├── ic-play.png     播放按钮图标
-    ├── logo.png        站标
-    └── logo.ico        favicon
+├── images/
+│   ├── ic-play.png     播放按钮图标
+│   ├── logo.png        站标
+│   └── logo.ico        favicon
+├── .github/
+│   └── workflows/
+│       └── deploy-cloudflare-pages.yml   自动部署流水线
+├── .gitattributes      换行符规范化（强制 LF，防 CI 踩坑）
+└── .gitignore
 ```
 
-全站仅 2 个 JS 文件，均无构建依赖。
+站点运行只需要前 6 项共 8 个文件；`.github/`、`.gitattributes`、`.gitignore`、`README.md` 是工程文件，不会进部署产物。
 
 ---
 
@@ -82,10 +87,99 @@ npx serve -l 8080
 
 ---
 
+## 部署到 Cloudflare Pages
+
+站点是纯静态的，全部文件加起来约 620 KB / 8 个文件，远低于 Cloudflare 的限制。
+
+### 限制速查
+
+| 项目 | 限制 |
+| --- | --- |
+| 仪表盘拖拽 / 上传 ZIP（Direct Upload） | **1,000 个文件** |
+| Wrangler CLI 上传 | 20,000 个文件（付费版 100,000） |
+| 单文件大小 | 25 MiB |
+
+本项目实际 8 个文件、最大单文件 413 KB，两种方式都毫无压力。
+
+### 方式一：仪表盘拖拽（最快）
+
+1. 打开 Cloudflare 控制台 → **Workers & Pages** → **Create application** → **Get started** → **Drag and drop your files**
+2. 把整个项目目录（或打包好的 ZIP）拖进去，填个项目名
+3. 点 **Deploy**
+
+> 拖拽时不要上传 `README.md`、`.github/` 等工程文件，它们会被公开访问。只拖
+> `index.html`、`about.html`、`css/`、`js/`、`libs/`、`images/` 即可。
+>
+> **注意**：`index.html` 必须在压缩包的**根目录**，不能套一层文件夹，否则站点打开是个文件列表。
+
+### 方式二：GitHub Actions 自动部署（推荐）
+
+仓库内已配好流水线 `.github/workflows/deploy-cloudflare-pages.yml`：
+
+| 触发条件 | 部署目标 | 访问地址 |
+| --- | --- | --- |
+| push 到 `main` | 生产环境 | `https://<项目名>.pages.dev` |
+| 提交 Pull Request | 预览环境 | `https://pr-<编号>.<项目名>.pages.dev` |
+| 手动触发（可指定分支） | 对应分支环境 | 同上规律 |
+
+流水线分两个 job：
+
+1. **校验并组装产物** —— 检查必需文件是否齐全、页面引用的本地资源是否都存在、
+   文件数与单文件体积是否超出 Cloudflare 限制，然后生成 `dist/`。这一步不接触
+   Cloudflare，问题会尽早暴露。
+2. **发布** —— 确认 Pages 项目存在（不存在则自动创建），用 Wrangler 上传 `dist/`。
+
+#### 需要配置的仓库 Secrets
+
+在 GitHub 仓库 → **Settings** → **Secrets and variables** → **Actions** 中添加两个 Secret：
+
+| Secret | 说明 |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌，权限需含 **Account → Cloudflare Pages → Edit** |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 账户 ID，在控制台右侧栏或 URL 中可见 |
+
+API Token 申请地址：Cloudflare 控制台 → **My Profile** → **API Tokens** → **Create Token**，
+选用 **Edit Cloudflare Workers** 模板，或自定义并勾选 `Account / Cloudflare Pages / Edit`。
+
+#### 项目名
+
+流水线里的项目名由 workflow 顶部的 `env.CF_PROJECT` 控制，默认 `streamplay`。
+要改名就改这一处，它会同时用于项目创建和部署目标。
+
+#### 首次部署
+
+```bash
+git remote add origin git@github.com:yqh-core/streamplay.git
+git push -u origin main
+```
+
+推送后到仓库 **Actions** 页面即可看到流水线运行；成功后访问
+`https://streamplay.pages.dev`。
+
+> 如果首次运行报权限错误，检查 API Token 是否包含
+> `Account → Cloudflare Pages → Edit`，以及 `CLOUDFLARE_ACCOUNT_ID` 是否正确。
+
+### 方式三：本地用 Wrangler 部署
+
+```bash
+npx wrangler login
+npx wrangler pages project create streamplay --production-branch=main
+npx wrangler pages deploy . --project-name=streamplay
+```
+
+> 直接部署当前目录时，`README.md` 也会被上传。想避免，先把站点文件复制到临时目录再部署。
+
+---
+
 ## 使用说明
+
+页面打开后**输入框已预填一个可用的测试流地址**，直接点右侧「播放」按钮即可看到画面；
+也可以点输入框下方的「测试流」快捷按钮一键体验。播放自己的视频：
 
 1. 在输入框粘贴 m3u8 / HLS / mp4 播放地址
 2. 点击「播放」按钮，或直接按 <kbd>Enter</kbd> 回车
+
+地址栏支持相对路径、绝对 URL；只填 `example.com/xxx.m3u8` 这种裸域名时会自动补上 `https://`。
 
 ### iframe 嵌入
 
@@ -137,6 +231,8 @@ window.StreamPlay.stop();
 | H.265 无法播放 | 黑屏、无报错，只有音频或完全无画面 | 浏览器对 HEVC 支持极差，播放器要求 H.264 编码 |
 | `href="/"` 部署到子目录后 404 | 部署到 `https://domain.com/player/` 时导航失效 | 原来用的是根路径写死的绝对地址，已改为 `./` 相对路径 |
 | CDN 抽风导致页面白屏 | 某个 CDN 域名不可达时脚本加载失败 | 已全部改为本地资源，不再依赖外网 |
+| 输入框留空导致「不知道怎么播」 | 用户打开页面只看到一个空输入框，不知道该填什么 | 改造时把原版预填的示例地址删掉了，这是纯粹的自伤。已恢复预填，并补上三步说明和示例流按钮 |
+| Windows 提交 CRLF 会让 CI 挂掉 | GitHub Actions 的 `run:` 块带上 `\r`，Linux runner 报 `$'\r': command not found` | 加 `.gitattributes` 强制 LF 作防护。**另注**：用 `grep -c $'\r'` 检查换行符是不可靠的（会被当成字母 `r` 匹配），要用 `od -c` 或按字节统计 |
 
 ---
 
