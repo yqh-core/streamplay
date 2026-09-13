@@ -140,9 +140,10 @@ npx serve -l 8080
 3. 选 **yqh-core/streamplay** 仓库
 4. **Project name**：填一个二级域名前缀（比如 `streamplay`）。
 
-   > ⚠️ **这个前缀可能已被他人占用**。Cloudflare 检测到冲突时会自动加随机后缀，
-   > 于是你的真实项目名变成 `streamplay-ey1` 这种。**以控制台显示的名字为准** ——
-   > 流水线的 `CF_PROJECT` 必须与它完全一致，否则会部署到另一个新项目上。
+   > ⚠️ **区分「项目名」和「子域名」**：`pages.dev` 二级域名是全局唯一的，被占用时
+   > Cloudflare 只给**子域名**加随机后缀，**项目名不变**。例如本项目填的是 `streamplay`，
+   > 项目名就一直是 `streamplay`，但子域名是 `streamplay-ey1.pages.dev`。
+   > API 里这是两个字段（`name` / `subdomain`），千万别拿域名反推项目名。
 5. **Production branch**：`main`
 6. **Build settings**（关键）：
    | 项 | 填写 |
@@ -183,6 +184,10 @@ git push origin feature/x  # → 自动部署到 <分支名>.<项目名>.pages.d
 如果你需要在 CI 里做额外操作（生成不同产物、加通知、跨云部署等），保留本仓库的
 `.github/workflows/deploy-cloudflare-pages.yml` 即可。流水线分两个 job：
 
+> ⚠️ **本项目已启用方式二的 Git 集成**。为避免两套部署同时写生产环境、互相覆盖，
+> 下面的 `deploy` job 默认**不运行**，只在手动 `workflow_dispatch` 时发布。
+> 日常 push / PR 只跑 `verify` 做质量校验，发布由 Cloudflare 负责。
+
 1. **校验并组装产物** —— 检查必需文件是否齐全、页面引用的本地资源是否都存在、
    文件数与单文件体积是否超出 Cloudflare 限制，然后生成 `dist/`。
 2. **发布** —— 确认 Pages 项目存在（**刻意不自动创建**：项目名写错时静默建个新项目，
@@ -202,23 +207,24 @@ API Token 申请：Cloudflare 控制台 → **My Profile** → **API Tokens** �
 
 #### 触发与目标
 
-| 触发条件 | 部署目标 | 访问地址 |
+| 触发条件 | 行为 | 访问地址 |
 | --- | --- | --- |
-| push 到 `main` | 生产环境 | `https://<项目名>.pages.dev` |
-| 提交 Pull Request | 预览环境 | 链接由 Actions 日志输出 |
-| 手动触发（可指定分支） | 对应分支环境 | 同上规律 |
+| push 到 `main` | 只校验，不发布（由 Git 集成发布） | — |
+| 提交 Pull Request | 只校验，不发布（由 Git 集成发预览） | — |
+| 手动触发（可指定分支） | 用 Wrangler 发布到对应分支环境 | `https://<分支名>.<项目名>.pages.dev` |
 
 #### 项目名
 
-由 workflow 顶部的 `env.CF_PROJECT` 控制，当前值为 **`streamplay-ey1`**（本项目对应
-`https://streamplay-ey1.pages.dev`）。
+由 workflow 顶部的 `env.CF_PROJECT` 控制，当前值为 **`streamplay`**，
+对应线上子域名 `https://streamplay-ey1.pages.dev`。
 
-> **改名前务必确认 Cloudflare 上的真实项目名**：`pages.dev` 的二级域名是全局唯一的，
-> 想用的名字被占时会自动加后缀。用 `npx wrangler pages project list` 或看控制台确认，
-> 名字对不上会导致部署到一个全新的空项目。
+> **项目名 ≠ 子域名**：`streamplay.pages.dev` 已被他人占用，Cloudflare 只给子域名加了
+> `-ey1` 后缀，项目名仍是 `streamplay`。用 `npx wrangler pages project list` 查到的
+> `name` 字段才是项目名 —— 填错会部署到一个全新的空项目上（流水线刻意不自动创建，
+> 宁可在这里失败）。
 >
-> 同时注意环境地址规则：生产分支（`main`）部署到 `https://<项目名>.pages.dev`，
-> 其他分支部署到 `https://<分支名>.<项目名>.pages.dev`。
+> 环境地址规则：`main` 分支 → `https://<子域名>.pages.dev`；
+> 其他分支 → `https://<分支名>.<子域名>.pages.dev`。
 
 ### 方式四：本地用 Wrangler 部署
 
