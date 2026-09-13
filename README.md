@@ -36,7 +36,7 @@ streamplay/
 ├── js/
 │   └── player.js       播放逻辑（双引擎、错误处理、深链解析）
 ├── libs/
-│   └── hls.min.js      HLS 播放内核（本地部署，1.5.17）
+│   └── hls.min.js      HLS 播放内核（本地部署，1.7.3）
 ├── images/
 │   ├── ic-play.png     播放按钮图标
 │   ├── logo.png        站标
@@ -275,7 +275,7 @@ window.StreamPlay.stop();
 
 | 项目 | 原始版本 | 当前版本 |
 | --- | --- | --- |
-| 播放内核 | 腾讯云 TCPlayer 5.1.0 | hls.js 1.5.17（本地） |
+| 播放内核 | 腾讯云 TCPlayer 5.1.0 | hls.js 1.7.3（本地） |
 | License 授权 | 必须申请并绑定域名，否则不可用 | 无需任何授权 |
 | 外部依赖 | jQuery + Bootstrap + social-share + TCPlayer CDN，共 4 个 CDN | 0 个，全部本地化 |
 | 播放格式 | 依赖 TCPlayer 支持范围 | m3u8 / HLS / mp4 等原生格式 |
@@ -325,7 +325,7 @@ window.StreamPlay.stop();
 # 本地启动预览
 python -m http.server 8080
 
-# 验证 hls.js 是否完整（应输出 1.5.17）
+# 验证 hls.js 是否完整（应输出 1.7.3）
 grep -o "1\.5\.17" libs/hls.min.js | head -1
 
 # 检查目录完整性
