@@ -186,27 +186,41 @@ jobs:
             exit 1
           fi
 
-          out=$(npx --yes wrangler@${WRANGLER_VERSION} pages project list --json 2>&1 || true)
+          # 直接查 API，不解析 wrangler 的输出：
+          # `wrangler pages project list --json` 给的字段名是 "Project Name"（带空格），
+          # 不是 "name"，按 "name" 去 grep 会永远匹配不上，把「命令输出格式」当成了
+          # 「项目不存在」，极难排查。API 的 JSON 字段稳定，且能把 401/403/404 分开报。
+          resp=$(curl -sS -w '\n%{http_code}' --max-time 30 \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${CF_PROJECT}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" 2>&1 || true)
+          code=$(printf '%s' "$resp" | tail -1)
+          body=$(printf '%s' "$resp" | sed '$d')
 
-          # 令牌无效/权限不足时，把 wrangler 的真实报错露出来
-          if echo "$out" | grep -qiE 'CLOUDFLARE_API_TOKEN|authentication|not authorized|unauthorized|error code ?9109|invalid api token|could not resolve'; then
-            echo "::error::Cloudflare 令牌无效、权限不足，或 Account ID 不属于该令牌"
-            echo "$out" | tail -20
-            exit 1
-          fi
-
-          if ! echo "$out" | tr -d ' \n' | grep -q "\"name\":\"${CF_PROJECT}\""; then
-            # 刻意不自动创建：项目名写错时静默建个新项目，部署看着成功却上到了另一个域名，
-            # 是最难排查的一类问题。宁可在这里失败。
-            echo "::error::Cloudflare 上不存在名为 ${CF_PROJECT} 的 Pages 项目"
-            echo "请核对以下两点后修正 workflow 顶部的 CF_PROJECT："
-            echo "  1. 在 Cloudflare 控制台 Workers & Pages 中确认项目的真实名称"
-            echo "     （pages.dev 二级域名可能被占用，Cloudflare 会自动加随机后缀，"
-            echo "      如 streamplay 被占用后实际叫 streamplay-ey1）"
-            echo "  2. 或运行 npx wrangler pages project list 查看"
-            exit 1
-          fi
-          echo "项目 ${CF_PROJECT} 已存在"
+          case "$code" in
+            200)
+              sub=$(printf '%s' "$body" | tr -d ' \n' | grep -o '"subdomain":"[^"]*"' | head -1 | cut -d'"' -f4)
+              echo "项目 ${CF_PROJECT} 已存在，线上域名 https://${sub:-<未知>}"
+              ;;
+            401|403)
+              echo "::error::令牌无效或权限不足（HTTP ${code}）"
+              echo "令牌需要 Account / Cloudflare Pages / Edit 权限，且 Account ID 要属于该令牌"
+              echo "$body"
+              exit 1
+              ;;
+            404)
+              # 刻意不自动创建：项目名写错时静默建个新项目，部署看着成功却上到了另一个域名，
+              # 是最难排查的一类问题。宁可在这里失败。
+              echo "::error::Cloudflare 上不存在名为 ${CF_PROJECT} 的 Pages 项目"
+              echo "注意「项目名」≠「子域名」：本项目项目名是 streamplay，域名才是 streamplay-ey1.pages.dev"
+              echo "$body"
+              exit 1
+              ;;
+            *)
+              echo "::error::查询 Pages 项目失败（HTTP ${code}）"
+              echo "$body"
+              exit 1
+              ;;
+          esac
 
       - name: 发布
         id: publish
