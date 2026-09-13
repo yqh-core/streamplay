@@ -138,7 +138,11 @@ npx serve -l 8080
 1. **Workers & Pages** → **Create application** → **Pages** → **Get started** → **Connect to Git**
 2. 选 **GitHub**，授权 Cloudflare 访问你的 GitHub 账号
 3. 选 **yqh-core/streamplay** 仓库
-4. **Project name**：填一个二级域名前缀（比如 `streamplay`，最终会得到 `streamplay.pages.dev`）
+4. **Project name**：填一个二级域名前缀（比如 `streamplay`）。
+
+   > ⚠️ **这个前缀可能已被他人占用**。Cloudflare 检测到冲突时会自动加随机后缀，
+   > 于是你的真实项目名变成 `streamplay-ey1` 这种。**以控制台显示的名字为准** ——
+   > 流水线的 `CF_PROJECT` 必须与它完全一致，否则会部署到另一个新项目上。
 5. **Production branch**：`main`
 6. **Build settings**（关键）：
    | 项 | 填写 |
@@ -181,7 +185,8 @@ git push origin feature/x  # → 自动部署到 <分支名>.<项目名>.pages.d
 
 1. **校验并组装产物** —— 检查必需文件是否齐全、页面引用的本地资源是否都存在、
    文件数与单文件体积是否超出 Cloudflare 限制，然后生成 `dist/`。
-2. **发布** —— 确认 Pages 项目存在（不存在则自动创建），用 Wrangler 上传 `dist/`。
+2. **发布** —— 确认 Pages 项目存在（**刻意不自动创建**：项目名写错时静默建个新项目，
+   部署看着成功却上了另一个域名，是最难排查的一类问题，所以这里选择直接失败），再用 Wrangler 上传 `dist/`。
 
 #### 需要配置的仓库 Secrets
 
@@ -205,7 +210,15 @@ API Token 申请：Cloudflare 控制台 → **My Profile** → **API Tokens** �
 
 #### 项目名
 
-由 workflow 顶部的 `env.CF_PROJECT` 控制，默认 `streamplay`。改这一处即改部署目标。
+由 workflow 顶部的 `env.CF_PROJECT` 控制，当前值为 **`streamplay-ey1`**（本项目对应
+`https://streamplay-ey1.pages.dev`）。
+
+> **改名前务必确认 Cloudflare 上的真实项目名**：`pages.dev` 的二级域名是全局唯一的，
+> 想用的名字被占时会自动加后缀。用 `npx wrangler pages project list` 或看控制台确认，
+> 名字对不上会导致部署到一个全新的空项目。
+>
+> 同时注意环境地址规则：生产分支（`main`）部署到 `https://<项目名>.pages.dev`，
+> 其他分支部署到 `https://<分支名>.<项目名>.pages.dev`。
 
 ### 方式四：本地用 Wrangler 部署
 

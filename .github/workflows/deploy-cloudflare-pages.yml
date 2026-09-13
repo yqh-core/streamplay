@@ -26,7 +26,11 @@ permissions:
   contents: read
 
 env:
-  CF_PROJECT: streamplay        # Cloudflare Pages 项目名，改了这里要同步改仓库变量
+  # Cloudflare Pages 项目名。必须是 Cloudflare 上真实存在的项目名 ——
+  # 注意 pages.dev 的二级域名可能已被他人占用，Cloudflare 创建时会自动加随机后缀
+  # （例如 streamplay 被占用后实际项目名变成 streamplay-ey1）。
+  # 用 `npx wrangler pages project list` 或看线上域名确认真实名字。
+  CF_PROJECT: streamplay-ey1
   WRANGLER_VERSION: '4'
 
 jobs:
@@ -144,10 +148,20 @@ jobs:
             env_name="生产"
           fi
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
-          echo "url=https://${branch}.${CF_PROJECT}.pages.dev" >> "$GITHUB_OUTPUT"
-          echo "将部署到${env_name}环境，分支: $branch"
 
-      - name: 确认 Pages 项目存在（不存在则创建）
+          # Cloudflare Pages 的地址规则：
+          #   生产分支（main）-> https://<项目名>.pages.dev
+          #   其他分支        -> https://<分支名>.<项目名>.pages.dev
+          if [ "$branch" = "main" ]; then
+            url="https://${CF_PROJECT}.pages.dev"
+          else
+            url="https://${branch}.${CF_PROJECT}.pages.dev"
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "将部署到${env_name}环境，分支: $branch"
+          echo "预期地址: $url"
+
+      - name: 确认 Pages 项目存在
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -156,14 +170,20 @@ jobs:
           existing=$(npx --yes wrangler@${WRANGLER_VERSION} pages project list --json \
             | tr -d ' \n' | grep -o "\"name\":\"${CF_PROJECT}\"" | head -1 || true)
           if [ -z "$existing" ]; then
-            echo "项目 ${CF_PROJECT} 不存在，正在创建…"
-            npx --yes wrangler@${WRANGLER_VERSION} pages project create "${CF_PROJECT}" \
-              --production-branch=main
-          else
-            echo "项目 ${CF_PROJECT} 已存在"
+            # 刻意不自动创建：项目名写错时静默建个新项目，部署看着成功却上到了另一个域名，
+            # 是最难排查的一类问题。宁可在这里失败。
+            echo "::error::Cloudflare 上不存在名为 ${CF_PROJECT} 的 Pages 项目"
+            echo "请核对以下两点后修正 workflow 顶部的 CF_PROJECT："
+            echo "  1. 在 Cloudflare 控制台 Workers & Pages 中确认项目的真实名称"
+            echo "     （pages.dev 二级域名可能被占用，Cloudflare 会自动加随机后缀，"
+            echo "      如 streamplay 被占用后实际叫 streamplay-ey1）"
+            echo "  2. 或运行 npx wrangler pages project list 查看"
+            exit 1
           fi
+          echo "项目 ${CF_PROJECT} 已存在"
 
       - name: 发布
+        id: publish
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -173,7 +193,14 @@ jobs:
             --project-name="${CF_PROJECT}" \
             --branch="${{ steps.target.outputs.branch }}" \
             --commit-hash="${GITHUB_SHA}" \
-            --commit-message="$(git log -1 --pretty=%s 2>/dev/null || echo 'deploy from GitHub Actions')"
+            --commit-message="$(git log -1 --pretty=%s 2>/dev/null || echo 'deploy from GitHub Actions')" \
+            2>&1 | tee /tmp/deploy.log
+
+          # 从 wrangler 输出里抓真实地址，比自己拼更可靠
+          real_url=$(grep -oE 'https://[a-zA-Z0-9._-]+\.pages\.dev' /tmp/deploy.log | tail -1 || true)
+          [ -n "$real_url" ] || real_url="${{ steps.target.outputs.url }}"
+          echo "real_url=$real_url" >> "$GITHUB_OUTPUT"
+          echo "真实部署地址: $real_url"
 
       - name: 输出访问地址
         run: |
@@ -181,6 +208,10 @@ jobs:
             echo "### 部署完成"
             echo ""
             echo "- 环境：\`${{ steps.target.outputs.branch }}\`"
-            echo "- 地址：${{ steps.target.outputs.url }}"
+            echo "- 生产地址：https://${CF_PROJECT}.pages.dev"
+            echo "- 本次部署地址：${{ steps.publish.outputs.real_url }}"
             echo "- 提交：\`${GITHUB_SHA:0:7}\`"
+            echo ""
+            echo "> 生产分支（main）的部署会直接更新 https://${CF_PROJECT}.pages.dev ；"
+            echo "> 其他分支的部署只在 <分支名>.${CF_PROJECT}.pages.dev 可见。"
           } >> "$GITHUB_STEP_SUMMARY"
