@@ -98,10 +98,24 @@ npx serve -l 8080
 | 仪表盘拖拽 / 上传 ZIP（Direct Upload） | **1,000 个文件** |
 | Wrangler CLI 上传 | 20,000 个文件（付费版 100,000） |
 | 单文件大小 | 25 MiB |
+| 免费版 Workers/Pages 请求数 | 100,000 次/天 |
 
-本项目实际 8 个文件、最大单文件 413 KB，两种方式都毫无压力。
+本项目实际 8 个文件、最大单文件 413 KB，毫无压力。
 
-### 方式一：仪表盘拖拽（最快）
+### 选型指南
+
+四种部署方式从简到繁排：
+
+| 方式 | 适合谁 | CI/CD | 配置成本 | 重建成本 |
+|---|---|---|---|---|
+| 仪表盘拖拽 ZIP | 一次性发布 / 不写代码的人 | 无 | 1 分钟 | 每次都要手动拖 |
+| **Cloudflare 控制台 Git 集成（推荐）** | **希望 push 即部署的所有人** | **自动** | **一次性配置 5 分钟** | **几乎为零（push 即可）** |
+| GitHub Actions + Wrangler | 需要在 CI 里做额外操作（如多产物、构建步骤、通知） | 自动 | 需 2 个 Secret + 维护 YAML | 改动要本地提交 |
+| 本地 Wrangler CLI | 不便绑定 GitHub 账号的场景 | 无 | 首次 `wrangler login` | 每次手动跑命令 |
+
+**Git 集成是绝大多数项目的最佳选择**：push 即生产，PR 自动出预览环境，零密钥管理。
+
+### 方式一：仪表盘拖拽（最快上手）
 
 1. 打开 Cloudflare 控制台 → **Workers & Pages** → **Create application** → **Get started** → **Drag and drop your files**
 2. 把整个项目目录（或打包好的 ZIP）拖进去，填个项目名
@@ -111,55 +125,89 @@ npx serve -l 8080
 > `index.html`、`about.html`、`css/`、`js/`、`libs/`、`images/` 即可。
 >
 > **注意**：`index.html` 必须在压缩包的**根目录**，不能套一层文件夹，否则站点打开是个文件列表。
+>
+> ⚠️ **拖拽创建的项目之后无法转为 Git 集成**。一旦打算走 CI/CD，必须删项目重建。
 
-### 方式二：GitHub Actions 自动部署（推荐）
+### 方式二：Cloudflare 控制台 Git 集成（推荐）
 
-仓库内已配好流水线 `.github/workflows/deploy-cloudflare-pages.yml`：
+> 完整的部署自动化，**推荐**。push 到 `main` → 自动生产部署；开 PR → 自动出预览环境，
+> 链接贴在 PR 评论里可以直接预览改动。配置只需 5 分钟，以后再也不用管。
 
-| 触发条件 | 部署目标 | 访问地址 |
-| --- | --- | --- |
-| push 到 `main` | 生产环境 | `https://<项目名>.pages.dev` |
-| 提交 Pull Request | 预览环境 | `https://pr-<编号>.<项目名>.pages.dev` |
-| 手动触发（可指定分支） | 对应分支环境 | 同上规律 |
+#### 1. 在 Cloudflare 控制台创建项目
 
-流水线分两个 job：
+1. **Workers & Pages** → **Create application** → **Pages** → **Get started** → **Connect to Git**
+2. 选 **GitHub**，授权 Cloudflare 访问你的 GitHub 账号
+3. 选 **yqh-core/streamplay** 仓库
+4. **Project name**：填一个二级域名前缀（比如 `streamplay`，最终会得到 `streamplay.pages.dev`）
+5. **Production branch**：`main`
+6. **Build settings**（关键）：
+   | 项 | 填写 |
+   |---|---|
+   | Framework preset | **None** |
+   | Build command | **留空** |
+   | Build output directory | **`/`**（仓库根目录） |
+   | Root directory | **留空** |
+7. 点 **Save and Deploy**
+
+首次构建会立刻触发一次（约 30 秒）。成功后访问 `https://<项目名>.pages.dev`。
+
+#### 2. 配置 PR 预览环境（可选但强烈推荐）
+
+1. 项目创建后进 **Settings** → **Builds** → **Configure page builds**
+2. 开启 **Preview deployments**（默认就开）
+3. 开启 **Branch deployments** 控制哪些分支自动部署（建议全部关闭，只留 main 生产）
+
+之后每次开 PR，Cloudflare 会在 PR 评论里贴出预览链接，方便评审。
+
+#### 3. 日常使用
+
+```bash
+git add -A
+git commit -m "feat: 新增 XXX"
+git push origin main       # → 自动部署到生产环境
+git push origin feature/x  # → 自动部署到 <分支名>.<项目名>.pages.dev
+```
+
+完全无需任何密钥 —— Cloudflare 走的是 OAuth 授权，Secrets 存在 Cloudflare 后端。
+
+#### 4. 自定义域名
+
+项目 → **Custom domains** → **Set up a custom domain** → 填你的域名 → Cloudflare 自动改 DNS（前提是该域名已托管在 Cloudflare）。
+
+### 方式三：GitHub Actions + Wrangler
+
+如果你需要在 CI 里做额外操作（生成不同产物、加通知、跨云部署等），保留本仓库的
+`.github/workflows/deploy-cloudflare-pages.yml` 即可。流水线分两个 job：
 
 1. **校验并组装产物** —— 检查必需文件是否齐全、页面引用的本地资源是否都存在、
-   文件数与单文件体积是否超出 Cloudflare 限制，然后生成 `dist/`。这一步不接触
-   Cloudflare，问题会尽早暴露。
+   文件数与单文件体积是否超出 Cloudflare 限制，然后生成 `dist/`。
 2. **发布** —— 确认 Pages 项目存在（不存在则自动创建），用 Wrangler 上传 `dist/`。
 
 #### 需要配置的仓库 Secrets
 
-在 GitHub 仓库 → **Settings** → **Secrets and variables** → **Actions** 中添加两个 Secret：
+在 GitHub 仓库 → **Settings** → **Secrets and variables** → **Actions** 中添加：
 
 | Secret | 说明 |
 | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌，权限需含 **Account → Cloudflare Pages → Edit** |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌，权限需含 **Account → Cloudflare Pages / Workers → Edit** |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 账户 ID，在控制台右侧栏或 URL 中可见 |
 
-API Token 申请地址：Cloudflare 控制台 → **My Profile** → **API Tokens** → **Create Token**，
-选用 **Edit Cloudflare Workers** 模板，或自定义并勾选 `Account / Cloudflare Pages / Edit`。
+API Token 申请：Cloudflare 控制台 → **My Profile** → **API Tokens** → **Create Token** →
+选用 **Edit Cloudflare Workers** 模板即可。
+
+#### 触发与目标
+
+| 触发条件 | 部署目标 | 访问地址 |
+| --- | --- | --- |
+| push 到 `main` | 生产环境 | `https://<项目名>.pages.dev` |
+| 提交 Pull Request | 预览环境 | 链接由 Actions 日志输出 |
+| 手动触发（可指定分支） | 对应分支环境 | 同上规律 |
 
 #### 项目名
 
-流水线里的项目名由 workflow 顶部的 `env.CF_PROJECT` 控制，默认 `streamplay`。
-要改名就改这一处，它会同时用于项目创建和部署目标。
+由 workflow 顶部的 `env.CF_PROJECT` 控制，默认 `streamplay`。改这一处即改部署目标。
 
-#### 首次部署
-
-```bash
-git remote add origin git@github.com:yqh-core/streamplay.git
-git push -u origin main
-```
-
-推送后到仓库 **Actions** 页面即可看到流水线运行；成功后访问
-`https://streamplay.pages.dev`。
-
-> 如果首次运行报权限错误，检查 API Token 是否包含
-> `Account → Cloudflare Pages → Edit`，以及 `CLOUDFLARE_ACCOUNT_ID` 是否正确。
-
-### 方式三：本地用 Wrangler 部署
+### 方式四：本地用 Wrangler 部署
 
 ```bash
 npx wrangler login
@@ -233,6 +281,8 @@ window.StreamPlay.stop();
 | CDN 抽风导致页面白屏 | 某个 CDN 域名不可达时脚本加载失败 | 已全部改为本地资源，不再依赖外网 |
 | 输入框留空导致「不知道怎么播」 | 用户打开页面只看到一个空输入框，不知道该填什么 | 改造时把原版预填的示例地址删掉了，这是纯粹的自伤。已恢复预填，并补上三步说明和示例流按钮 |
 | Windows 提交 CRLF 会让 CI 挂掉 | GitHub Actions 的 `run:` 块带上 `\r`，Linux runner 报 `$'\r': command not found` | 加 `.gitattributes` 强制 LF 作防护。**另注**：用 `grep -c $'\r'` 检查换行符是不可靠的（会被当成字母 `r` 匹配），要用 `od -c` 或按字节统计 |
+| Windows 上 `git https` 报 `unable to access` | curl/git 走 Windows schannel 证书校验，本机 `CRYPT_E_NO_REVOCATION_CHECK`（吊销检查失败） | 全局配置 `git config --global http.sslBackend schannel`，作用是显式让 git 走 schannel 后端（默认会因其他配置触发 openssl 分支，从而撞上吊销检查）。curl 单独配 `~/.curlrc` 加 `ssl-no-revoke` |
+| 本机 hosts 劫持导致 GitHub 全家桶 0.0.0.0:443 无法访问 | 浏览器能开（信任过 Steam++ 根证书），但命令行 / GitHub Actions 全部失败 | 这是 Steam++「网络加速」把 27 个 GitHub 域名指到 `127.0.0.1`，再由本地反代用**自签证书**做 MITM。修复方法：编辑 `C:\Windows\System32\drivers\etc\hosts`，注释掉 `# Steam++ Start … # Steam++ End` 那一整块；或者在 Steam++ 控制台里关掉 GitHub 加速。备份 `D:\work\_hosts-backup\hosts.backup-*` 可还原 |
 
 ---
 
