@@ -1,9 +1,12 @@
 name: Deploy to Cloudflare Pages
 
-# 触发时机：
-#   1. push 到 main        -> 生产环境（https://<项目名>.pages.dev）
-#   2. 提交 Pull Request   -> 预览环境（https://pr-<编号>.<项目名>.pages.dev）
-#   3. 手动触发            -> 可指定部署到哪个分支环境
+# 发布链路说明（重要，改动前先读）：
+#   本项目已接入 Cloudflare Pages 的 Git 集成 —— push 到 main 由 Cloudflare 自动构建发布，
+#   生产地址 https://streamplay-ey1.pages.dev ，PR 会自动生成预览地址。
+#   本流水线因此只做两件事：
+#     verify job：每次 push / PR 都跑，卡住文件缺失、引用失效、超限文件（不碰 Cloudflare）
+#     deploy job：仅手动 workflow_dispatch 时跑，用 wrangler 发布，便于临时发到其他分支环境
+#   两者同时写生产环境会互相覆盖，所以 deploy 默认关闭。
 on:
   push:
     branches: [main]
@@ -26,11 +29,12 @@ permissions:
   contents: read
 
 env:
-  # Cloudflare Pages 项目名。必须是 Cloudflare 上真实存在的项目名 ——
-  # 注意 pages.dev 的二级域名可能已被他人占用，Cloudflare 创建时会自动加随机后缀
-  # （例如 streamplay 被占用后实际项目名变成 streamplay-ey1）。
-  # 用 `npx wrangler pages project list` 或看线上域名确认真实名字。
-  CF_PROJECT: streamplay-ey1
+  # Cloudflare Pages 的「项目名」和「子域名」是两回事，别搞混：
+  #   项目名   CF_PROJECT = streamplay          <- API / wrangler 用它定位项目
+  #   子域名               = streamplay-ey1      <- 因为 streamplay.pages.dev 已被他人
+  #                                                占用，CF 自动加了随机后缀
+  # 用 `npx wrangler pages project list` 查到的 name 字段才是项目名。
+  CF_PROJECT: streamplay
   WRANGLER_VERSION: '4'
 
 jobs:
@@ -110,10 +114,15 @@ jobs:
 
   # ------------------------------------------------------------------
   # 第二步：发布到 Cloudflare Pages
+  #
+  # 默认不跑：本项目已接 Cloudflare Git 集成，push 到 main 由 Cloudflare 自己构建发布。
+  # 若这一步也跟着跑，两套部署会同时写生产环境、互相覆盖，反而分不清线上是谁的产物。
+  # 只在手动 workflow_dispatch 时用 wrangler 发布（可指定部署到其他分支环境）。
   # ------------------------------------------------------------------
   deploy:
-    name: 发布到 Cloudflare Pages
+    name: 发布到 Cloudflare Pages（仅手动）
     needs: verify
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'pull_request' && 'preview' || 'production' }}
