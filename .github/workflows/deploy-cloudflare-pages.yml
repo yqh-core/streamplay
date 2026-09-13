@@ -167,9 +167,26 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          existing=$(npx --yes wrangler@${WRANGLER_VERSION} pages project list --json \
-            | tr -d ' \n' | grep -o "\"name\":\"${CF_PROJECT}\"" | head -1 || true)
-          if [ -z "$existing" ]; then
+
+          # 先自查凭据：没配 token 时 wrangler 只会含糊报错，不拦在这里会被误读成「项目不存在」
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "::error::未配置 Cloudflare 凭据（两个 secret 至少有一个为空）"
+            echo "到仓库 Settings > Secrets and variables > Actions > New repository secret 添加："
+            echo "  CLOUDFLARE_API_TOKEN  = Cloudflare API 令牌（权限 Account / Cloudflare Pages / Edit）"
+            echo "  CLOUDFLARE_ACCOUNT_ID = Cloudflare 控制台右侧边栏的 Account ID（32 位十六进制）"
+            exit 1
+          fi
+
+          out=$(npx --yes wrangler@${WRANGLER_VERSION} pages project list --json 2>&1 || true)
+
+          # 令牌无效/权限不足时，把 wrangler 的真实报错露出来
+          if echo "$out" | grep -qiE 'CLOUDFLARE_API_TOKEN|authentication|not authorized|unauthorized|error code ?9109|invalid api token|could not resolve'; then
+            echo "::error::Cloudflare 令牌无效、权限不足，或 Account ID 不属于该令牌"
+            echo "$out" | tail -20
+            exit 1
+          fi
+
+          if ! echo "$out" | tr -d ' \n' | grep -q "\"name\":\"${CF_PROJECT}\""; then
             # 刻意不自动创建：项目名写错时静默建个新项目，部署看着成功却上到了另一个域名，
             # 是最难排查的一类问题。宁可在这里失败。
             echo "::error::Cloudflare 上不存在名为 ${CF_PROJECT} 的 Pages 项目"
