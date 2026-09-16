@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>HLS 文档 - m3u8 结构、常用标签与工作原理 | StreamPlay 流影</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="系统讲解 HLS 与 m3u8：协议原理、Master Playlist 与 Media Playlist 的区别、EXT-X 常用标签速查、分片格式、AES-128 加密、自适应码率、CORS 与延迟优化。">
+    <meta name="keywords" content="HLS协议,m3u8格式,EXT-X-STREAM-INF,Master Playlist,Media Playlist,AES-128加密,自适应码率,HLS延迟">
+    <meta name="theme-color" content="#0e90d2">
+    <link rel="canonical" href="https://streamplay-ey1.pages.dev/docs">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="HLS 文档 - m3u8 结构、常用标签与工作原理">
+    <meta property="og:description" content="协议原理、两类播放列表、EXT-X 标签速查、加密、自适应码率与延迟优化。">
+    <meta property="og:url" content="https://streamplay-ey1.pages.dev/docs">
+    <meta property="og:site_name" content="StreamPlay 流影">
+    <meta property="og:locale" content="zh_CN">
+
+    <link rel="icon" href="./images/logo.ico">
+    <link rel="apple-touch-icon" href="./images/logo.png">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <header class="hd">
+        <div class="link-list">
+            <a class="brand" href="/">
+                <img src="./images/logo.png" alt="StreamPlay 流影">
+                <span>StreamPlay 流影</span>
+            </a>
+            <nav>
+                <a href="/">首页</a>
+                <a href="/guides">使用教程</a>
+                <a href="/docs" aria-current="page">HLS 文档</a>
+                <a href="/faq">常见问题</a>
+                <a href="/about">关于</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main about">
+        <h1>HLS 文档</h1>
+        <p class="subtitle">理解 m3u8 与 HLS 的技术基础</p>
+
+        <h2>1. HLS 是什么</h2>
+        <p>HLS（HTTP Live Streaming）是苹果公司提出的基于 HTTP 的自适应码率流媒体传输协议。它的核心思路很朴素：<strong>把一整段视频切成许多小分片，用一个文本播放列表描述这些分片的顺序与位置，播放器依次下载并连续播放。</strong></p>
+        <p>因为跑在标准 HTTP 之上，HLS 不需要专用流媒体服务器，能直接利用现有的 CDN 与缓存体系，这也是它被广泛采用的主要原因。</p>
+
+        <h2>2. m3u8 文件长什么样</h2>
+        <p>m3u8 就是那个「播放列表」，本质是 UTF-8 编码的纯文本文件，用文本编辑器就能打开。一个最简单的点播列表示例：</p>
+        <pre>#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:10
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:9.009,
+seg_000.ts
+#EXTINF:9.009,
+seg_001.ts
+#EXTINF:9.009,
+seg_002.ts
+#EXT-X-ENDLIST</pre>
+        <p>每一行 <code>#EXT-X-</code> / <code>#EXT</code> 开头的是标签（指令），其余行是分片地址。</p>
+
+        <h2>3. 两类播放列表：Master 与 Media</h2>
+        <table>
+            <tr>
+                <th>类型</th>
+                <th>作用</th>
+                <th>是否含分片地址</th>
+            </tr>
+            <tr>
+                <td><strong>Master Playlist</strong><br>（主播放列表）</td>
+                <td>本身不含分片，而是列出多个不同码率/分辨率的子列表地址，供播放器按网速选择。</td>
+                <td>否</td>
+            </tr>
+            <tr>
+                <td><strong>Media Playlist</strong><br>（媒体播放列表）</td>
+                <td>真正列出一串分片（.ts 或 .m4s）及其时长。</td>
+                <td>是</td>
+            </tr>
+        </table>
+        <p>判断方法：打开 m3u8，如果里面有 <code>EXT-X-STREAM-INF</code>，它就是 Master Playlist。</p>
+        <p>一个多码率主列表示例：</p>
+        <pre>#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=1280000,RESOLUTION=720x480
+low/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2560000,RESOLUTION=1280x720
+mid/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=7680000,RESOLUTION=1920x1080
+high/index.m3u8</pre>
+
+        <h2>4. 常用标签速查</h2>
+        <table>
+            <tr>
+                <th>标签</th>
+                <th>含义</th>
+            </tr>
+            <tr>
+                <td><code>#EXTM3U</code></td>
+                <td>文件头，必须位于第一行</td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-VERSION</code></td>
+                <td>协议版本号，决定可使用哪些特性</td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-TARGETDURATION</code></td>
+                <td>任意分片的最大时长（秒），取整</td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-MEDIA-SEQUENCE</code></td>
+                <td>第一个分片的序号，直播中随窗口滑动递增</td>
+            </tr>
+            <tr>
+                <td><code>#EXTINF</code></td>
+                <td>紧随其后的那个分片的时长</td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-STREAM-INF</code></td>
+                <td>描述一路码率流，带 BANDWIDTH、RESOLUTION、CODECS 等属性</td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-ENDLIST</code></td>
+                <td>表示列表结束——<strong>有点播（VOD），无直播</strong></td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-KEY</code></td>
+                <td>分片加密方式与密钥获取地址</td>
+            </tr>
+            <tr>
+                <td><code>#EXT-X-MAP</code></td>
+                <td>fMP4 容器的初始化段（init segment）位置</td>
+            </tr>
+        </table>
+        <p>一个实用判断：<strong>有没有 <code>EXT-X-ENDLIST</code> 可以区分直播与点播</strong>。直播列表会不断追加新分片并移除旧分片，永远不写这个标签。</p>
+
+        <h2>5. 分片格式：TS 与 fMP4</h2>
+        <ul>
+            <li><strong>MPEG-2 TS（.ts）</strong>：HLS 传统格式，兼容性最好，每个分片可独立解码。</li>
+            <li><strong>fMP4（.m4s）</strong>：较新的封装方式，与 DASH 共用同一套文件，便于一套源同时服务 HLS 与 DASH。使用时需要 <code>EXT-X-MAP</code> 指向初始化段。</li>
+        </ul>
+        <p>hls.js 这类库的工作，就是把 TS / fMP4 分片<strong>转封装</strong>成浏览器能直接喂给 <code>&lt;video&gt;</code> 的格式，并通过 Media Source Extensions 连续播放。Safari 则原生支持 HLS，不需要这层转换。</p>
+
+        <h2>6. 加密与 DRM</h2>
+        <p>HLS 支持分片级加密。最常见的 AES-128 通过 <code>EXT-X-KEY</code> 声明：</p>
+        <pre>#EXT-X-KEY:METHOD=AES-128,URI="https://example.com/key.bin",IV=0x...</pre>
+        <p>播放器需要先拿到 URI 指向的密钥，才能解密后续分片。需要注意：<strong>这只是内容加密，不是强版权保护</strong>——密钥获取方式是自定义的，真正的 DRM（如 FairPlay、Widevine）需要额外的授权体系与浏览器支持，本站不涉及。</p>
+
+        <h2>7. 自适应码率（ABR）</h2>
+        <p>Master Playlist 里列出的每一路 <code>EXT-X-STREAM-INF</code> 都带 <code>BANDWIDTH</code>。播放器会持续测量当前网速与缓冲水位，在多个档位间自动切换：网速好时升到高清，网速变差时降到流畅档，避免卡顿。这也是为什么同一条流在不同网络下清晰度会变。</p>
+
+        <h2>8. 为什么跨域（CORS）这么关键</h2>
+        <p>浏览器安全策略要求：网页要读取另一个域名的资源，对方必须显式允许。对 HLS 来说，就是 m3u8 与分片文件的响应头里要带上：</p>
+        <pre>Access-Control-Allow-Origin: *</pre>
+        <p>或指定具体来源。少了这个头，浏览器会在网络层直接拦掉请求，播放器只能报「地址不可达」——这是 m3u8 播放失败<strong>最常见的原因</strong>，且需要在源站侧修复，播放器无法绕过。</p>
+
+        <h2>9. 延迟从哪来，怎么优化</h2>
+        <p>HLS 的天然延迟主要来自分片时长：播放器通常要等至少一个完整分片下载完才开始播。若分片为 6 秒，叠加缓冲，端到端延迟轻松达到 10–30 秒。</p>
+        <ul>
+            <li><strong>缩短分片</strong>：把 <code>-hls_time</code> 降到 2–4 秒，延迟下降，但请求数上升。</li>
+            <li><strong>LL-HLS（低延迟 HLS）</strong>：引入部分分片（Partial Segment）与预加载提示，可把延迟降到 2–5 秒，但需要源站与播放器同时支持。</li>
+            <li><strong>权衡：</strong>延迟越低，对网络抖动的容忍度越差，卡顿风险上升。直播互动类场景才值得为低延迟付出代价。</li>
+        </ul>
+
+        <h2>10. HLS、DASH 与普通 MP4 怎么选</h2>
+        <table>
+            <tr>
+                <th>方案</th>
+                <th>优点</th>
+                <th>局限</th>
+            </tr>
+            <tr>
+                <td><strong>HLS</strong></td>
+                <td>iOS / Safari 原生支持；生态成熟；CDN 友好</td>
+                <td>延迟相对较高（传统模式下）</td>
+            </tr>
+            <tr>
+                <td><strong>DASH</strong></td>
+                <td>国际标准；与 fMP4 天然契合；Android / 智能电视支持好</td>
+                <td>苹果设备支持较弱</td>
+            </tr>
+            <tr>
+                <td><strong>普通 MP4</strong></td>
+                <td>最简单，一个文件丢上去就能播</td>
+                <td>无自适应码率；长视频首播慢；拖动需等缓冲</td>
+            </tr>
+        </table>
+        <p>实践中的常见做法是：短视频用 MP4 直传；长视频与直播用 HLS（需要覆盖苹果设备时）或 HLS + DASH 双轨。</p>
+
+        <h2>延伸阅读</h2>
+        <ul>
+            <li><a href="/guides">使用教程</a> — 三步播放、iframe 嵌入、五步排查</li>
+            <li><a href="/faq">常见问题</a> — 跨域、编码、延迟等高频疑问</li>
+            <li><a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js 项目</a> — 本站使用的播放内核</li>
+        </ul>
+
+        <div class="footer">
+            <p class="links">
+                <a href="/">← 返回首页</a> |
+                <a href="/guides">使用教程</a> |
+                <a href="/faq">常见问题</a>
+            </p>
+            <p>&copy; 2026 StreamPlay 流影</p>
+        </div>
+    </div>
+
+</body>
+
+</html>
