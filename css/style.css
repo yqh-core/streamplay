@@ -4,9 +4,10 @@
    ========================================================================== */
 
 :root {
-    --primary: #0e90d2;
-    --primary-dark: #0b76ae;
-    --primary-light: #e8f5fc;
+    /* DigDevBox 家族主色：原 StreamPlay 蓝 #0e90d2 → teal 体系（见 digdevbox-tokens.css）*/
+    --primary: #0f766e;
+    --primary-dark: #115e59;
+    --primary-light: #ccfbf1;
     --text: #222222;
     --text-muted: #6b7280;
     --border: #dfe3e8;
@@ -131,7 +132,7 @@ a {
     margin-bottom: 8px;
     border-radius: var(--radius);
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(14, 144, 210, 0.12);
+    box-shadow: 0 1px 3px rgba(15, 118, 110, 0.12);
 }
 
 .main .form input {
