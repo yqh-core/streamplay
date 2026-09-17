@@ -4,7 +4,7 @@
    ========================================================================== */
 
 :root {
-    /* DigDevBox 家族主色：原 StreamPlay 蓝 #0e90d2 → teal 体系（见 digdevbox-tokens.css）*/
+    /* DigDevBox 家族主色：原 StreamPlay 蓝 #0e90d2 → teal 体系（见 dd-tokens.css）*/
     --primary: #0f766e;
     --primary-dark: #115e59;
     --primary-light: #ccfbf1;
