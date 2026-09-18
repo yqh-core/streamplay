@@ -8,11 +8,11 @@
     <meta name="description" content="StreamPlay 流影使用教程：三步播放 m3u8、用 ?url= 参数嵌入自己的网站、五步排查播放故障，以及用 ffmpeg 生成可播放的 HLS 测试流。">
     <meta name="keywords" content="m3u8播放教程,HLS嵌入,iframe播放器,ffmpeg转m3u8,播放故障排查">
     <meta name="theme-color" content="#0f766e">
-    <link rel="canonical" href="https://streamplay-ey1.pages.dev/guides">
+    <link rel="canonical" href="https://play.digdevbox.com/guides">
     <meta property="og:type" content="article">
     <meta property="og:title" content="使用教程 - 播放 m3u8、嵌入网站与故障排查">
     <meta property="og:description" content="三步播放、?url= 嵌入、五步排查，以及用 ffmpeg 生成 HLS 测试流。">
-    <meta property="og:url" content="https://streamplay-ey1.pages.dev/guides">
+    <meta property="og:url" content="https://play.digdevbox.com/guides">
     <meta property="og:site_name" content="StreamPlay 流影">
     <meta property="og:locale" content="zh_CN">
 
@@ -21,6 +21,12 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="css/dd-tokens.css">
     <link rel="stylesheet" href="css/dd-shell.css">
+    <meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="StreamPlay 流影 - M3U8 / HLS 在线播放器">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
 </head>
 
 <body>
@@ -28,11 +34,10 @@
     <div class="dd-shell-inner">
         <a class="dd-brand" href="https://digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
         <nav>
-                <a href="https://digdevbox.com/">Dev 工具箱</a>
-                <a href="https://coderkit.pages.dev/">开发者工具箱</a>
-                <a href="https://streamplay-ey1.pages.dev/" aria-current="page">流影播放器</a>
-                <a href="https://locip.pages.dev/">IP 查询</a>
-                <a href="https://repaycalc.pages.dev/">房贷计算器</a>
+                <a href="https://digdevbox.com/">开发者工具箱</a>
+                <a href="https://play.digdevbox.com/" aria-current="page">流影播放器</a>
+                <a href="https://ip.digdevbox.com/">IP 查询</a>
+                <a href="https://fangdai.digdevbox.com/">房贷计算器</a>
         </nav>
     </div>
 </div>
@@ -67,7 +72,7 @@
 
         <h2>第 2 步：嵌入到你自己的网站</h2>
         <p>本站支持用 <code>?url=</code> 参数指定播放地址，因此可以直接用 iframe 嵌入：</p>
-        <pre>&lt;iframe src="https://streamplay-ey1.pages.dev/?url=编码后的地址"
+        <pre>&lt;iframe src="https://play.digdevbox.com/?url=编码后的地址"
         width="100%" height="480" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
         <p><strong>关键细节：地址必须做 URL 编码。</strong>很多人的 m3u8 地址里带 <code>?</code>、<code>&amp;</code> 等参数符号，不编码的话会被当成页面自身的参数截掉，结果就是播不出来。例如：</p>
         <pre>原始：https://example.com/live/index.m3u8?token=abc&amp;exp=123
@@ -137,10 +142,9 @@
     <div class="dd-shell-inner">
         <p class="dd-brandfoot-title">DigDevBox · 免费在线开发者工具集</p>
         <nav class="dd-brandfoot-nav">
-                <a href="https://digdevbox.com/">Dev 工具箱</a>
-                <a href="https://coderkit.pages.dev/">开发者工具箱</a>
-                <a href="https://locip.pages.dev/">IP 查询</a>
-                <a href="https://repaycalc.pages.dev/">房贷计算器</a>
+                <a href="https://digdevbox.com/">开发者工具箱</a>
+                <a href="https://ip.digdevbox.com/">IP 查询</a>
+                <a href="https://fangdai.digdevbox.com/">房贷计算器</a>
         </nav>
     </div>
 </footer>

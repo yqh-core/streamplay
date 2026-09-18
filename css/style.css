@@ -100,6 +100,30 @@ a {
     text-underline-offset: 4px;
 }
 
+/* 移动端：导航换行。
+   375px 视口下 5 个导航项放不进一行，且 .link-list 是固定 56px 高 + 两者都没有
+   flex-wrap，会把文档撑到 389px（横向溢出 14px，手机上出现左右拖动条）。
+   这里让品牌行与导航各占一行，导航项内部再自行换行。 */
+@media screen and (max-width: 640px) {
+    .hd .link-list {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 10px 16px;
+        gap: 10px 16px;
+    }
+
+    .hd nav {
+        flex-wrap: wrap;
+        margin-left: 0;
+        width: 100%;
+        gap: 10px 18px;
+    }
+
+    .hd nav a {
+        font-size: 13.5px;
+    }
+}
+
 /* ---------------------------------------------------------------- 主体布局 */
 .main {
     padding: 24px 16px 48px;
