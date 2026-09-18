@@ -475,3 +475,46 @@ a {
     font-weight: 600;
     width: 34%;
 }
+
+/* ==== dd-dark-override：站点自有变量重映射（由 dd-shell 切换器驱动） ==== */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0b1220; --bg-soft:#131c2b; --text:#e5e7eb; --text-muted:#8a97ad;
+  --border:#1e2d49; --primary:#14b8a6; --primary-dark:#0d9488; --primary-light:#0d2b28;
+}
+html[data-theme="dark"] .main .form input{ background:#0f1a2e; color:var(--text); }
+html[data-theme="dark"] .card pre,
+html[data-theme="dark"] .card .note,
+html[data-theme="dark"] .demo-btn,
+html[data-theme="dark"] .card kbd{ background:#0f1a2e; color:var(--text); border-color:var(--border); }
+html[data-theme="dark"] .card p,
+html[data-theme="dark"] .steps li,
+html[data-theme="dark"] .about li,
+html[data-theme="dark"] .about ul{ color:#a8b0bd; }
+html[data-theme="dark"] .tip.is-info{ background:#0d2b28; color:#5eead4; }
+html[data-theme="dark"] .tip.is-warn{ background:#2b2110; color:#fbbf24; }
+html[data-theme="dark"] .tip.is-error{ background:#2b1618; color:#f5a3a3; }
+html[data-theme="dark"] .about th{ background:#0d2b28; color:#5eead4; }
+html[data-theme="dark"] .dev-card{ background:#0f1a2e; }
+@media (prefers-color-scheme: dark){
+  html[data-dd-auto]{
+    color-scheme:dark;
+    --bg:#0b1220; --bg-soft:#131c2b; --text:#e5e7eb; --text-muted:#8a97ad;
+    --border:#1e2d49; --primary:#14b8a6; --primary-dark:#0d9488; --primary-light:#0d2b28;
+  }
+  html[data-dd-auto] .main .form input{ background:#0f1a2e; color:var(--text); }
+  html[data-dd-auto] .card pre,
+  html[data-dd-auto] .card .note,
+  html[data-dd-auto] .demo-btn,
+  html[data-dd-auto] .card kbd{ background:#0f1a2e; color:var(--text); border-color:var(--border); }
+  html[data-dd-auto] .card p,
+  html[data-dd-auto] .steps li,
+  html[data-dd-auto] .about li,
+  html[data-dd-auto] .about ul{ color:#a8b0bd; }
+  html[data-dd-auto] .tip.is-info{ background:#0d2b28; color:#5eead4; }
+  html[data-dd-auto] .tip.is-warn{ background:#2b2110; color:#fbbf24; }
+  html[data-dd-auto] .tip.is-error{ background:#2b1618; color:#f5a3a3; }
+  html[data-dd-auto] .about th{ background:#0d2b28; color:#5eead4; }
+  html[data-dd-auto] .dev-card{ background:#0f1a2e; }
+}
+
