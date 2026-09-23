@@ -524,3 +524,20 @@ html[data-theme="dark"] .tag { background: #4b5b76 !important; }
 @media (prefers-color-scheme: dark) {
   html[data-dd-auto] .tag { background: #4b5b76 !important; }
 }
+
+/* ==========================================================================
+ * V1.3.1 第一眼扩面修复（2026-09-24）
+ * 背景：UI 门禁扩面扫描（ui-gate.mjs，覆盖核心页）发现两处只在子页暴露的问题：
+ *   ① docs/guides/faq 的代码块 white-space:pre 且 overflow-x:visible → 内容 672px
+ *      撑破 358px 容器，移动端整页横向滚动 170~299px（首页无代码块，故此前未暴露）
+ *   ② 暗色下 .hd 背景取 --primary（#14b8a6 亮青绿），而导航/站名为白字 → 2.49:1
+ */
+
+/* ① 代码块内部滚动，不再撑破视口 */
+pre { overflow-x: auto; max-width: 100%; }
+
+/* ② 暗色下站点头部恢复深青绿底，白字对比 5.5:1（与亮色模式观感一致） */
+html[data-theme="dark"] .hd { background-color: #0f766e !important; }
+@media (prefers-color-scheme: dark) {
+  html[data-dd-auto] .hd { background-color: #0f766e !important; }
+}
