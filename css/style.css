@@ -541,3 +541,12 @@ html[data-theme="dark"] .hd { background-color: #0f766e !important; }
 @media (prefers-color-scheme: dark) {
   html[data-dd-auto] .hd { background-color: #0f766e !important; }
 }
+
+/* V1.3.1 续：暗色下「播放」按钮（.main .form button）取 --primary 亮青绿 + 白字 2.49:1
+ * → 暗色下改深青绿底，白字与白色播放图标均达标（5.5:1） */
+html[data-theme="dark"] .main .form button,
+html[data-theme="dark"] .main .form button:hover { background: #0f766e !important; color: #fff !important; }
+@media (prefers-color-scheme: dark) {
+  html[data-dd-auto] .main .form button,
+  html[data-dd-auto] .main .form button:hover { background: #0f766e !important; color: #fff !important; }
+}
