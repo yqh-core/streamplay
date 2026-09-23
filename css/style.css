@@ -518,3 +518,9 @@ html[data-theme="dark"] .dev-card{ background:#0f1a2e; }
   html[data-dd-auto] .dev-card{ background:#0f1a2e; }
 }
 
+
+/* V1.3 第一眼修复：.tag 徽章白字压 var(--text-muted) 暗色下仅 2.95 → 加深徽章底色 */
+html[data-theme="dark"] .tag { background: #4b5b76 !important; }
+@media (prefers-color-scheme: dark) {
+  html[data-dd-auto] .tag { background: #4b5b76 !important; }
+}
