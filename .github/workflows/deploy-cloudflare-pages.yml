@@ -90,6 +90,8 @@ jobs:
           # 404.html 必须带上：Pages 只在根目录有它时才对未匹配路径返回真 404，
           # 否则会当成 SPA 把所有路径兜底到 index.html（返回 200）
           cp -r index.html about.html 404.html css js libs images dist/
+          # CF Pages 配置文件：_headers（安全响应头）+ IndexNow key 文件
+          cp -r _headers 9765d1ca8a6604d220ffa976e8ba38ce.txt dist/
 
           count=$(find dist -type f | wc -l | tr -d ' ')
           echo "dist 文件数: $count"
