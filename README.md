@@ -301,7 +301,7 @@ window.StreamPlay.stop();
 | 输入框留空导致「不知道怎么播」 | 用户打开页面只看到一个空输入框，不知道该填什么 | 改造时把原版预填的示例地址删掉了，这是纯粹的自伤。已恢复预填，并补上三步说明和示例流按钮 |
 | Windows 提交 CRLF 会让 CI 挂掉 | GitHub Actions 的 `run:` 块带上 `\r`，Linux runner 报 `$'\r': command not found` | 加 `.gitattributes` 强制 LF 作防护。**另注**：用 `grep -c $'\r'` 检查换行符是不可靠的（会被当成字母 `r` 匹配），要用 `od -c` 或按字节统计 |
 | Windows 上 `git https` 报 `unable to access` | curl/git 走 Windows schannel 证书校验，本机 `CRYPT_E_NO_REVOCATION_CHECK`（吊销检查失败） | 全局配置 `git config --global http.sslBackend schannel`，作用是显式让 git 走 schannel 后端（默认会因其他配置触发 openssl 分支，从而撞上吊销检查）。curl 单独配 `~/.curlrc` 加 `ssl-no-revoke` |
-| 本机 hosts 劫持导致 GitHub 全家桶 0.0.0.0:443 无法访问 | 浏览器能开（信任过 Steam++ 根证书），但命令行 / GitHub Actions 全部失败 | 这是 Steam++「网络加速」把 27 个 GitHub 域名指到 `127.0.0.1`，再由本地反代用**自签证书**做 MITM。修复方法：编辑 `C:\Windows\System32\drivers\etc\hosts`，注释掉 `# Steam++ Start … # Steam++ End` 那一整块；或者在 Steam++ 控制台里关掉 GitHub 加速。备份 `D:\work\_hosts-backup\hosts.backup-*` 可还原 |
+| 本机 hosts 劫持导致 GitHub 全家桶 0.0.0.0:443 无法访问 | 浏览器能开（信任过 Steam++ 根证书），但命令行 / GitHub Actions 全部失败 | 这是 Steam++「网络加速」把 27 个 GitHub 域名指到 `127.0.0.1`，再由本地反代用**自签证书**做 MITM。修复方法：编辑 `C:\Windows\System32\drivers\etc\hosts`，注释掉 `# Steam++ Start … # Steam++ End` 那一整块；或者在 Steam++ 控制台里关掉 GitHub 加速。修改前先备份 hosts 文件可还原 |
 
 ---
 
