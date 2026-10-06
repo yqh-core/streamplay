@@ -1,0 +1,20 @@
+{
+  "nav.devtools": "Dev Toolbox",
+  "nav.player": "StreamPlay",
+  "nav.ip": "IP Lookup",
+  "nav.loan": "Loan Calculator",
+  "topnav.home": "Home",
+  "topnav.guides": "Guides",
+  "topnav.docs": "HLS Docs",
+  "topnav.faq": "FAQ",
+  "topnav.about": "About",
+  "h1.title": "StreamPlay",
+  "hero.subtitle": "Paste an m3u8 / HLS or mp4 URL and hit play",
+  "placeholder.urlInput": "Paste an m3u8 / HLS / mp4 URL",
+  "btn.play": "Play",
+  "trust.text": "Privacy: we do not store any video files — playback streams straight from the third-party origin of the URL you enter.",
+  "aria.themeToggle": "Toggle dark mode",
+  "aria.langToggle": "Switch language",
+  "seo.title": "StreamPlay — Online M3U8 / HLS Player",
+  "seo.description": "StreamPlay is a lightweight online player for m3u8 / HLS live and on-demand streams plus mp4 files. Runs entirely in your browser — no plugins, no installation."
+}

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 
-<head><script id="dd-theme-bootstrap">/* inject-dd-shell: 主题防闪烁 */
+<head><script id="dd-i18n-data">/* inject-dd-shell: i18n 词条内联（源: locales/*.json） */
+window.DD_I18N_DATA={"en":{"nav.devtools":"Dev Toolbox","nav.player":"StreamPlay","nav.ip":"IP Lookup","nav.loan":"Loan Calculator","topnav.home":"Home","topnav.guides":"Guides","topnav.docs":"HLS Docs","topnav.faq":"FAQ","topnav.about":"About","h1.title":"StreamPlay","hero.subtitle":"Paste an m3u8 / HLS or mp4 URL and hit play","placeholder.urlInput":"Paste an m3u8 / HLS / mp4 URL","btn.play":"Play","trust.text":"Privacy: we do not store any video files — playback streams straight from the third-party origin of the URL you enter.","aria.themeToggle":"Toggle dark mode","aria.langToggle":"Switch language","seo.title":"StreamPlay — Online M3U8 / HLS Player","seo.description":"StreamPlay is a lightweight online player for m3u8 / HLS live and on-demand streams plus mp4 files. Runs entirely in your browser — no plugins, no installation."},"zh":{"nav.devtools":"Dev 工具箱","nav.player":"流影播放器","nav.ip":"IP 查询","nav.loan":"房贷计算器","topnav.home":"首页","topnav.guides":"使用教程","topnav.docs":"HLS 文档","topnav.faq":"常见问题","topnav.about":"关于","h1.title":"StreamPlay 流影","hero.subtitle":"粘贴 m3u8 / HLS 或 mp4 地址，点击播放即可观看","placeholder.urlInput":"粘贴 m3u8 / HLS / mp4 播放地址","btn.play":"播放","trust.text":"隐私说明：本站不存储任何视频文件，播放内容直接来自你输入链接所属的第三方源站。","aria.themeToggle":"切换深色模式","aria.langToggle":"切换语言","seo.title":"StreamPlay 流影 - M3U8 在线播放器","seo.description":"StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件，纯前端实现。"}};</script><script src="js/dd-i18n.js" defer></script><script id="dd-theme-bootstrap">/* inject-dd-shell: 主题防闪烁 */
 (function(){try{var t=localStorage.getItem('dd-theme');var h=document.documentElement;
 if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto');}
 else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto');}
@@ -54,12 +55,13 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
     <div class="dd-shell-inner">
         <a class="dd-brand" href="https://digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
         <nav>
-                <a href="https://digdevbox.com/">Dev 工具箱</a>
-                <a href="https://play.digdevbox.com/" aria-current="page">流影播放器</a>
-                <a href="https://ip.digdevbox.com/">IP 查询</a>
-                <a href="https://fangdai.digdevbox.com/">房贷计算器</a>
+                <a href="https://digdevbox.com/" data-i18n="nav.devtools">Dev 工具箱</a>
+                <a href="https://play.digdevbox.com/" aria-current="page" data-i18n="nav.player">流影播放器</a>
+                <a href="https://ip.digdevbox.com/" data-i18n="nav.ip">IP 查询</a>
+                <a href="https://fangdai.digdevbox.com/" data-i18n="nav.loan">房贷计算器</a>
         </nav>
-        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式">🌙</button>
+        <button id="dd-lang-toggle" class="dd-theme-toggle dd-lang-toggle" type="button" aria-label="切换语言" title="切换语言" data-i18n-attr="aria-label:aria.langToggle,title:aria.langToggle"></button>
+        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
     </div>
 </div>
     <header class="hd">
@@ -69,11 +71,11 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <span>StreamPlay 流影</span>
             </a>
             <nav>
-                <a href="/">首页</a>
-                <a href="/guides">使用教程</a>
-                <a href="/docs">HLS 文档</a>
-                <a href="/faq" aria-current="page">常见问题</a>
-                <a href="/about">关于</a>
+                <a href="/" data-i18n="topnav.home">首页</a>
+                <a href="/guides" data-i18n="topnav.guides">使用教程</a>
+                <a href="/docs" data-i18n="topnav.docs">HLS 文档</a>
+                <a href="/faq" aria-current="page" data-i18n="topnav.faq">常见问题</a>
+                <a href="/about" data-i18n="topnav.about">关于</a>
             </nav>
         </div>
     </header>
@@ -89,7 +91,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <li><strong>允许跨域吗？</strong>浏览器要求流媒体服务器返回 CORS 头，否则会被安全策略拦下。</li>
             <li><strong>编码格式支持吗？</strong>多数浏览器只支持 H.264 编码，H.265/HEVC 基本播不了。</li>
         </ol>
-        <p>详细排查步骤见<a href="/guides">使用教程</a>。</p>
+        <p>详细排查步骤见<a href="/guides" data-i18n="topnav.guides">使用教程</a>。</p>
 
         <h2>什么是跨域（CORS）？为什么会拦我？</h2>
         <p>当网页（本站）要读取另一个域名下的资源（你的 m3u8）时，浏览器会要求对方服务器明确声明「允许谁来读」，这个声明就是响应头里的 <code>Access-Control-Allow-Origin</code>。如果对方没返回这个头，浏览器会直接拒绝，播放器就报跨域错误。</p>
@@ -140,7 +142,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <a href="https://draw.digdevbox.com/">ImageForge</a>
                 <a href="https://notes.digdevbox.com/">Notes</a>
         </nav>
-            <p class="dd-trustline">隐私说明：本站不存储任何视频文件，播放内容直接来自你输入链接所属的第三方源站。</p>
+            <p class="dd-trustline" data-i18n="trust.text">隐私说明：本站不存储任何视频文件，播放内容直接来自你输入链接所属的第三方源站。</p>
     </div>
 </footer>
 
@@ -159,9 +161,14 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
     if(h.getAttribute('data-theme')==='dark')return 'dark';
     if(h.getAttribute('data-theme')==='light')return 'light';
     return sysDark()?'dark':'light';}
+  // aria/title 交给 i18n 内核统一管理（按钮已带 data-i18n-attr="aria-label:aria.themeToggle"）。
+  // 原因：本脚本的 init 挂在 DOMContentLoaded 上，执行晚于 defer 的 dd-i18n.js，
+  // 若在这里硬编码中文 aria，会把内核刚写好的英文 aria 覆盖回中文（实测到的假通过点）。
+  // 未启用 i18n 的站点（无 window.DD_I18N）仍走原中文动态文案。
   function sync(){var b=document.getElementById('dd-theme-toggle');if(!b)return;
     var d=effective()==='dark';
     b.textContent=d?'☀️':'🌙';
+    if(window.DD_I18N&&window.DD_I18N.t)return;
     b.setAttribute('aria-label', d?'切换到浅色模式':'切换到深色模式');
     b.setAttribute('title', d?'切换到浅色模式':'切换到深色模式');}
   function toggle(){var c=effective();apply(c==='dark'?'light':'dark');}

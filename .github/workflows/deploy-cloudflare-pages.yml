@@ -53,7 +53,7 @@ jobs:
       - name: 校验站点必需文件是否齐全
         run: |
           set -euo pipefail
-          required="index.html about.html 404.html css/style.css js/player.js libs/hls.min.js images/logo.ico images/logo.png images/ic-play.png"
+          required="index.html about.html 404.html css/style.css js/player.js js/dd-i18n.js locales/en.json locales/zh.json libs/hls.min.js images/logo.ico images/logo.png images/ic-play.png"
           for f in $required; do
             if [ ! -f "$f" ]; then
               echo "::error file=$f::缺少站点必需文件"
@@ -90,6 +90,9 @@ jobs:
           # 404.html 必须带上：Pages 只在根目录有它时才对未匹配路径返回真 404，
           # 否则会当成 SPA 把所有路径兜底到 index.html（返回 200）
           cp -r index.html about.html 404.html css js libs images dist/
+          # i18n Phase 1.5：运行时词条真源（locales/*.json 已由 inject-dd-shell 内联进 HTML，
+          # 带上是为了 Phase 2 构建期渲染直接消费同一份文件，避免线上与源码漂移）
+          cp -r locales dist/
           # CF Pages 配置文件：_headers（安全响应头）+ IndexNow key 文件
           cp -r _headers 9765d1ca8a6604d220ffa976e8ba38ce.txt dist/
 
