@@ -1,16 +1,19 @@
-# StreamPlay 流影
+# StreamPlay
 
-**在线使用**：<https://play.digdevbox.com/>
+A pure front-end HLS / m3u8 player built on HTML5 `<video>` and the open-source [hls.js](https://github.com/video-dev/hls.js), with native playback for mp4 and other browser-supported formats.
 
-一款纯前端的 m3u8 / HLS 在线播放器，基于 HTML5 `<video>` 与开源 [hls.js](https://github.com/video-dev/hls.js) 实现，同时兼容浏览器原生的 mp4 等格式。
+No plugins, no backend, no build step — drop the files on any static server and it works.
 
-无需安装插件、无需后端服务、无构建步骤，把目录丢到静态服务器上即可运行。
+**Part of [DigDevBox](https://digdevbox.com)** — a collection of free online developer tools.
 
----
+| | |
+| --- | --- |
+| **Website** | <https://play.digdevbox.com/> |
+| **Source code** | <https://github.com/yqh-core/streamplay> |
 
-## 效果预览
+![StreamPlay player](.github/assets/player.png)
 
-本地启动后访问 `http://localhost:8080`。
+![Playback in action](.github/assets/playback.png)
 
 ---
 
