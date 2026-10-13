@@ -4,15 +4,15 @@
    ========================================================================== */
 
 :root {
-    /* DigDevBox 家族主色：原 StreamPlay 蓝 #0e90d2 → teal 体系（见 dd-tokens.css）*/
-    --primary: #0f766e;
-    --primary-dark: #115e59;
-    --primary-light: #ccfbf1;
-    --text: #222222;
-    --text-muted: #6b7280;
-    --border: #dfe3e8;
-    --bg: #ffffff;
-    --bg-soft: #f7f9fb;
+    /* DigDevBox 家族主色：原 StreamPlay 蓝 var(--dd-primary) → teal 体系（见 dd-tokens.css）*/
+    --primary: var(--dd-primary);
+    --primary-dark: var(--dd-primary-active);
+    --primary-light: var(--dd-primary-soft);
+    --text: var(--dd-text);
+    --text-muted: var(--dd-text-soft);
+    --border: var(--dd-border);
+    --bg: var(--dd-surface);
+    --bg-soft: var(--dd-bg);
     --radius: 10px;
 }
 
@@ -62,7 +62,7 @@ a {
     gap: 9px;
     font-size: 18px;
     font-weight: 700;
-    color: #fff;
+    color: var(--dd-surface);
     text-decoration: none;
     letter-spacing: 0.3px;
     white-space: nowrap;
@@ -73,7 +73,7 @@ a {
     height: 26px;
     display: block;
     border-radius: 5px;
-    background: #fff;
+    background: var(--dd-surface);
     object-fit: contain;
 }
 
@@ -85,7 +85,7 @@ a {
 
 .hd nav a {
     font-size: 15px;
-    color: #fff;
+    color: var(--dd-surface);
     text-decoration: none;
     cursor: pointer;
     opacity: 0.92;
@@ -169,7 +169,7 @@ a {
     border-right: 0;
     padding: 0 12px;
     border-radius: var(--radius) 0 0 var(--radius);
-    background: #fff;
+    background: var(--dd-surface);
 }
 
 .main .form input:focus {
@@ -183,7 +183,7 @@ a {
     border: 0;
     padding: 0;
     background: var(--primary);
-    color: #fff;
+    color: var(--dd-surface);
     font-size: 15px;
     font-weight: 600;
     font-family: inherit;
@@ -243,19 +243,19 @@ a {
 }
 
 .tip.is-warn {
-    background: #fff7e6;
-    color: #a15c00;
+    background: var(--dd-warning-bg);
+    color: var(--dd-warning);
 }
 
 .tip.is-error {
-    background: #fdecec;
-    color: #b3261e;
+    background: var(--dd-danger-bg);
+    color: var(--dd-danger);
 }
 
 /* ---------------------------------------------------------------- 播放器 */
 .player-wrap {
     width: 100%;
-    background: #000;
+    background: var(--dd-text);
     border-radius: var(--radius);
     overflow: hidden;
     margin-bottom: 24px;
@@ -267,7 +267,7 @@ a {
     width: 100%;
     height: 100%;
     display: block;
-    background: #000;
+    background: var(--dd-text);
 }
 
 /* ---------------------------------------------------------------- 内容区 */
@@ -288,7 +288,7 @@ a {
 }
 
 .card pre {
-    background: #fff;
+    background: var(--dd-surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 12px;
@@ -296,7 +296,7 @@ a {
     overflow-x: auto;
     font-size: 13px;
     font-family: Consolas, Monaco, "Courier New", monospace;
-    color: #374151;
+    color: var(--dd-text-soft);
 }
 
 .card h2 {
@@ -308,7 +308,7 @@ a {
 
 .card p {
     font-size: 15px;
-    color: #374151;
+    color: var(--dd-text-soft);
 }
 
 /* ---------------------------------------------------------------- 播放引导 */
@@ -343,7 +343,7 @@ a {
     padding: 7px 11px;
     border: 1px solid var(--primary);
     border-radius: 999px;
-    background: #fff;
+    background: var(--dd-surface);
     color: var(--primary);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
@@ -351,14 +351,14 @@ a {
 
 .demo-btn:hover {
     background: var(--primary);
-    color: #fff;
+    color: var(--dd-surface);
 }
 
 /* ---------------------------------------------------------------- 使用说明 */
 .steps {
     margin: 8px 0 12px;
     padding-left: 22px;
-    color: #374151;
+    color: var(--dd-text-soft);
 }
 
 .steps li {
@@ -376,8 +376,8 @@ a {
     padding: 1px 6px;
     font-family: Consolas, Monaco, "Courier New", monospace;
     font-size: 12px;
-    color: #374151;
-    background: #fff;
+    color: var(--dd-text-soft);
+    background: var(--dd-surface);
     border: 1px solid var(--border);
     border-bottom-width: 2px;
     border-radius: 4px;
@@ -386,7 +386,7 @@ a {
 .card .note {
     font-size: 13px;
     color: var(--text-muted);
-    background: #fff;
+    background: var(--dd-surface);
     border-left: 3px solid var(--primary);
     padding: 8px 12px;
     border-radius: 0 6px 6px 0;
@@ -399,14 +399,14 @@ a {
     padding: 2px 8px;
     font-size: 12px;
     font-weight: 500;
-    color: #fff;
+    color: var(--dd-surface);
     background: var(--text-muted);
     border-radius: 999px;
     vertical-align: middle;
 }
 
 .dev-card {
-    background: #fff;
+    background: var(--dd-surface);
     border-style: dashed;
 }
 
@@ -447,7 +447,7 @@ a {
 
 .about ul {
     padding-left: 20px;
-    color: #374151;
+    color: var(--dd-text-soft);
 }
 
 .about li {
@@ -479,50 +479,50 @@ a {
 /* ==== dd-dark-override：站点自有变量重映射（由 dd-shell 切换器驱动） ==== */
 html[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#0b1220; --bg-soft:#131c2b; --text:#e5e7eb; --text-muted:#8a97ad;
-  --border:#1e2d49; --primary:#14b8a6; --primary-dark:#0d9488; --primary-light:#0d2b28;
+  --bg:var(--dd-bg); --bg-soft:var(--dd-surface); --text:var(--dd-text); --text-muted:var(--dd-text-soft);
+  --border:var(--dd-border); --primary:var(--dd-primary); --primary-dark:var(--dd-primary-hover); --primary-light:var(--dd-primary-soft);
 }
-html[data-theme="dark"] .main .form input{ background:#0f1a2e; color:var(--text); }
+html[data-theme="dark"] .main .form input{ background:var(--dd-surface-2); color:var(--text); }
 html[data-theme="dark"] .card pre,
 html[data-theme="dark"] .card .note,
 html[data-theme="dark"] .demo-btn,
-html[data-theme="dark"] .card kbd{ background:#0f1a2e; color:var(--text); border-color:var(--border); }
+html[data-theme="dark"] .card kbd{ background:var(--dd-surface-2); color:var(--text); border-color:var(--border); }
 html[data-theme="dark"] .card p,
 html[data-theme="dark"] .steps li,
 html[data-theme="dark"] .about li,
-html[data-theme="dark"] .about ul{ color:#a8b0bd; }
-html[data-theme="dark"] .tip.is-info{ background:#0d2b28; color:#5eead4; }
-html[data-theme="dark"] .tip.is-warn{ background:#2b2110; color:#fbbf24; }
-html[data-theme="dark"] .tip.is-error{ background:#2b1618; color:#f5a3a3; }
-html[data-theme="dark"] .about th{ background:#0d2b28; color:#5eead4; }
-html[data-theme="dark"] .dev-card{ background:#0f1a2e; }
+html[data-theme="dark"] .about ul{ color:var(--dd-text-soft); }
+html[data-theme="dark"] .tip.is-info{ background:var(--dd-primary-soft); color:var(--dd-primary-hover); }
+html[data-theme="dark"] .tip.is-warn{ background:var(--dd-warning-bg); color:var(--dd-warning); }
+html[data-theme="dark"] .tip.is-error{ background:var(--dd-danger-bg); color:var(--dd-danger); }
+html[data-theme="dark"] .about th{ background:var(--dd-primary-soft); color:var(--dd-primary-hover); }
+html[data-theme="dark"] .dev-card{ background:var(--dd-surface-2); }
 @media (prefers-color-scheme: dark){
   html[data-dd-auto]{
     color-scheme:dark;
-    --bg:#0b1220; --bg-soft:#131c2b; --text:#e5e7eb; --text-muted:#8a97ad;
-    --border:#1e2d49; --primary:#14b8a6; --primary-dark:#0d9488; --primary-light:#0d2b28;
+    --bg:var(--dd-bg); --bg-soft:var(--dd-surface); --text:var(--dd-text); --text-muted:var(--dd-text-soft);
+    --border:var(--dd-border); --primary:var(--dd-primary); --primary-dark:var(--dd-primary-hover); --primary-light:var(--dd-primary-soft);
   }
-  html[data-dd-auto] .main .form input{ background:#0f1a2e; color:var(--text); }
+  html[data-dd-auto] .main .form input{ background:var(--dd-surface-2); color:var(--text); }
   html[data-dd-auto] .card pre,
   html[data-dd-auto] .card .note,
   html[data-dd-auto] .demo-btn,
-  html[data-dd-auto] .card kbd{ background:#0f1a2e; color:var(--text); border-color:var(--border); }
+  html[data-dd-auto] .card kbd{ background:var(--dd-surface-2); color:var(--text); border-color:var(--border); }
   html[data-dd-auto] .card p,
   html[data-dd-auto] .steps li,
   html[data-dd-auto] .about li,
-  html[data-dd-auto] .about ul{ color:#a8b0bd; }
-  html[data-dd-auto] .tip.is-info{ background:#0d2b28; color:#5eead4; }
-  html[data-dd-auto] .tip.is-warn{ background:#2b2110; color:#fbbf24; }
-  html[data-dd-auto] .tip.is-error{ background:#2b1618; color:#f5a3a3; }
-  html[data-dd-auto] .about th{ background:#0d2b28; color:#5eead4; }
-  html[data-dd-auto] .dev-card{ background:#0f1a2e; }
+  html[data-dd-auto] .about ul{ color:var(--dd-text-soft); }
+  html[data-dd-auto] .tip.is-info{ background:var(--dd-primary-soft); color:var(--dd-primary-hover); }
+  html[data-dd-auto] .tip.is-warn{ background:var(--dd-warning-bg); color:var(--dd-warning); }
+  html[data-dd-auto] .tip.is-error{ background:var(--dd-danger-bg); color:var(--dd-danger); }
+  html[data-dd-auto] .about th{ background:var(--dd-primary-soft); color:var(--dd-primary-hover); }
+  html[data-dd-auto] .dev-card{ background:var(--dd-surface-2); }
 }
 
 
 /* V1.3 第一眼修复：.tag 徽章白字压 var(--text-muted) 暗色下仅 2.95 → 加深徽章底色 */
-html[data-theme="dark"] .tag { background: #4b5b76 !important; }
+html[data-theme="dark"] .tag { background: var(--dd-text-soft) !important; }
 @media (prefers-color-scheme: dark) {
-  html[data-dd-auto] .tag { background: #4b5b76 !important; }
+  html[data-dd-auto] .tag { background: var(--dd-text-soft) !important; }
 }
 
 /* ==========================================================================
@@ -530,23 +530,23 @@ html[data-theme="dark"] .tag { background: #4b5b76 !important; }
  * 背景：UI 门禁扩面扫描（ui-gate.mjs，覆盖核心页）发现两处只在子页暴露的问题：
  *   ① docs/guides/faq 的代码块 white-space:pre 且 overflow-x:visible → 内容 672px
  *      撑破 358px 容器，移动端整页横向滚动 170~299px（首页无代码块，故此前未暴露）
- *   ② 暗色下 .hd 背景取 --primary（#14b8a6 亮青绿），而导航/站名为白字 → 2.49:1
+ *   ② 暗色下 .hd 背景取 --primary（var(--dd-primary) 亮青绿），而导航/站名为白字 → 2.49:1
  */
 
 /* ① 代码块内部滚动，不再撑破视口 */
 pre { overflow-x: auto; max-width: 100%; }
 
 /* ② 暗色下站点头部恢复深青绿底，白字对比 5.5:1（与亮色模式观感一致） */
-html[data-theme="dark"] .hd { background-color: #0f766e !important; }
+html[data-theme="dark"] .hd { background-color: var(--dd-primary) !important; }
 @media (prefers-color-scheme: dark) {
-  html[data-dd-auto] .hd { background-color: #0f766e !important; }
+  html[data-dd-auto] .hd { background-color: var(--dd-primary) !important; }
 }
 
 /* V1.3.1 续：暗色下「播放」按钮（.main .form button）取 --primary 亮青绿 + 白字 2.49:1
  * → 暗色下改深青绿底，白字与白色播放图标均达标（5.5:1） */
 html[data-theme="dark"] .main .form button,
-html[data-theme="dark"] .main .form button:hover { background: #0f766e !important; color: #fff !important; }
+html[data-theme="dark"] .main .form button:hover { background: var(--dd-primary) !important; color: var(--dd-surface) !important; }
 @media (prefers-color-scheme: dark) {
   html[data-dd-auto] .main .form button,
-  html[data-dd-auto] .main .form button:hover { background: #0f766e !important; color: #fff !important; }
+  html[data-dd-auto] .main .form button:hover { background: var(--dd-primary) !important; color: var(--dd-surface) !important; }
 }
