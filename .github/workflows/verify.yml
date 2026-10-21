@@ -1,0 +1,27 @@
+name: verify
+
+# 只做质量门禁，不负责发布。
+# 发布由 .github/workflows/deploy-cloudflare-pages.yml 负责，两条链路职责不重叠。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  locales:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # G2（B 型 dd-i18n 站）：与 ip / fangdai 同一份执行器。
+      # 本仓此前没有任何 locale 检查，也没有 scripts/ 目录。
+      - name: 校验 locale 配平（G2）
+        run: node scripts/check-locales.mjs
