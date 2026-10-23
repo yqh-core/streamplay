@@ -25,3 +25,12 @@ jobs:
       # 本仓此前没有任何 locale 检查，也没有 scripts/ 目录。
       - name: 校验 locale 配平（G2）
         run: node scripts/check-locales.mjs
+
+      # G-ASSET-VER：_headers 已把 /js/*.js 与 /libs/*.js 设成一年 immutable，
+      # 长缓存只在「内容变→URL 变」时安全，故每个长缓存路径引用必须带 ?v=<内容哈希前8位>。
+      # 改了 JS 忘 bump 版本 = 回访用户拿旧内容一年，这里判红拦住。退出码 2 = 扫描覆盖自证失败（UNDECIDED）。
+      - name: 静态资源版本串门禁（G-ASSET-VER）
+        run: node scripts/check-asset-versioning.mjs
+
+      - name: 静态资源版本串门禁自证（G-ASSET-VER --falsify）
+        run: node scripts/check-asset-versioning.mjs --falsify
