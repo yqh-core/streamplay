@@ -66,8 +66,10 @@ jobs:
         run: |
           set -euo pipefail
           # 抽出 HTML 里的 src="./x" / href="./x"，以及 CSS 里的 url(./x)
+          # 2026-10-23 补：引用已带 ?v=<内容哈希> 查询串（G-ASSET-VER 缓存方案），
+          # 存在性检查必须先剥掉查询串，否则每个带版本的引用都会误报"不存在"。
           grep -rhoE '(src|href)="\./[^"]+"' index.html about.html \
-            | sed -E 's/.*="\.\///; s/"$//' | sort -u > /tmp/refs.txt
+            | sed -E 's/.*="\.\///; s/"$//; s/\?.*$//' | sort -u > /tmp/refs.txt
           grep -rhoE 'url\(\./[^)]+\)' css/style.css \
             | sed -E 's/^url\(\.\///; s/\)$//' >> /tmp/refs.txt || true
 
