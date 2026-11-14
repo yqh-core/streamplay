@@ -108,7 +108,13 @@
 
         hls.on(window.Hls.Events.MANIFEST_PARSED, function () {
             attempts = 0;          // 清单解析成功，重置重试计数
+            populateLevels();
             safePlay();
+        });
+
+        hls.on(window.Hls.Events.LEVEL_SWITCHED, function () {
+            if (qualitySel && hls) qualitySel.value = String(hls.currentLevel);
+            syncStats();
         });
 
         hls.on(window.Hls.Events.ERROR, function (evt, data) {
@@ -255,6 +261,183 @@
             hideTip();
         }
     });
+
+    /* ------------------------------------------------------------ 自定义控制条 */
+    /* 对标 video.js / hls.js：播放/暂停、进度+缓冲、音量、速度、HLS 画质、画中画、
+       全屏、快捷键、实时统计。控制条常驻可见（不自动隐藏），所有控件即时生效。 */
+    var controls = document.getElementById('controls');
+    var shell = document.querySelector('.player-shell');
+    var bigPlay = document.getElementById('big-play');
+    var cPlay = document.getElementById('c-play');
+    var cMute = document.getElementById('c-mute');
+    var cPip = document.getElementById('c-pip');
+    var cFull = document.getElementById('c-full');
+    var seek = document.getElementById('seek');
+    var bufferTrack = document.getElementById('buffer-track');
+    var vol = document.getElementById('vol');
+    var rateSel = document.getElementById('rate');
+    var qualitySel = document.getElementById('quality');
+    var curEl = document.getElementById('cur');
+    var durEl = document.getElementById('dur');
+    var statsEl = document.getElementById('stats');
+    var seeking = false;
+
+    function fmtTime(s) {
+        if (!isFinite(s) || s < 0) s = 0;
+        var h = Math.floor(s / 3600);
+        var m = Math.floor((s % 3600) / 60);
+        var sec = Math.floor(s % 60);
+        var mm = (h > 0 && m < 10 ? '0' : '') + m;
+        var ss = (sec < 10 ? '0' : '') + sec;
+        return (h > 0 ? h + ':' : '') + mm + ':' + ss;
+    }
+
+    function syncPlayIcon() {
+        var paused = video.paused;
+        if (cPlay) cPlay.textContent = paused ? '▶' : '⏸';
+        if (bigPlay) bigPlay.style.display = paused ? 'flex' : 'none';
+    }
+
+    function togglePlay() {
+        if (video.paused) { safePlay(); } else { video.pause(); }
+    }
+
+    function syncVolume() {
+        if (vol) vol.value = String(video.muted ? 0 : video.volume);
+        if (cMute) cMute.textContent = (video.muted || video.volume === 0) ? '🔇' : '🔊';
+    }
+
+    function syncTime() {
+        if (curEl) curEl.textContent = fmtTime(video.currentTime);
+        if (durEl) durEl.textContent = fmtTime(video.duration);
+        if (seek && !seeking) {
+            var pct = video.duration > 0 ? (video.currentTime / video.duration) * 100 : 0;
+            seek.value = String(pct);
+        }
+    }
+
+    function syncBuffer() {
+        if (!bufferTrack) return;
+        try {
+            if (video.buffered.length > 0 && video.duration > 0) {
+                var end = video.buffered.end(video.buffered.length - 1);
+                bufferTrack.style.width = Math.min(100, (end / video.duration) * 100) + '%';
+            }
+        } catch (e) { /* 缓冲区间暂不可读 */ }
+    }
+
+    function syncStats() {
+        if (!statsEl) return;
+        var parts = [];
+        if (hls && hls.levels && hls.levels.length) {
+            var lvl = hls.levels[hls.currentLevel];
+            if (lvl) parts.push('画质 ' + (lvl.height ? lvl.height + 'p' : Math.round(lvl.bitrate / 1000) + 'kbps'));
+            parts.push(hls.currentLevel === -1 ? '自动切换' : '手动锁定');
+        }
+        parts.push('速度 ' + video.playbackRate + '×');
+        if (video.buffered.length > 0) {
+            try {
+                var buf = Math.max(0, video.buffered.end(video.buffered.length - 1) - video.currentTime);
+                parts.push('缓冲 ' + buf.toFixed(1) + 's');
+            } catch (e) { /* ignore */ }
+        }
+        statsEl.textContent = parts.join(' · ');
+    }
+
+    /* HLS 画质选项：从 hls.levels 填充（自动 + 各档），手动选择锁定档位。 */
+    function populateLevels() {
+        if (!qualitySel) return;
+        if (!hls || !hls.levels || !hls.levels.length) {
+            qualitySel.innerHTML = '<option value="-1">自动</option>';
+            qualitySel.disabled = true;
+            return;
+        }
+        qualitySel.disabled = false;
+        var html = '<option value="-1">自动</option>';
+        hls.levels.forEach(function (lvl, i) {
+            var label = lvl.height ? lvl.height + 'p' : Math.round(lvl.bitrate / 1000) + 'kbps';
+            if (lvl.bitrate && lvl.height) label += ' (' + Math.round(lvl.bitrate / 1000) + 'kbps)';
+            html += '<option value="' + i + '">' + label + '</option>';
+        });
+        qualitySel.innerHTML = html;
+        qualitySel.value = String(hls.currentLevel);
+    }
+
+    if (controls) {
+        if (cPlay) cPlay.addEventListener('click', togglePlay);
+        if (bigPlay) bigPlay.addEventListener('click', togglePlay);
+        video.addEventListener('click', togglePlay);
+        video.addEventListener('play', syncPlayIcon);
+        video.addEventListener('pause', syncPlayIcon);
+        video.addEventListener('timeupdate', function () { syncTime(); syncStats(); });
+        video.addEventListener('durationchange', syncTime);
+        video.addEventListener('progress', syncBuffer);
+        video.addEventListener('volumechange', syncVolume);
+        video.addEventListener('ratechange', function () {
+            if (rateSel) rateSel.value = String(video.playbackRate);
+            syncStats();
+        });
+        video.addEventListener('loadedmetadata', function () { syncTime(); syncPlayIcon(); syncVolume(); });
+
+        if (seek) {
+            seek.addEventListener('input', function () {
+                seeking = true;
+                if (video.duration > 0) {
+                    video.currentTime = (Number(seek.value) / 100) * video.duration;
+                }
+                if (curEl) curEl.textContent = fmtTime(video.currentTime);
+            });
+            seek.addEventListener('change', function () { seeking = false; });
+        }
+        if (vol) {
+            vol.addEventListener('input', function () {
+                video.volume = Number(vol.value);
+                video.muted = Number(vol.value) === 0;
+            });
+        }
+        if (cMute) cMute.addEventListener('click', function () { video.muted = !video.muted; });
+        if (rateSel) rateSel.addEventListener('change', function () { video.playbackRate = Number(rateSel.value); });
+        if (qualitySel) qualitySel.addEventListener('change', function () {
+            if (hls) { hls.currentLevel = Number(qualitySel.value); syncStats(); }
+        });
+        if (cPip) cPip.addEventListener('click', function () {
+            if (document.pictureInPictureElement) {
+                document.exitPictureInPicture().catch(function () { });
+            } else if (video.requestPictureInPicture) {
+                video.requestPictureInPicture().catch(function () { showTip('当前浏览器或视频不支持画中画', 'warn'); });
+            } else {
+                showTip('当前浏览器不支持画中画', 'warn');
+            }
+        });
+        if (cFull) cFull.addEventListener('click', function () {
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(function () { });
+            } else if (shell && shell.requestFullscreen) {
+                shell.requestFullscreen().catch(function () { });
+            }
+        });
+
+        /* 快捷键：输入框/下拉聚焦时不拦截，避免打断地址输入与选择。 */
+        document.addEventListener('keydown', function (e) {
+            var tag = (e.target && e.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'select' || tag === 'textarea' || e.target.isContentEditable) return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            switch (e.key) {
+                case ' ': case 'k': e.preventDefault(); togglePlay(); break;
+                case 'ArrowLeft': e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 5); break;
+                case 'ArrowRight': e.preventDefault(); video.currentTime = Math.min(video.duration || 0, video.currentTime + 5); break;
+                case 'j': video.currentTime = Math.max(0, video.currentTime - 10); break;
+                case 'l': video.currentTime = Math.min(video.duration || 0, video.currentTime + 10); break;
+                case 'ArrowUp': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); video.muted = false; break;
+                case 'ArrowDown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); break;
+                case 'm': video.muted = !video.muted; break;
+                case 'f': if (cFull) cFull.click(); break;
+                default: break;
+            }
+        });
+
+        syncPlayIcon(); syncVolume(); syncTime();
+    }
 
     /* ------------------------------------------------------------ 深链支持 */
     /* 页面地址带 ?url=xxx 时自动填充并加载，便于 iframe 嵌入 */

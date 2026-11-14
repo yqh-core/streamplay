@@ -125,10 +125,44 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
         <div class="tip" id="tip" role="status" aria-live="polite"></div>
 
-        <!-- ③ 播放器 -->
-        <div class="player-wrap">
-            <video id="player" preload="auto" playsinline webkit-playsinline controls></video>
+        <!-- ③ 播放器 + 自定义控制条（对标 video.js / hls.js：速度、画质、画中画、快捷键） -->
+        <div class="player-shell">
+            <div class="player-wrap">
+                <video id="player" preload="auto" playsinline webkit-playsinline></video>
+                <button type="button" class="big-play" id="big-play" aria-label="播放">▶</button>
+            </div>
+            <div class="controls" id="controls">
+                <div class="seek-row">
+                    <div class="buffer-track" id="buffer-track" aria-hidden="true"></div>
+                    <input type="range" id="seek" min="0" max="100" value="0" step="0.1" aria-label="播放进度">
+                </div>
+                <div class="ctrl-row">
+                    <button type="button" id="c-play" class="cbtn" aria-label="播放/暂停" title="播放/暂停（空格）">▶</button>
+                    <span class="time"><span id="cur">0:00</span> / <span id="dur">0:00</span></span>
+                    <button type="button" id="c-mute" class="cbtn" aria-label="静音" title="静音（M）">🔊</button>
+                    <input type="range" id="vol" class="vol" min="0" max="1" step="0.05" value="1" aria-label="音量">
+                    <label class="sel-wrap">速度
+                        <select id="rate" aria-label="播放速度">
+                            <option value="0.5">0.5×</option>
+                            <option value="0.75">0.75×</option>
+                            <option value="1" selected>1×</option>
+                            <option value="1.25">1.25×</option>
+                            <option value="1.5">1.5×</option>
+                            <option value="2">2×</option>
+                        </select>
+                    </label>
+                    <label class="sel-wrap">画质
+                        <select id="quality" aria-label="画质">
+                            <option value="-1">自动</option>
+                        </select>
+                    </label>
+                    <button type="button" id="c-pip" class="cbtn" aria-label="画中画" title="画中画">📺</button>
+                    <button type="button" id="c-full" class="cbtn" aria-label="全屏" title="全屏（F）">⛶</button>
+                </div>
+                <div class="stats" id="stats" aria-live="off"></div>
+            </div>
         </div>
+        <p class="kbd-hint">快捷键：<kbd>空格</kbd> 播放/暂停 · <kbd>←</kbd>/<kbd>→</kbd> 快退/快进 5s · <kbd>J</kbd>/<kbd>L</kbd> 10s · <kbd>↑</kbd>/<kbd>↓</kbd> 音量 · <kbd>M</kbd> 静音 · <kbd>F</kbd> 全屏</p>
 
         <!-- ④ 使用说明 -->
         <div class="card">
@@ -198,7 +232,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
-    <script src="./js/player.js?v=6f3b128d"></script>
+    <script src="./js/player.js?v=71275002"></script>
 
 
 
