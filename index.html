@@ -77,7 +77,9 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
       "字幕样式定制（字号/颜色/背景）",
       "详细播放统计面板（分辨率/编码/带宽/丢帧）",
       "播放诊断（MSE/解码/地址可达性）",
-      "快捷键帮助面板"
+      "快捷键帮助面板",
+      "浮动迷你播放器（滚动自动悬浮）",
+      "播放队列（自动连播/上下首/循环整片）"
     ],
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
   }
@@ -162,6 +164,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <span class="np-url" id="np-url"></span>
         </div>
         <div class="player-glow" aria-hidden="true"></div>
+        <div class="mini-spacer" id="mini-spacer" hidden></div>
         <div class="player-shell">
             <div class="player-wrap">
                 <video id="player" preload="auto" playsinline webkit-playsinline></video>
@@ -209,6 +212,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                             <option value="-1">默认</option>
                         </select>
                     </label>
+                    <span class="ctrl-sep" aria-hidden="true"></span>
                     <button type="button" id="c-pip" class="cbtn" aria-label="画中画" title="画中画">📺</button>
                     <button type="button" id="c-snap" class="cbtn" aria-label="截图当前帧" title="截图当前帧">📷</button>
                     <button type="button" id="c-loop-a" class="cbtn loop-btn" aria-label="设定循环起点 A" title="A-B 循环：设起点 A">A</button>
@@ -218,9 +222,16 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="c-stats" class="cbtn" aria-label="播放统计面板" title="播放统计（分辨率/编码/带宽/丢帧）">📊</button>
                     <button type="button" id="c-diag" class="cbtn" aria-label="播放诊断" title="播放诊断（MSE/解码/地址可达性）">🩺</button>
                     <button type="button" id="c-help" class="cbtn" aria-label="快捷键帮助" title="快捷键帮助（?）">⌨</button>
+                    <button type="button" id="c-mini" class="cbtn" aria-label="迷你播放器" title="迷你播放器（滚出画面自动悬浮）">🪟</button>
                     <button type="button" id="c-full" class="cbtn" aria-label="全屏" title="全屏（F）">⛶</button>
                 </div>
                 <div class="stats" id="stats" aria-live="off"></div>
+            </div>
+            <div class="mini-bar" id="mini-bar">
+                <button type="button" id="mini-play" class="cbtn" aria-label="播放/暂停">⏸</button>
+                <span class="mini-title" id="mini-title">正在播放</span>
+                <button type="button" id="mini-expand" class="cbtn" aria-label="还原播放器" title="还原播放器">⤢</button>
+                <button type="button" id="mini-close" class="cbtn" aria-label="关闭迷你播放器" title="关闭迷你播放器">✕</button>
             </div>
         </div>
         <p class="kbd-hint">快捷键：<kbd>空格</kbd> 播放/暂停 · <kbd>←</kbd>/<kbd>→</kbd> 快退/快进 5s · <kbd>J</kbd>/<kbd>L</kbd> 10s · <kbd>↑</kbd>/<kbd>↓</kbd> 音量 · <kbd>M</kbd> 静音 · <kbd>F</kbd> 全屏 · <kbd>?</kbd> 帮助</p>
@@ -287,6 +298,23 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <ul class="recent-list" id="recent-list" aria-label="最近播放地址"></ul>
                 <p class="note" id="recent-empty">播放过的地址会自动记在这里（仅存于本机浏览器），点击即可重播。</p>
             </div>
+        </div>
+
+        <!-- ③-d 播放队列：自动连播 / 上下首 / 循环整片（对标商业播放器的播放列表能力） -->
+        <div class="card queue-card">
+            <p><strong>播放队列 <span class="tag" id="queue-count">0</span></strong>
+                <label class="queue-toggle"><input type="checkbox" id="queue-auto"> 自动连播</label>
+                <label class="queue-toggle"><input type="checkbox" id="queue-repeat"> 循环整片</label>
+                <button type="button" id="queue-clear" class="mini-btn ghost clear-btn">清空</button>
+            </p>
+            <div class="sub-row">
+                <input type="text" id="queue-url" placeholder="粘贴地址加入队列，回车添加" autocomplete="off" spellcheck="false">
+                <button type="button" id="queue-add" class="mini-btn">添加</button>
+                <button type="button" id="queue-prev" class="mini-btn ghost">⏮ 上一首</button>
+                <button type="button" id="queue-next" class="mini-btn ghost">下一首 ⏭</button>
+            </div>
+            <ol class="queue-list" id="queue-list" aria-label="播放队列"></ol>
+            <p class="note" id="queue-empty">添加多个地址组成队列；开启「自动连播」播完自动播下一首，「循环整片」单曲循环。队列仅存本机浏览器。</p>
         </div>
 
         <!-- ④ 使用说明 -->
@@ -371,6 +399,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <summary>如何排查播放问题或查看播放统计？</summary>
                 <p>点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。</p>
             </details>
+            <details>
+                <summary>可以连续播放多个视频或边滚动边看吗？</summary>
+                <p>可以。在「播放队列」添加多个地址，开启「自动连播」后播完自动播下一首，也可用上一首/下一首切换，「循环整片」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩小悬浮到右下角，点 ⤢ 还原、✕ 关闭。</p>
+            </details>
         </div>
         <script type="application/ld+json">
         {
@@ -383,7 +415,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             { "@type": "Question", "name": "可以调整播放速度和画质吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。控制条提供 0.5× 到 2× 六档速度；对于多码率 HLS 流，画质菜单会列出各档分辨率，可手动锁定或自动切换。" } },
             { "@type": "Question", "name": "如何加载字幕？", "acceptedAnswer": { "@type": "Answer", "text": "在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。" } },
             { "@type": "Question", "name": "能记住播放进度或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } },
-            { "@type": "Question", "name": "如何排查播放问题或查看播放统计？", "acceptedAnswer": { "@type": "Answer", "text": "点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。" } }
+            { "@type": "Question", "name": "如何排查播放问题或查看播放统计？", "acceptedAnswer": { "@type": "Answer", "text": "点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。" } },
+            { "@type": "Question", "name": "可以连续播放多个视频或边滚动边看吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「播放队列」添加多个地址，开启「自动连播」后播完自动播下一首，也可用上一首/下一首切换，「循环整片」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩小悬浮到右下角，点 ⤢ 还原、✕ 关闭。" } }
           ]
         }
         </script>
@@ -405,7 +438,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
-    <script src="./js/player.js?v=64e2e654"></script>
+    <script src="./js/player.js?v=03259dd9"></script>
 
 
 

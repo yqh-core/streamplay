@@ -190,6 +190,7 @@
         recordRecent(url);
         clearLoop();
         syncNowPlaying();
+        renderQueue();
         hideResume();
         hideRetry();
         hideSpin();
@@ -1052,6 +1053,155 @@
         if (tag === 'input' || tag === 'select' || tag === 'textarea' || e.target.isContentEditable) return;
         if (e.key === '?') { e.preventDefault(); openHelp(); }
     });
+
+    /* ------------------------------------------------------------ 第六轮：迷你播放器 + 播放队列 */
+    /* 对标 YouTube / Plyr：滚出画面自动悬浮迷你播放器；播放队列自动连播/上下首/循环整片。 */
+    var shellEl = document.querySelector('.player-shell');
+    var cMini = document.getElementById('c-mini');
+    var miniSpacer = document.getElementById('mini-spacer');
+    var miniPlay = document.getElementById('mini-play');
+    var miniTitle = document.getElementById('mini-title');
+    var miniExpand = document.getElementById('mini-expand');
+    var miniClose = document.getElementById('mini-close');
+    var isMini = false;
+    var miniManual = false;
+
+    function syncMiniPlay() {
+        if (miniPlay) miniPlay.textContent = video.paused ? '▶' : '⏸';
+        if (miniTitle && currentUrl) miniTitle.textContent = currentUrl;
+    }
+    function enterMini() {
+        if (isMini || !shellEl) return;
+        isMini = true;
+        /* 用占位块撑住原高度，避免 shell 脱离文档流后下方内容跳动 */
+        if (miniSpacer) { miniSpacer.style.height = shellEl.offsetHeight + 'px'; miniSpacer.hidden = false; }
+        shellEl.classList.add('is-mini');
+        syncMiniPlay();
+    }
+    function exitMini() {
+        if (!isMini || !shellEl) return;
+        isMini = false;
+        shellEl.classList.remove('is-mini');
+        if (miniSpacer) { miniSpacer.hidden = true; miniSpacer.style.height = ''; }
+    }
+    if (cMini) cMini.addEventListener('click', function () {
+        if (isMini) { miniManual = false; exitMini(); }
+        else { miniManual = true; enterMini(); }
+    });
+    if (miniPlay) miniPlay.addEventListener('click', function () { togglePlay(); syncMiniPlay(); });
+    if (miniExpand) miniExpand.addEventListener('click', function () { miniManual = false; exitMini(); });
+    if (miniClose) miniClose.addEventListener('click', function () { miniManual = false; exitMini(); video.pause(); });
+    video.addEventListener('play', syncMiniPlay);
+    video.addEventListener('pause', syncMiniPlay);
+    /* 滚动自动悬浮：以 now-playing 条为哨兵（它不随 shell 悬浮移动，避免反馈环）。
+       手动迷你（miniManual）时不自动还原，交由 ⤢/✕ 控制。 */
+    if ('IntersectionObserver' in window && nowPlaying) {
+        var miniIO = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (!en.isIntersecting && !video.paused && currentUrl && !isMini) { enterMini(); }
+                else if (en.isIntersecting && isMini && !miniManual) { exitMini(); }
+            });
+        }, { threshold: 0 });
+        miniIO.observe(nowPlaying);
+    }
+
+    /* —— 播放队列：增删播/上下首/自动连播/循环整片，仅存本机 —— */
+    var QUEUE_KEY = 'streamplay:queue';
+    var QUEUE_PREF_KEY = 'streamplay:queuepref';
+    var queueUrl = document.getElementById('queue-url');
+    var queueAdd = document.getElementById('queue-add');
+    var queuePrev = document.getElementById('queue-prev');
+    var queueNext = document.getElementById('queue-next');
+    var queueClear = document.getElementById('queue-clear');
+    var queueList = document.getElementById('queue-list');
+    var queueCount = document.getElementById('queue-count');
+    var queueEmpty = document.getElementById('queue-empty');
+    var queueAuto = document.getElementById('queue-auto');
+    var queueRepeat = document.getElementById('queue-repeat');
+
+    function readQueue() {
+        try {
+            var arr = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+            return Array.isArray(arr) ? arr.filter(function (x) { return typeof x === 'string'; }) : [];
+        } catch (e) { return []; }
+    }
+    function writeQueue(arr) { try { localStorage.setItem(QUEUE_KEY, JSON.stringify(arr)); } catch (e) { /* 隐私模式禁写 */ } }
+    function renderQueue() {
+        if (!queueList) return;
+        var arr = readQueue();
+        queueList.innerHTML = '';
+        if (queueCount) queueCount.textContent = String(arr.length);
+        if (queueEmpty) queueEmpty.style.display = arr.length ? 'none' : 'block';
+        arr.forEach(function (url, i) {
+            var li = document.createElement('li');
+            li.className = 'queue-item' + (url === currentUrl ? ' current' : '');
+            var idx = document.createElement('span');
+            idx.className = 'queue-idx';
+            idx.textContent = url === currentUrl ? '▶' : String(i + 1);
+            var link = document.createElement('button');
+            link.type = 'button';
+            link.className = 'queue-link';
+            link.title = url;
+            link.textContent = url;
+            link.addEventListener('click', function () { play(url); });
+            var del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'queue-del';
+            del.setAttribute('aria-label', '从队列移除');
+            del.textContent = '✕';
+            del.addEventListener('click', function () {
+                writeQueue(readQueue().filter(function (x) { return x !== url; }));
+                renderQueue();
+            });
+            li.appendChild(idx);
+            li.appendChild(link);
+            li.appendChild(del);
+            queueList.appendChild(li);
+        });
+    }
+    function addToQueue(raw) {
+        var url = String(raw === undefined || raw === null ? (queueUrl ? queueUrl.value : '') : raw).trim();
+        if (!url) { showTip('请先输入要加入队列的地址', 'warn'); return; }
+        if (!/^(https?:)?\/\//i.test(url) && /^[\w-]+(\.[\w-]+)+\//.test(url)) url = 'https://' + url;
+        var arr = readQueue();
+        if (arr.indexOf(url) < 0) { arr.push(url); writeQueue(arr); }
+        if (queueUrl) queueUrl.value = '';
+        renderQueue();
+        showTip('已加入队列（共 ' + readQueue().length + ' 首）', 'info');
+    }
+    function queueStep(delta) {
+        var arr = readQueue();
+        if (!arr.length) { showTip('队列为空，先添加地址', 'warn'); return; }
+        var idx = arr.indexOf(currentUrl);
+        var next = idx < 0 ? (delta > 0 ? 0 : arr.length - 1) : idx + delta;
+        if (next < 0 || next >= arr.length) { showTip(delta > 0 ? '已是最后一首' : '已是第一首', 'info'); return; }
+        play(arr[next]);
+    }
+    if (queueAdd) queueAdd.addEventListener('click', function () { addToQueue(); });
+    if (queueUrl) queueUrl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addToQueue(); } });
+    if (queuePrev) queuePrev.addEventListener('click', function () { queueStep(-1); });
+    if (queueNext) queueNext.addEventListener('click', function () { queueStep(1); });
+    if (queueClear) queueClear.addEventListener('click', function () { writeQueue([]); renderQueue(); });
+    /* 自动连播：播完取队列下一首（循环整片由 video.loop 原生处理，ended 不触发） */
+    video.addEventListener('ended', function () {
+        if (video.loop) return;
+        if (queueAuto && queueAuto.checked) {
+            var arr = readQueue();
+            var idx = arr.indexOf(currentUrl);
+            if (idx >= 0 && idx < arr.length - 1) play(arr[idx + 1]);
+        }
+    });
+    /* 偏好持久化 */
+    function readPref() { try { return JSON.parse(localStorage.getItem(QUEUE_PREF_KEY) || '{}') || {}; } catch (e) { return {}; } }
+    function savePref() {
+        try { localStorage.setItem(QUEUE_PREF_KEY, JSON.stringify({ auto: queueAuto ? queueAuto.checked : false, repeat: queueRepeat ? queueRepeat.checked : false })); } catch (e) { /* ignore */ }
+    }
+    if (queueAuto) queueAuto.addEventListener('change', function () { savePref(); showTip(queueAuto.checked ? '自动连播已开启' : '自动连播已关闭', 'info'); });
+    if (queueRepeat) queueRepeat.addEventListener('change', function () { video.loop = queueRepeat.checked; savePref(); showTip(queueRepeat.checked ? '循环整片已开启' : '循环整片已关闭', 'info'); });
+    var pref = readPref();
+    if (queueAuto) queueAuto.checked = !!pref.auto;
+    if (queueRepeat) { queueRepeat.checked = !!pref.repeat; video.loop = !!pref.repeat; }
+    renderQueue();
 
     /* ------------------------------------------------------------ 对外接口 */
     /* 兼容原版全局 play() 调用方式 */

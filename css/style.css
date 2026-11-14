@@ -681,6 +681,165 @@ body.sp-theater .player-wrap {
     .diag-detail { font-size: 12px; }
 }
 
+/* ---------------------------------------------------------------- 第六轮：迷你播放器 + 播放队列 */
+.ctrl-sep {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.18);
+    flex: none;
+    margin: 0 2px;
+}
+
+/* 迷你播放器：脱离文档流悬浮右下角，占位块撑住原高度防跳动 */
+.mini-spacer { width: 100%; }
+
+.player-shell.is-mini {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    z-index: 900;
+    margin: 0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    animation: sp-mini-in 0.25s ease;
+}
+
+.player-shell.is-mini .controls { display: none; }
+
+.player-shell.is-mini .player-wrap {
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    margin: 0;
+}
+
+.player-shell.is-mini .big-play,
+.player-shell.is-mini .resume-bar,
+.player-shell.is-mini .retry-overlay,
+.player-shell.is-mini .stats-panel { display: none; }
+
+.mini-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 7;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: linear-gradient(0deg, rgba(11, 18, 32, 0.94), rgba(11, 18, 32, 0.6));
+}
+
+.player-shell.is-mini .mini-bar { display: flex; }
+
+.mini-bar .cbtn { width: 28px; height: 28px; font-size: 13px; }
+
+.mini-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    color: #c9d4e0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@keyframes sp-mini-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 播放队列 */
+.queue-card { margin-bottom: 24px; }
+
+.queue-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    color: var(--dd-text-soft);
+    margin-left: 12px;
+    font-weight: 400;
+}
+
+.queue-toggle input { accent-color: var(--dd-primary); }
+
+.queue-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.queue-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.queue-item.current {
+    background: var(--dd-primary-soft);
+    border-radius: 6px;
+}
+
+.queue-idx {
+    flex: none;
+    width: 22px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--dd-text-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.queue-item.current .queue-idx { color: var(--dd-primary); }
+
+.queue-link {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--dd-primary);
+    font-size: 12.5px;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 2px 0;
+}
+
+.queue-link:hover { text-decoration: underline; }
+
+.queue-del {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 5px;
+    background: var(--dd-surface-2);
+    color: var(--dd-text-soft);
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.queue-del:hover {
+    background: color-mix(in srgb, #dc2626 18%, transparent);
+    color: #dc2626;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-shell.is-mini { animation: none; }
+}
+
+@media (max-width: 640px) {
+    .player-shell.is-mini { right: 8px; bottom: 8px; width: 260px; }
+    .queue-toggle { margin-left: 8px; }
+}
+
 /* 入场动效：主区块 staged fade-up */
 @keyframes sp-rise {
     from { opacity: 0; transform: translateY(14px); }
