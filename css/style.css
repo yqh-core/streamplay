@@ -479,6 +479,164 @@ a {
     font-family: inherit;
 }
 
+/* ---------------------------------------------------------------- 播放工具面板 */
+.tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 720px) {
+    .tool-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tool-card {
+    margin-bottom: 0;
+}
+
+.tool-card .tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dd-primary);
+    background: var(--dd-primary-soft);
+    border-radius: 5px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.sub-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+
+.sub-row input {
+    flex: 1;
+    min-width: 160px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--dd-surface);
+    color: var(--dd-text);
+    font-size: 13px;
+    outline: none;
+}
+
+.sub-row input:focus {
+    border-color: var(--dd-primary);
+}
+
+.mini-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 7px;
+    background: var(--dd-primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s;
+}
+
+.mini-btn:hover {
+    filter: brightness(1.1);
+}
+
+.mini-btn.ghost {
+    background: var(--dd-surface-2);
+    color: var(--dd-text-soft);
+    border: 1px solid var(--border);
+}
+
+.clear-btn {
+    float: right;
+    padding: 3px 10px;
+    font-size: 12px;
+}
+
+.recent-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.recent-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.recent-link {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--dd-primary);
+    font-size: 12.5px;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 2px 0;
+}
+
+.recent-link:hover {
+    text-decoration: underline;
+}
+
+.recent-del {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 5px;
+    background: var(--dd-surface-2);
+    color: var(--dd-text-soft);
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.recent-del:hover {
+    background: color-mix(in srgb, #dc2626 18%, transparent);
+    color: #dc2626;
+}
+
+/* ---------------------------------------------------------------- FAQ */
+.faq-card h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+.faq-card details {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--dd-surface);
+    padding: 10px 14px;
+    margin: 10px 0;
+}
+
+.faq-card summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--dd-text);
+}
+
+.faq-card details p {
+    margin: 8px 0 0;
+    color: var(--dd-text-soft);
+    line-height: 1.7;
+}
+
 /* 全屏时控制条贴底，视频填满 */
 .player-shell:fullscreen {
     display: flex;

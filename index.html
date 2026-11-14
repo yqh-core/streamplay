@@ -157,12 +157,33 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                         </select>
                     </label>
                     <button type="button" id="c-pip" class="cbtn" aria-label="画中画" title="画中画">📺</button>
+                    <button type="button" id="c-snap" class="cbtn" aria-label="截图当前帧" title="截图当前帧">📷</button>
                     <button type="button" id="c-full" class="cbtn" aria-label="全屏" title="全屏（F）">⛶</button>
                 </div>
                 <div class="stats" id="stats" aria-live="off"></div>
             </div>
         </div>
         <p class="kbd-hint">快捷键：<kbd>空格</kbd> 播放/暂停 · <kbd>←</kbd>/<kbd>→</kbd> 快退/快进 5s · <kbd>J</kbd>/<kbd>L</kbd> 10s · <kbd>↑</kbd>/<kbd>↓</kbd> 音量 · <kbd>M</kbd> 静音 · <kbd>F</kbd> 全屏</p>
+
+        <!-- ③-b 播放工具：字幕 + 最近播放（对标 video.js 插件生态的常用能力） -->
+        <div class="tool-grid">
+            <div class="card tool-card">
+                <p><strong>字幕 <span class="tag">.vtt / .srt</span></strong></p>
+                <div class="sub-row">
+                    <input type="text" id="sub-url" placeholder="粘贴字幕地址（.vtt / .srt），回车加载" autocomplete="off" spellcheck="false">
+                    <button type="button" id="sub-load" class="mini-btn">加载字幕</button>
+                    <button type="button" id="sub-off" class="mini-btn ghost">关闭</button>
+                </div>
+                <p class="note" id="sub-note">加载后在系统播放器字幕菜单中选择轨道；跨域字幕需对方允许 CORS。</p>
+            </div>
+            <div class="card tool-card">
+                <p><strong>最近播放 <span class="tag" id="recent-count">0</span></strong>
+                    <button type="button" id="recent-clear" class="mini-btn ghost clear-btn">清空</button>
+                </p>
+                <ul class="recent-list" id="recent-list" aria-label="最近播放地址"></ul>
+                <p class="note" id="recent-empty">播放过的地址会自动记在这里（仅存于本机浏览器），点击即可重播。</p>
+            </div>
+        </div>
 
         <!-- ④ 使用说明 -->
         <div class="card">
@@ -215,6 +236,44 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </p>
         </div>
 
+        <!-- ⑦ 常见问题（可见 FAQ + FAQPage 结构化数据，内容逐字一致） -->
+        <div class="card faq-card" id="faq">
+            <h2>常见问题</h2>
+            <details>
+                <summary>支持哪些视频格式？</summary>
+                <p>支持 m3u8 / HLS（直播与点播）以及浏览器原生的 mp4、webm、ogg 等格式。HLS 由 hls.js 解析，mp4 等走浏览器原生播放，无需安装插件。</p>
+            </details>
+            <details>
+                <summary>为什么视频加载失败或一直转圈？</summary>
+                <p>多半是地址本身打不开，或对方服务器不允许跨域访问（CORS）。可以先在浏览器新标签页直接打开该地址验证——能打开，播放器才能播。</p>
+            </details>
+            <details>
+                <summary>我的播放地址会被上传或保存吗？</summary>
+                <p>播放是纯前端行为，视频流不经过本站服务器。「最近播放」只存在你自己浏览器的 localStorage 里，不会上传，可随时清空。</p>
+            </details>
+            <details>
+                <summary>可以调整播放速度和画质吗？</summary>
+                <p>可以。控制条提供 0.5× 到 2× 六档速度；对于多码率 HLS 流，画质菜单会列出各档分辨率，可手动锁定或自动切换。</p>
+            </details>
+            <details>
+                <summary>如何加载字幕？</summary>
+                <p>在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。</p>
+            </details>
+        </div>
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            { "@type": "Question", "name": "支持哪些视频格式？", "acceptedAnswer": { "@type": "Answer", "text": "支持 m3u8 / HLS（直播与点播）以及浏览器原生的 mp4、webm、ogg 等格式。HLS 由 hls.js 解析，mp4 等走浏览器原生播放，无需安装插件。" } },
+            { "@type": "Question", "name": "为什么视频加载失败或一直转圈？", "acceptedAnswer": { "@type": "Answer", "text": "多半是地址本身打不开，或对方服务器不允许跨域访问（CORS）。可以先在浏览器新标签页直接打开该地址验证——能打开，播放器才能播。" } },
+            { "@type": "Question", "name": "我的播放地址会被上传或保存吗？", "acceptedAnswer": { "@type": "Answer", "text": "播放是纯前端行为，视频流不经过本站服务器。「最近播放」只存在你自己浏览器的 localStorage 里，不会上传，可随时清空。" } },
+            { "@type": "Question", "name": "可以调整播放速度和画质吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。控制条提供 0.5× 到 2× 六档速度；对于多码率 HLS 流，画质菜单会列出各档分辨率，可手动锁定或自动切换。" } },
+            { "@type": "Question", "name": "如何加载字幕？", "acceptedAnswer": { "@type": "Answer", "text": "在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。" } }
+          ]
+        }
+        </script>
+
         <div class="footer">
             <p>本站仅提供播放技术演示，不存储、不制作、不分发任何音视频内容。资源均来源于网络，如有侵权请联系删除。</p>
                         <p class="links">
@@ -232,7 +291,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
-    <script src="./js/player.js?v=71275002"></script>
+    <script src="./js/player.js?v=94346682"></script>
 
 
 

@@ -178,6 +178,7 @@
         input.value = url;
         currentUrl = url;
         attempts = 0;          // 新地址重新计数
+        recordRecent(url);
         hideTip();
         releaseHls();
 
@@ -458,6 +459,172 @@
         input.value = deepUrl;
         play(deepUrl);
     }
+
+    /* ------------------------------------------------------------ 帧截图 */
+    /* 把当前帧画到 canvas 导出 PNG。跨域视频会污染 canvas，捕获异常并如实提示。 */
+    var cSnap = document.getElementById('c-snap');
+    if (cSnap) {
+        cSnap.addEventListener('click', function () {
+            if (!video.videoWidth) { showTip('还没有画面，先播放视频再截图', 'warn'); return; }
+            try {
+                var canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(function (blob) {
+                    if (!blob) { showTip('截图失败：画面受跨域保护，无法导出', 'error'); return; }
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'streamplay-' + fmtTime(video.currentTime).replace(/:/g, '-') + '.png';
+                    a.click();
+                    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+                    showTip('已截图当前帧并下载', 'info');
+                }, 'image/png');
+            } catch (e) {
+                showTip('截图失败：画面受跨域保护（CORS），无法导出', 'error');
+            }
+        });
+    }
+
+    /* ------------------------------------------------------------ 字幕加载 */
+    /* .vtt 直接挂 track；.srt 浏览器不原生支持，先转成 VTT 再用 blob 挂载。 */
+    var subUrl = document.getElementById('sub-url');
+    var subLoad = document.getElementById('sub-load');
+    var subOff = document.getElementById('sub-off');
+    var subNote = document.getElementById('sub-note');
+    var subTrackEl = null;
+    var subBlobUrl = null;
+
+    function srtToVtt(srt) {
+        var body = srt.replace(/\r+/g, '').trim();
+        // 时间轴逗号毫秒 → 点毫秒；去掉序号行
+        body = body.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+        body = body.replace(/^\d+\s*$/gm, '');
+        return 'WEBVTT\n\n' + body + '\n';
+    }
+
+    function clearSubtitle() {
+        if (subTrackEl) { subTrackEl.remove(); subTrackEl = null; }
+        if (subBlobUrl) { URL.revokeObjectURL(subBlobUrl); subBlobUrl = null; }
+        var tracks = video.querySelectorAll('track[data-sp-sub]');
+        Array.prototype.forEach.call(tracks, function (t) { t.remove(); });
+        if (video.textTracks) {
+            for (var i = 0; i < video.textTracks.length; i++) { video.textTracks[i].mode = 'disabled'; }
+        }
+    }
+
+    function attachTrack(src, label) {
+        clearSubtitle();
+        subTrackEl = document.createElement('track');
+        subTrackEl.kind = 'subtitles';
+        subTrackEl.label = label || '字幕';
+        subTrackEl.srclang = 'zh';
+        subTrackEl.default = true;
+        subTrackEl.setAttribute('data-sp-sub', '1');
+        subTrackEl.src = src;
+        video.appendChild(subTrackEl);
+        // 挂载后启用第一条字幕轨
+        setTimeout(function () {
+            if (video.textTracks && video.textTracks.length) {
+                video.textTracks[video.textTracks.length - 1].mode = 'showing';
+            }
+        }, 300);
+    }
+
+    function loadSubtitle() {
+        if (!subUrl) return;
+        var url = subUrl.value.trim();
+        if (!url) { if (subNote) subNote.textContent = '请先粘贴字幕地址'; return; }
+        if (!/^(https?:)?\/\//i.test(url)) url = 'https://' + url;
+        var isSrt = /\.srt(\?|#|$)/i.test(url);
+        if (subNote) subNote.textContent = '正在加载字幕…';
+        if (isSrt) {
+            fetch(url).then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.text();
+            }).then(function (text) {
+                subBlobUrl = URL.createObjectURL(new Blob([srtToVtt(text)], { type: 'text/vtt' }));
+                attachTrack(subBlobUrl, '字幕（SRT 转换）');
+                if (subNote) subNote.textContent = '字幕已加载（SRT 已转为 VTT）';
+            }).catch(function (e) {
+                if (subNote) subNote.textContent = '字幕加载失败：' + e.message + '（跨域字幕需对方允许 CORS）';
+            });
+        } else {
+            attachTrack(url, '字幕');
+            if (subNote) subNote.textContent = '字幕已加载，请在字幕菜单中确认轨道';
+        }
+    }
+
+    if (subLoad) subLoad.addEventListener('click', loadSubtitle);
+    if (subUrl) subUrl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); loadSubtitle(); } });
+    if (subOff) subOff.addEventListener('click', function () {
+        clearSubtitle();
+        if (subNote) subNote.textContent = '字幕已关闭';
+    });
+
+    /* ------------------------------------------------------------ 最近播放 */
+    /* 仅存本机 localStorage，不上传。去重、上限 12、点击重播、单条删除、清空。 */
+    var RECENT_KEY = 'streamplay:recent';
+    var RECENT_MAX = 12;
+    var recentList = document.getElementById('recent-list');
+    var recentEmpty = document.getElementById('recent-empty');
+    var recentCount = document.getElementById('recent-count');
+    var recentClear = document.getElementById('recent-clear');
+
+    function readRecent() {
+        try {
+            var arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+            return Array.isArray(arr) ? arr.filter(function (x) { return typeof x === 'string'; }) : [];
+        } catch (e) { return []; }
+    }
+
+    function writeRecent(arr) {
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(arr)); } catch (e) { /* 隐私模式可能禁写 */ }
+    }
+
+    function renderRecent() {
+        if (!recentList) return;
+        var arr = readRecent();
+        recentList.innerHTML = '';
+        if (recentCount) recentCount.textContent = String(arr.length);
+        if (recentEmpty) recentEmpty.style.display = arr.length ? 'none' : 'block';
+        arr.forEach(function (url) {
+            var li = document.createElement('li');
+            li.className = 'recent-item';
+            var link = document.createElement('button');
+            link.type = 'button';
+            link.className = 'recent-link';
+            link.title = url;
+            link.textContent = url;
+            link.addEventListener('click', function () { input.value = url; play(url); });
+            var del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'recent-del';
+            del.setAttribute('aria-label', '删除这条记录');
+            del.textContent = '✕';
+            del.addEventListener('click', function () {
+                writeRecent(readRecent().filter(function (x) { return x !== url; }));
+                renderRecent();
+            });
+            li.appendChild(link);
+            li.appendChild(del);
+            recentList.appendChild(li);
+        });
+    }
+
+    function recordRecent(url) {
+        if (!url) return;
+        var arr = readRecent().filter(function (x) { return x !== url; });
+        arr.unshift(url);
+        writeRecent(arr.slice(0, RECENT_MAX));
+        renderRecent();
+    }
+
+    if (recentClear) recentClear.addEventListener('click', function () {
+        writeRecent([]);
+        renderRecent();
+    });
+    renderRecent();
 
     /* ------------------------------------------------------------ 对外接口 */
     /* 兼容原版全局 play() 调用方式 */
