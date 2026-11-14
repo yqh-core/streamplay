@@ -1203,6 +1203,406 @@
     if (queueRepeat) { queueRepeat.checked = !!pref.repeat; video.loop = !!pref.repeat; }
     renderQueue();
 
+    /* ------------------------------------------------------------ M3U8 清单分析（对标 LivePlayer Analyzer） */
+    /* 纯前端 fetch + 解析：master 列变体/音轨/字幕组，media 列分片/时长/直播态/加密。
+       清单内容是第三方数据，所有渲染走 textContent/DOM API，绝不 innerHTML 拼接。 */
+    var maUrl = document.getElementById('ma-url');
+    var maRun = document.getElementById('ma-run');
+    var maUseCurrent = document.getElementById('ma-use-current');
+    var maStatus = document.getElementById('ma-status');
+    var maResult = document.getElementById('ma-result');
+    var maSeq = 0;
+
+    function maSetStatus(msg, kind) {
+        if (!maStatus) return;
+        maStatus.textContent = msg;
+        maStatus.className = 'ma-status' + (kind ? ' is-' + kind : '');
+    }
+
+    function resolveUrl(uri, base) {
+        try { return new URL(uri, base).href; } catch (e) { return uri; }
+    }
+
+    /* 属性列表解析：KEY=VALUE,KEY2="带,逗号",RESOLUTION=1280x720 */
+    function parseAttrs(s) {
+        var out = {};
+        var re = /([A-Z0-9-]+)=("[^"]*"|[^,]*)/g;
+        var m;
+        while ((m = re.exec(s)) !== null) {
+            out[m[1]] = m[2].replace(/^"|"$/g, '');
+        }
+        return out;
+    }
+
+    function parseManifest(text, baseUrl) {
+        var lines = text.split(/\r?\n/);
+        var info = {
+            isMaster: false, version: '', targetDuration: 0, mediaSequence: 0,
+            playlistType: '', endList: false, variants: [], media: [],
+            segments: [], totalDuration: 0, encrypted: false, keyMethod: '',
+            initSegment: '', discontinuities: 0
+        };
+        var pendingVariant = null;
+        var pendingExtinf = 0;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (!line) continue;
+            if (line.indexOf('#EXT-X-STREAM-INF:') === 0) {
+                info.isMaster = true;
+                pendingVariant = parseAttrs(line.slice(18));
+            } else if (line.indexOf('#EXT-X-MEDIA:') === 0) {
+                info.media.push(parseAttrs(line.slice(13)));
+            } else if (line.indexOf('#EXT-X-VERSION:') === 0) {
+                info.version = line.slice(15);
+            } else if (line.indexOf('#EXT-X-TARGETDURATION:') === 0) {
+                info.targetDuration = parseFloat(line.slice(20)) || 0;
+            } else if (line.indexOf('#EXT-X-MEDIA-SEQUENCE:') === 0) {
+                info.mediaSequence = parseInt(line.slice(20), 10) || 0;
+            } else if (line.indexOf('#EXT-X-PLAYLIST-TYPE:') === 0) {
+                info.playlistType = line.slice(19);
+            } else if (line.indexOf('#EXT-X-ENDLIST') === 0) {
+                info.endList = true;
+            } else if (line.indexOf('#EXT-X-KEY:') === 0) {
+                var keyAttrs = parseAttrs(line.slice(11));
+                if (keyAttrs.METHOD && keyAttrs.METHOD !== 'NONE') {
+                    info.encrypted = true;
+                    info.keyMethod = keyAttrs.METHOD;
+                }
+            } else if (line.indexOf('#EXT-X-MAP:') === 0) {
+                var mapAttrs = parseAttrs(line.slice(11));
+                if (mapAttrs.URI) info.initSegment = resolveUrl(mapAttrs.URI, baseUrl);
+            } else if (line.indexOf('#EXT-X-DISCONTINUITY') === 0) {
+                info.discontinuities++;
+            } else if (line.indexOf('#EXTINF:') === 0) {
+                pendingExtinf = parseFloat(line.slice(8)) || 0;
+            } else if (line[0] !== '#') {
+                if (pendingVariant) {
+                    pendingVariant.uri = resolveUrl(line, baseUrl);
+                    info.variants.push(pendingVariant);
+                    pendingVariant = null;
+                } else if (!info.isMaster) {
+                    info.segments.push({ duration: pendingExtinf, uri: resolveUrl(line, baseUrl) });
+                    info.totalDuration += pendingExtinf;
+                    pendingExtinf = 0;
+                }
+            }
+        }
+        return info;
+    }
+
+    function fmtDuration(sec) {
+        if (!isFinite(sec) || sec <= 0) return '—';
+        var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = Math.floor(sec % 60);
+        return (h ? h + ':' : '') + (h && m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function maChip(label, value) {
+        var span = document.createElement('span');
+        span.className = 'ma-chip';
+        var b = document.createElement('strong');
+        b.textContent = value;
+        span.appendChild(b);
+        span.appendChild(document.createTextNode(' ' + label));
+        return span;
+    }
+
+    function maTable(headers, rows) {
+        var wrap = document.createElement('div');
+        wrap.className = 'ma-tablewrap';
+        var table = document.createElement('table');
+        table.className = 'ma-table';
+        var thead = document.createElement('thead');
+        var hr = document.createElement('tr');
+        headers.forEach(function (h) {
+            var th = document.createElement('th');
+            th.textContent = h;
+            hr.appendChild(th);
+        });
+        thead.appendChild(hr);
+        table.appendChild(thead);
+        var tbody = document.createElement('tbody');
+        rows.forEach(function (r) {
+            var tr = document.createElement('tr');
+            r.forEach(function (c) {
+                var td = document.createElement('td');
+                td.textContent = c;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        return wrap;
+    }
+
+    function maSection(title) {
+        var p = document.createElement('p');
+        p.className = 'ma-section';
+        var b = document.createElement('strong');
+        b.textContent = title;
+        p.appendChild(b);
+        return p;
+    }
+
+    function renderMediaInfo(info, container, labelPrefix) {
+        var chips = document.createElement('div');
+        chips.className = 'ma-chips';
+        chips.appendChild(maChip('类型', info.endList ? 'VOD 点播' : 'LIVE 直播'));
+        if (info.version) chips.appendChild(maChip('HLS 版本', info.version));
+        if (info.targetDuration) chips.appendChild(maChip('目标分片时长', info.targetDuration + 's'));
+        chips.appendChild(maChip('分片数', String(info.segments.length)));
+        if (info.totalDuration > 0) chips.appendChild(maChip('总时长', fmtDuration(info.totalDuration)));
+        chips.appendChild(maChip('加密', info.encrypted ? info.keyMethod : '无'));
+        if (info.discontinuities) chips.appendChild(maChip('不连续点', String(info.discontinuities)));
+        container.appendChild(chips);
+        if (info.segments.length) {
+            var durs = info.segments.map(function (s) { return s.duration; }).filter(function (d) { return d > 0; });
+            if (durs.length) {
+                var sum = durs.reduce(function (a, b) { return a + b; }, 0);
+                container.appendChild(maSection((labelPrefix || '') + '分片时长：最短 ' + Math.min.apply(null, durs).toFixed(2) + 's · 最长 ' + Math.max.apply(null, durs).toFixed(2) + 's · 平均 ' + (sum / durs.length).toFixed(2) + 's'));
+            }
+            var details = document.createElement('details');
+            details.className = 'ma-raw';
+            var summary = document.createElement('summary');
+            summary.textContent = '分片列表（' + info.segments.length + ' 条，点击展开）';
+            details.appendChild(summary);
+            var ol = document.createElement('ol');
+            ol.className = 'ma-seglist';
+            info.segments.slice(0, 200).forEach(function (s) {
+                var li = document.createElement('li');
+                li.textContent = s.duration.toFixed(2) + 's — ' + s.uri;
+                ol.appendChild(li);
+            });
+            if (info.segments.length > 200) {
+                var more = document.createElement('li');
+                more.textContent = '… 其余 ' + (info.segments.length - 200) + ' 条省略';
+                ol.appendChild(more);
+            }
+            details.appendChild(ol);
+            container.appendChild(details);
+        }
+        if (info.initSegment) {
+            container.appendChild(maSection('初始化分片：' + info.initSegment));
+        }
+    }
+
+    function renderManifest(info, text, baseUrl, container) {
+        var headChips = document.createElement('div');
+        headChips.className = 'ma-chips';
+        headChips.appendChild(maChip(info.isMaster ? 'Master 主清单' : 'Media 媒体清单', info.isMaster ? '多码率' : '单码率'));
+        container.appendChild(headChips);
+        if (info.isMaster) {
+            container.appendChild(maSection('变体流（' + info.variants.length + ' 条）'));
+            container.appendChild(maTable(
+                ['#', '分辨率', '带宽', '帧率', '编码', '音轨组', '字幕组', 'URI'],
+                info.variants.map(function (v, i) {
+                    var bw = parseInt(v.BANDWIDTH || '0', 10);
+                    return [String(i + 1), v.RESOLUTION || '—',
+                        bw ? (bw / 1000000).toFixed(2) + ' Mbps' : '—',
+                        v['FRAME-RATE'] || '—', v.CODECS || '—',
+                        v.AUDIO || '—', v.SUBTITLES || '—', v.uri || '—'];
+                })
+            ));
+            if (info.media.length) {
+                container.appendChild(maSection('音轨 / 字幕组（' + info.media.length + ' 条）'));
+                container.appendChild(maTable(
+                    ['类型', '组 ID', '名称', '语言', '默认', 'URI'],
+                    info.media.map(function (m) {
+                        return [m.TYPE || '—', m['GROUP-ID'] || '—', m.NAME || '—',
+                            m.LANGUAGE || '—', m.DEFAULT || '—', m.URI || '（内嵌）'];
+                    })
+                ));
+            }
+            /* 自动抓第一个变体的媒体清单，给出分片级信息（CORS 失败如实报告） */
+            if (info.variants.length && info.variants[0].uri) {
+                var firstUri = info.variants[0].uri;
+                var sub = document.createElement('div');
+                sub.className = 'ma-sub';
+                container.appendChild(sub);
+                maSetStatus('正在分析首个变体的媒体清单…', 'info');
+                fetchText(firstUri, 15000).then(function (r) {
+                    var child = parseManifest(r.text, firstUri);
+                    var title = maSection('首个变体的媒体清单');
+                    sub.appendChild(title);
+                    renderMediaInfo(child, sub, '');
+                    maSetStatus('分析完成：master + 首个变体媒体清单', 'ok');
+                }).catch(function (e) {
+                    sub.appendChild(maSection('首个变体媒体清单获取失败：' + e.message + '（变体表仍可用）'));
+                    maSetStatus('分析完成：master 变体表可用；首个变体媒体清单不可读', 'warn');
+                });
+            }
+        } else {
+            renderMediaInfo(info, container, '');
+        }
+        /* 原文折叠 + 复制 */
+        var raw = document.createElement('details');
+        raw.className = 'ma-raw';
+        var rawSum = document.createElement('summary');
+        rawSum.textContent = '清单原文（' + text.length + ' 字符，点击展开）';
+        raw.appendChild(rawSum);
+        var pre = document.createElement('pre');
+        pre.className = 'ma-pre';
+        pre.textContent = text;
+        raw.appendChild(pre);
+        var copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'mini-btn';
+        copyBtn.textContent = '复制原文';
+        copyBtn.addEventListener('click', function () {
+            copyText(text).then(function (ok) {
+                copyBtn.textContent = ok ? '已复制 ✓' : '复制失败';
+                setTimeout(function () { copyBtn.textContent = '复制原文'; }, 2000);
+            });
+        });
+        raw.appendChild(copyBtn);
+        container.appendChild(raw);
+    }
+
+    function fetchText(url, timeoutMs) {
+        var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs) : null;
+        return fetch(url, ctrl ? { signal: ctrl.signal } : {}).then(function (resp) {
+            if (timer) clearTimeout(timer);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+            return resp.text().then(function (text) { return { text: text, resp: resp }; });
+        }).catch(function (e) {
+            if (timer) clearTimeout(timer);
+            if (e && e.name === 'AbortError') throw new Error('请求超时（' + (timeoutMs / 1000) + 's）');
+            if (e instanceof TypeError) throw new Error('网络请求失败：地址不可达或对方不允许跨域（CORS）');
+            throw e;
+        });
+    }
+
+    function analyzeManifest() {
+        if (!maUrl || !maResult) return;
+        var url = maUrl.value.trim();
+        if (!url) { maSetStatus('请先输入 m3u8 地址', 'warn'); return; }
+        if (!/^https?:\/\//i.test(url)) { maSetStatus('地址必须以 http:// 或 https:// 开头', 'warn'); return; }
+        var seq = ++maSeq;
+        maResult.innerHTML = '';
+        maSetStatus('正在获取清单…', 'info');
+        if (maRun) maRun.disabled = true;
+        fetchText(url, 15000).then(function (r) {
+            if (seq !== maSeq) return;
+            var text = r.text;
+            if (text.trim().indexOf('#EXTM3U') !== 0) {
+                maSetStatus('内容不是 M3U8 清单（缺少 #EXTM3U 头）——可能是 HTML 错误页或媒体文件', 'error');
+                return;
+            }
+            var info = parseManifest(text, url);
+            renderManifest(info, text, url, maResult);
+            if (!info.isMaster) maSetStatus('分析完成', 'ok');
+        }).catch(function (e) {
+            if (seq !== maSeq) return;
+            maSetStatus('分析失败：' + e.message, 'error');
+        }).finally(function () {
+            if (seq === maSeq && maRun) maRun.disabled = false;
+        });
+    }
+
+    if (maRun) maRun.addEventListener('click', analyzeManifest);
+    if (maUrl) maUrl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); analyzeManifest(); } });
+    if (maUseCurrent) maUseCurrent.addEventListener('click', function () {
+        if (maUrl) { maUrl.value = input.value.trim(); analyzeManifest(); }
+    });
+    if (maUrl && !maUrl.value) maUrl.value = input.value.trim();
+
+    /* ------------------------------------------------------------ 嵌入代码生成器（对标 LivePlayer Embed Builder） */
+    var embUrl = document.getElementById('emb-url');
+    var embWidth = document.getElementById('emb-width');
+    var embHeight = document.getElementById('emb-height');
+    var embT = document.getElementById('emb-t');
+    var embAutoplay = document.getElementById('emb-autoplay');
+    var embMuted = document.getElementById('emb-muted');
+    var embCode = document.getElementById('emb-code');
+    var embCopy = document.getElementById('emb-copy');
+    var embPreview = document.getElementById('emb-preview');
+    var embNote = document.getElementById('emb-note');
+    var EMBED_ORIGIN = 'https://play.digdevbox.com';
+
+    function buildEmbedSrc(origin) {
+        var url = embUrl ? embUrl.value.trim() : '';
+        if (!url) return '';
+        var src = origin + '/?url=' + encodeURIComponent(url);
+        var t = embT ? parseInt(embT.value, 10) : 0;
+        if (t > 0) src += '&t=' + t;
+        if (embAutoplay && embAutoplay.checked) {
+            src += '&autoplay=1';
+            /* 浏览器自动播放策略：有声自动播放基本会被拦，静音才可靠 */
+            if (embMuted && embMuted.checked) src += '&muted=1';
+        }
+        return src;
+    }
+
+    function refreshEmbed() {
+        if (!embCode) return;
+        var url = embUrl ? embUrl.value.trim() : '';
+        if (!url) {
+            embCode.textContent = '（先填写播放地址）';
+            if (embPreview) embPreview.removeAttribute('src');
+            return;
+        }
+        var w = embWidth && embWidth.value.trim() ? embWidth.value.trim() : '100%';
+        var h = embHeight && embHeight.value.trim() ? embHeight.value.trim() : '480';
+        var src = buildEmbedSrc(EMBED_ORIGIN);
+        embCode.textContent = '<iframe src="' + src + '" width="' + w + '" height="' + h + '" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+        if (embNote) {
+            embNote.textContent = embAutoplay && embAutoplay.checked && !(embMuted && embMuted.checked)
+                ? '注意：多数浏览器会拦截有声自动播放，建议勾选「静音」。'
+                : '预览使用当前站点地址；复制的代码指向正式域名 play.digdevbox.com。';
+        }
+        /* 预览用当前 origin（本地测试也能播），尺寸缩放到容器内 */
+        if (embPreview) {
+            var previewSrc = buildEmbedSrc((window.location.origin + window.location.pathname.replace(/index\.html$/, '')).replace(/\/$/, ''));
+            embPreview.src = previewSrc;
+            var ph = Math.min(parseInt(h, 10) || 480, 260);
+            embPreview.style.height = ph + 'px';
+        }
+    }
+
+    var embTimer = null;
+    function scheduleEmbed() {
+        if (embTimer) clearTimeout(embTimer);
+        embTimer = setTimeout(refreshEmbed, 400);
+    }
+    [embUrl, embWidth, embHeight, embT].forEach(function (el) {
+        if (el) el.addEventListener('input', scheduleEmbed);
+    });
+    [embAutoplay, embMuted].forEach(function (el) {
+        if (el) el.addEventListener('change', refreshEmbed);
+    });
+    if (embAutoplay) embAutoplay.addEventListener('change', function () {
+        if (embAutoplay.checked && embMuted) embMuted.checked = true;
+        refreshEmbed();
+    });
+    if (embCopy) embCopy.addEventListener('click', function () {
+        copyText(embCode.textContent).then(function (ok) {
+            showTip(ok ? '已复制嵌入代码' : '复制失败，请手动选择代码复制', ok ? 'info' : 'error');
+        });
+    });
+    var embUseCurrent = document.getElementById('emb-use-current');
+    if (embUseCurrent) embUseCurrent.addEventListener('click', function () {
+        if (embUrl) { embUrl.value = input.value.trim(); refreshEmbed(); }
+    });
+    if (embUrl && !embUrl.value) embUrl.value = input.value.trim();
+    refreshEmbed();
+
+    /* ------------------------------------------------------------ 深链自动播放/静音（嵌入场景） */
+    /* ?autoplay=1&muted=1：静音自动播放（浏览器策略下唯一可靠的自动播放形态）。
+       deepUrl 的 play() 本身就会尝试起播；这里只补 muted 语义与未起播时的兜底。 */
+    (function () {
+        var qs = window.location.search;
+        var muted = /[?&]muted=1/.test(qs);
+        var autoplay = /[?&]autoplay=1/.test(qs);
+        if (muted) { video.muted = true; syncVolume(); }
+        if (autoplay && deepUrl) {
+            video.addEventListener('canplay', function onCanPlay() {
+                video.removeEventListener('canplay', onCanPlay);
+                safePlay();
+            });
+        }
+    })();
+
     /* ------------------------------------------------------------ 对外接口 */
     /* 兼容原版全局 play() 调用方式 */
     window.play = play;

@@ -79,7 +79,9 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
       "播放诊断（MSE/解码/地址可达性）",
       "快捷键帮助面板",
       "浮动迷你播放器（滚动自动悬浮）",
-      "播放队列（自动连播/上下首/循环整片）"
+      "播放队列（自动连播/上下首/循环整片）",
+      "M3U8 清单分析（变体/音轨/字幕/分片/直播态/加密）",
+      "嵌入代码生成器（配置/实时预览/一键复制）"
     ],
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
   }
@@ -317,6 +319,19 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <p class="note" id="queue-empty">添加多个地址组成队列；开启「自动连播」播完自动播下一首，「循环整片」单曲循环。队列仅存本机浏览器。</p>
         </div>
 
+        <!-- ③-e M3U8 清单分析器（对标 LivePlayer Analyzer：变体/音轨/字幕/分片/直播态/加密） -->
+        <div class="card analyzer-card">
+            <p><strong>M3U8 清单分析 <span class="tag">开发者</span></strong></p>
+            <div class="sub-row">
+                <input type="text" id="ma-url" placeholder="粘贴 m3u8 地址，回车分析" autocomplete="off" spellcheck="false">
+                <button type="button" id="ma-run" class="mini-btn">分析</button>
+                <button type="button" id="ma-use-current" class="mini-btn ghost">用当前播放地址</button>
+            </div>
+            <p class="ma-status" id="ma-status" role="status" aria-live="polite"></p>
+            <div class="ma-result" id="ma-result"></div>
+            <p class="note">解析在浏览器本地完成，不经过本站服务器。分析需要源站允许跨域（CORS）；master 清单会自动尝试读取首个变体的媒体清单。加密流（EXT-X-KEY）只能分析结构，不能也不应绕过 DRM 播放。</p>
+        </div>
+
         <!-- ④ 使用说明 -->
         <div class="card">
             <p><strong>怎么播放？三步就够了</strong></p>
@@ -331,11 +346,33 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </p>
         </div>
 
-        <!-- ⑤ 开发者：嵌入到自己网站 -->
+        <!-- ⑤ 开发者：嵌入代码生成器（对标 LivePlayer Embed Builder：配置 + 实时预览 + 一键复制） -->
         <div class="card dev-card">
-            <p><strong>嵌入到你的网站<span class="tag">开发者</span></strong></p>
-            <p>在页面地址后拼接 <code>?url=</code> 参数即可自动加载播放；再加 <code>&amp;t=秒数</code> 可从指定时间点开始（控制条 🔗 按钮一键复制带当前时间点的分享链接）：</p>
-            <pre>&lt;iframe src="https://你的域名/?url=https://example.com/index.m3u8&amp;t=90" width="100%" height="480" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
+            <p><strong>嵌入到你的网站 <span class="tag">生成器</span></strong></p>
+            <div class="emb-grid">
+                <div class="emb-form">
+                    <label class="emb-field emb-url-field">播放地址
+                        <input type="text" id="emb-url" placeholder="m3u8 / mp4 地址" autocomplete="off" spellcheck="false">
+                    </label>
+                    <div class="emb-row">
+                        <label class="emb-field">宽度<input type="text" id="emb-width" value="100%" autocomplete="off"></label>
+                        <label class="emb-field">高度<input type="number" id="emb-height" value="480" min="120" step="10"></label>
+                        <label class="emb-field">起始秒数<input type="number" id="emb-t" value="0" min="0" step="1"></label>
+                    </div>
+                    <div class="emb-row">
+                        <label class="emb-check"><input type="checkbox" id="emb-autoplay"> 自动播放</label>
+                        <label class="emb-check"><input type="checkbox" id="emb-muted" checked> 静音</label>
+                        <button type="button" id="emb-use-current" class="mini-btn ghost">用当前播放地址</button>
+                    </div>
+                    <p class="note" id="emb-note">预览使用当前站点地址；复制的代码指向正式域名 play.digdevbox.com。</p>
+                    <pre class="emb-code" id="emb-code"></pre>
+                    <button type="button" id="emb-copy" class="mini-btn">复制嵌入代码</button>
+                </div>
+                <div class="emb-preview-wrap">
+                    <iframe id="emb-preview" title="嵌入预览" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                </div>
+            </div>
+            <p class="note">原理：页面地址拼接 <code>?url=</code> 自动加载播放，<code>&amp;t=秒数</code> 指定起始时间，<code>&amp;autoplay=1&amp;muted=1</code> 静音自动播放（多数浏览器只允许静音自动播放）。控制条 🔗 按钮可一键复制带当前时间点的分享链接。</p>
         </div>
 
         <!-- ⑥ 科普 -->
@@ -403,6 +440,14 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <summary>可以连续播放多个视频或边滚动边看吗？</summary>
                 <p>可以。在「播放队列」添加多个地址，开启「自动连播」后播完自动播下一首，也可用上一首/下一首切换，「循环整片」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩小悬浮到右下角，点 ⤢ 还原、✕ 关闭。</p>
             </details>
+            <details>
+                <summary>如何分析 m3u8 清单里有哪些画质和音轨？</summary>
+                <p>在「M3U8 清单分析」工具粘贴地址并点分析：master 清单列出全部变体的分辨率/带宽/编码与音轨、字幕组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。</p>
+            </details>
+            <details>
+                <summary>如何把播放器嵌入到我自己的网站？</summary>
+                <p>用「嵌入代码生成器」填写播放地址、宽高、起始秒数与自动播放选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许静音自动播放，建议勾选静音。</p>
+            </details>
         </div>
         <script type="application/ld+json">
         {
@@ -416,7 +461,9 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             { "@type": "Question", "name": "如何加载字幕？", "acceptedAnswer": { "@type": "Answer", "text": "在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。" } },
             { "@type": "Question", "name": "能记住播放进度或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } },
             { "@type": "Question", "name": "如何排查播放问题或查看播放统计？", "acceptedAnswer": { "@type": "Answer", "text": "点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。" } },
-            { "@type": "Question", "name": "可以连续播放多个视频或边滚动边看吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「播放队列」添加多个地址，开启「自动连播」后播完自动播下一首，也可用上一首/下一首切换，「循环整片」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩小悬浮到右下角，点 ⤢ 还原、✕ 关闭。" } }
+            { "@type": "Question", "name": "可以连续播放多个视频或边滚动边看吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「播放队列」添加多个地址，开启「自动连播」后播完自动播下一首，也可用上一首/下一首切换，「循环整片」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩小悬浮到右下角，点 ⤢ 还原、✕ 关闭。" } },
+            { "@type": "Question", "name": "如何分析 m3u8 清单里有哪些画质和音轨？", "acceptedAnswer": { "@type": "Answer", "text": "在「M3U8 清单分析」工具粘贴地址并点分析：master 清单列出全部变体的分辨率/带宽/编码与音轨、字幕组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。" } },
+            { "@type": "Question", "name": "如何把播放器嵌入到我自己的网站？", "acceptedAnswer": { "@type": "Answer", "text": "用「嵌入代码生成器」填写播放地址、宽高、起始秒数与自动播放选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许静音自动播放，建议勾选静音。" } }
           ]
         }
         </script>
@@ -438,7 +485,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
-    <script src="./js/player.js?v=03259dd9"></script>
+    <script src="./js/player.js?v=b86a37b6"></script>
 
 
 
