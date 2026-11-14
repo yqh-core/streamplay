@@ -373,6 +373,135 @@ a {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--dd-primary) 40%, transparent);
 }
 
+/* ---------------------------------------------------------------- 第四轮：播放生命周期 */
+/* 缓冲转圈 */
+.buffer-spin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px;
+    height: 54px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.buffer-spin span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid color-mix(in srgb, var(--dd-primary) 30%, transparent);
+    border-top-color: var(--dd-primary);
+    animation: sp-spin 0.8s linear infinite;
+}
+
+@keyframes sp-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 失败重试遮罩 */
+.retry-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    padding: 12px 22px;
+    border: 1px solid color-mix(in srgb, var(--dd-danger) 50%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, #0b1220 88%, transparent);
+    color: #ffd7d7;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.retry-overlay:hover {
+    background: color-mix(in srgb, var(--dd-danger) 30%, #0b1220);
+    transform: translate(-50%, -50%) scale(1.04);
+}
+
+/* 续播提示条（贴播放器底部） */
+.resume-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: linear-gradient(0deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.72));
+    border-top: 1px solid color-mix(in srgb, var(--dd-primary) 35%, transparent);
+    font-size: 13px;
+    color: #e6edf3;
+}
+
+.resume-text {
+    flex: 1;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.resume-bar .mini-btn {
+    padding: 6px 12px;
+    font-size: 12.5px;
+}
+
+.resume-bar .mini-btn.ghost {
+    background: rgba(255, 255, 255, 0.1);
+    color: #c9d4e0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 进度悬停时间预览 */
+.seek-tip {
+    position: absolute;
+    bottom: 20px;
+    transform: translateX(-50%);
+    z-index: 5;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #0b1220;
+    border: 1px solid color-mix(in srgb, var(--dd-primary) 45%, transparent);
+    color: #e6edf3;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* 影院宽屏：主区容器内放宽到 1280px（width:100% 兜底，不产生横向溢出） */
+.main {
+    transition: max-width 0.3s ease;
+}
+
+body.sp-theater .main {
+    max-width: 1280px;
+}
+
+body.sp-theater .player-wrap {
+    aspect-ratio: 21 / 9;
+}
+
+.cbtn.active {
+    background: var(--dd-primary);
+    color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .buffer-spin span { animation: none; }
+    .main { transition: none; }
+}
+
+@media (max-width: 640px) {
+    body.sp-theater .player-wrap { aspect-ratio: 16 / 9; }
+    .resume-bar { flex-wrap: wrap; }
+}
+
 /* 入场动效：主区块 staged fade-up */
 @keyframes sp-rise {
     from { opacity: 0; transform: translateY(14px); }
@@ -627,19 +756,22 @@ a {
 /* ---------------------------------------------------------------- 播放工具面板 */
 .tool-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0,1fr)：轨道可缩到容器宽。裸 1fr 的下限是 min-content，
+       字幕卡 input(min-width:160)+按钮会把轨道撑到 380px → 移动端整页横向溢出。 */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
     margin-bottom: 24px;
 }
 
 @media (max-width: 720px) {
     .tool-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
 .tool-card {
     margin-bottom: 0;
+    min-width: 0;
 }
 
 .tool-card .tag {

@@ -164,6 +164,7 @@
 
         attempts = 0;
         showTip('播放失败：地址不可达，或该地址不允许跨域访问。请确认该地址能在浏览器中直接打开。', 'error');
+        showRetry();
     }
 
     /* ------------------------------------------------------------ 主入口 */
@@ -189,6 +190,9 @@
         recordRecent(url);
         clearLoop();
         syncNowPlaying();
+        hideResume();
+        hideRetry();
+        hideSpin();
         hideTip();
         releaseHls();
 
@@ -248,12 +252,14 @@
         /* 地址本身是 m3u8，说明引擎已选对，此处只报告失败 */
         if (isHlsUrl(currentUrl)) {
             showTip('播放失败：m3u8 地址不可达，或该地址不允许跨域访问。', 'error');
+            showRetry();
             return;
         }
 
         /* mp4 这类明确格式：直接给结论，不要再拿 HLS 引擎兜一圈 */
         if (isPlainMediaFile(currentUrl)) {
             showTip('播放失败：地址不可达，或该格式不受当前浏览器支持（建议用 mp4 / webm）。', 'error');
+            showRetry();
             return;
         }
 
@@ -263,6 +269,7 @@
             loadWithHls(currentUrl);
         } else {
             showTip('播放失败：地址不可达或该格式不受浏览器支持。', 'error');
+            showRetry();
         }
     });
 
@@ -733,6 +740,171 @@
         renderRecent();
     });
     renderRecent();
+
+    /* ------------------------------------------------------------ 第四轮：专业播放生命周期 */
+    /* 对标 video.js / Plyr / YouTube 的招牌体验：断点续播、带时间点分享/深链、
+       缓冲转圈、进度悬停预览、影院宽屏、失败重试。全部本地实现，进度只存本机。 */
+    var bufferSpin = document.getElementById('buffer-spin');
+    var retryOverlay = document.getElementById('retry-overlay');
+    var resumeBar = document.getElementById('resume-bar');
+    var resumeText = document.getElementById('resume-text');
+    var resumeGo = document.getElementById('resume-go');
+    var resumeDismiss = document.getElementById('resume-dismiss');
+    var seekRow = document.getElementById('seek-row');
+    var seekTip = document.getElementById('seek-tip');
+    var cShare = document.getElementById('c-share');
+    var cTheater = document.getElementById('c-theater');
+
+    /* —— 缓冲转圈：waiting/loadstart 显示，playing/canplay/pause/emptied/error 隐藏 —— */
+    function showSpin() { if (bufferSpin && currentUrl) bufferSpin.hidden = false; }
+    function hideSpin() { if (bufferSpin) bufferSpin.hidden = true; }
+    video.addEventListener('waiting', showSpin);
+    video.addEventListener('loadstart', showSpin);
+    video.addEventListener('playing', hideSpin);
+    video.addEventListener('canplay', hideSpin);
+    video.addEventListener('pause', hideSpin);
+    video.addEventListener('emptied', hideSpin);
+    video.addEventListener('error', hideSpin);
+
+    /* —— 进度悬停预览：鼠标在进度条上移动时，浮出该位置对应的时间 —— */
+    if (seekRow && seekTip) {
+        seekRow.addEventListener('mousemove', function (e) {
+            if (!(video.duration > 0) || !isFinite(video.duration)) { seekTip.hidden = true; return; }
+            var rect = seekRow.getBoundingClientRect();
+            var x = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+            var pct = rect.width > 0 ? x / rect.width : 0;
+            seekTip.textContent = fmtTime(pct * video.duration);
+            seekTip.style.left = Math.min(Math.max(x, 24), Math.max(24, rect.width - 24)) + 'px';
+            seekTip.hidden = false;
+        });
+        seekRow.addEventListener('mouseleave', function () { seekTip.hidden = true; });
+    }
+
+    /* —— 断点续播：进度按地址存本机 localStorage，再次打开提示「继续播放」 —— */
+    var PROGRESS_KEY = 'streamplay:progress';
+    var PROGRESS_MAX = 50;
+    var resumeTarget = null;
+    var lastSave = 0;
+
+    function readProgress() {
+        try {
+            var o = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+            return (o && typeof o === 'object') ? o : {};
+        } catch (e) { return {}; }
+    }
+    function writeProgress(o) { try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(o)); } catch (e) { /* 隐私模式禁写 */ } }
+    function saveProgress() {
+        if (!currentUrl || !isFinite(video.duration) || !(video.duration > 0) || !isFinite(video.currentTime)) return;
+        var t = video.currentTime;
+        var o = readProgress();
+        /* 接近开头/结尾不记，避免无意义续播 */
+        if (t < 5 || t > video.duration - 10) {
+            if (o[currentUrl]) { delete o[currentUrl]; writeProgress(o); }
+            return;
+        }
+        o[currentUrl] = { t: t, d: video.duration, ts: Date.now() };
+        var keys = Object.keys(o);
+        if (keys.length > PROGRESS_MAX) {
+            keys.sort(function (a, b) { return (o[a].ts || 0) - (o[b].ts || 0); });
+            keys.slice(0, keys.length - PROGRESS_MAX).forEach(function (k) { delete o[k]; });
+        }
+        writeProgress(o);
+    }
+    function hideResume() { if (resumeBar) resumeBar.hidden = true; resumeTarget = null; }
+    function offerResume() {
+        if (!resumeBar || !currentUrl) return;
+        var rec = readProgress()[currentUrl];
+        if (rec && rec.t > 5 && isFinite(video.duration) && video.duration > 0 && rec.t < video.duration - 10) {
+            resumeTarget = rec.t;
+            if (resumeText) resumeText.textContent = '上次看到 ' + fmtTime(rec.t);
+            resumeBar.hidden = false;
+        } else {
+            hideResume();
+        }
+    }
+    video.addEventListener('timeupdate', function () {
+        var now = Date.now();
+        if (now - lastSave > 4000) { lastSave = now; saveProgress(); }
+    });
+    video.addEventListener('pause', saveProgress);
+    window.addEventListener('pagehide', saveProgress);
+    if (resumeGo) resumeGo.addEventListener('click', function () {
+        if (resumeTarget !== null) { video.currentTime = resumeTarget; safePlay(); }
+        hideResume();
+    });
+    if (resumeDismiss) resumeDismiss.addEventListener('click', function () {
+        if (currentUrl) { var o = readProgress(); delete o[currentUrl]; writeProgress(o); }
+        video.currentTime = 0;
+        hideResume();
+    });
+
+    /* —— 带时间点深链 ?t=秒数：优先于续播，加载后跳到指定时间 —— */
+    function readTimeParam() {
+        var m = /[?&]t=([^&]*)/.exec(window.location.search);
+        if (!m) return null;
+        var n = Number(decodeURIComponent(m[1]));
+        return (isFinite(n) && n >= 0) ? n : null;
+    }
+    var startTime = readTimeParam();
+    var startApplied = false;
+    video.addEventListener('loadedmetadata', function () {
+        if (startTime !== null && !startApplied && video.duration > 0) {
+            startApplied = true;
+            video.currentTime = Math.min(startTime, Math.max(0, video.duration - 1));
+            hideResume();
+            showTip('已从 ' + fmtTime(video.currentTime) + ' 开始播放', 'info');
+            return;
+        }
+        offerResume();
+    });
+
+    /* —— 失败重试遮罩：致命失败后给出明确的手动重试入口 —— */
+    function showRetry() { if (retryOverlay && currentUrl) retryOverlay.hidden = false; }
+    function hideRetry() { if (retryOverlay) retryOverlay.hidden = true; }
+    if (retryOverlay) retryOverlay.addEventListener('click', function () {
+        hideRetry();
+        if (currentUrl) play(currentUrl);
+    });
+    video.addEventListener('playing', hideRetry);
+    video.addEventListener('loadstart', hideRetry);
+
+    /* —— 分享：复制 ?url=地址&t=当前秒数 链接（clipboard + execCommand 降级） —— */
+    function legacyCopy(text) {
+        try {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            var ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            return ok;
+        } catch (e) { return false; }
+    }
+    function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return legacyCopy(text); });
+        }
+        return Promise.resolve(legacyCopy(text));
+    }
+    if (cShare) cShare.addEventListener('click', function () {
+        if (!currentUrl) { showTip('先播放一个视频，再复制分享链接', 'warn'); return; }
+        var t = Math.floor(video.currentTime || 0);
+        var link = window.location.origin + window.location.pathname + '?url=' + encodeURIComponent(currentUrl) + '&t=' + t;
+        copyText(link).then(function (ok) {
+            if (ok) showTip('已复制分享链接（从 ' + fmtTime(t) + ' 开始）', 'info');
+            else showTip('复制失败，请手动复制地址栏链接', 'error');
+        });
+    });
+
+    /* —— 影院宽屏：切换 body.sp-theater，主区放宽到 1280px，画面更大 —— */
+    if (cTheater) cTheater.addEventListener('click', function () {
+        var on = document.body.classList.toggle('sp-theater');
+        cTheater.classList.toggle('active', on);
+        cTheater.title = on ? '退出影院模式' : '影院宽屏模式';
+        showTip(on ? '影院宽屏模式已开启' : '已退出影院宽屏模式', 'info');
+    });
 
     /* ------------------------------------------------------------ 对外接口 */
     /* 兼容原版全局 play() 调用方式 */

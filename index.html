@@ -70,7 +70,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
       "字幕加载（VTT / SRT）",
       "当前帧截图",
       "画中画与全屏",
-      "最近播放列表（本地存储）"
+      "最近播放列表（本地存储）",
+      "断点续播（本地记忆进度）",
+      "带时间点分享链接（?url=&t=）",
+      "影院宽屏模式"
     ],
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
   }
@@ -159,11 +162,19 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <div class="player-wrap">
                 <video id="player" preload="auto" playsinline webkit-playsinline></video>
                 <button type="button" class="big-play" id="big-play" aria-label="播放">▶</button>
+                <div class="buffer-spin" id="buffer-spin" hidden aria-hidden="true"><span></span></div>
+                <button type="button" class="retry-overlay" id="retry-overlay" hidden>⟳ 播放失败，点击重试</button>
+                <div class="resume-bar" id="resume-bar" hidden>
+                    <span class="resume-text" id="resume-text"></span>
+                    <button type="button" id="resume-go" class="mini-btn">继续播放</button>
+                    <button type="button" id="resume-dismiss" class="mini-btn ghost">从头开始</button>
+                </div>
             </div>
             <div class="controls" id="controls">
-                <div class="seek-row">
+                <div class="seek-row" id="seek-row">
                     <div class="buffer-track" id="buffer-track" aria-hidden="true"></div>
                     <input type="range" id="seek" min="0" max="100" value="0" step="0.1" aria-label="播放进度">
+                    <div class="seek-tip" id="seek-tip" hidden></div>
                 </div>
                 <div class="ctrl-row">
                     <button type="button" id="c-play" class="cbtn" aria-label="播放/暂停" title="播放/暂停（空格）">▶</button>
@@ -194,6 +205,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="c-snap" class="cbtn" aria-label="截图当前帧" title="截图当前帧">📷</button>
                     <button type="button" id="c-loop-a" class="cbtn loop-btn" aria-label="设定循环起点 A" title="A-B 循环：设起点 A">A</button>
                     <button type="button" id="c-loop-b" class="cbtn loop-btn" aria-label="设定循环终点 B" title="A-B 循环：设终点 B">B</button>
+                    <button type="button" id="c-share" class="cbtn" aria-label="复制带时间点的分享链接" title="复制分享链接（含当前时间点）">🔗</button>
+                    <button type="button" id="c-theater" class="cbtn" aria-label="影院宽屏模式" title="影院宽屏模式">🎬</button>
                     <button type="button" id="c-full" class="cbtn" aria-label="全屏" title="全屏（F）">⛶</button>
                 </div>
                 <div class="stats" id="stats" aria-live="off"></div>
@@ -238,8 +251,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <!-- ⑤ 开发者：嵌入到自己网站 -->
         <div class="card dev-card">
             <p><strong>嵌入到你的网站<span class="tag">开发者</span></strong></p>
-            <p>在页面地址后拼接 <code>?url=</code> 参数即可自动加载播放：</p>
-            <pre>&lt;iframe src="https://你的域名/?url=https://example.com/index.m3u8" width="100%" height="480" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
+            <p>在页面地址后拼接 <code>?url=</code> 参数即可自动加载播放；再加 <code>&amp;t=秒数</code> 可从指定时间点开始（控制条 🔗 按钮一键复制带当前时间点的分享链接）：</p>
+            <pre>&lt;iframe src="https://你的域名/?url=https://example.com/index.m3u8&amp;t=90" width="100%" height="480" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</pre>
         </div>
 
         <!-- ⑥ 科普 -->
@@ -295,6 +308,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <summary>如何加载字幕？</summary>
                 <p>在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。</p>
             </details>
+            <details>
+                <summary>能记住播放进度或分享指定时间点吗？</summary>
+                <p>能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。</p>
+            </details>
         </div>
         <script type="application/ld+json">
         {
@@ -305,7 +322,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             { "@type": "Question", "name": "为什么视频加载失败或一直转圈？", "acceptedAnswer": { "@type": "Answer", "text": "多半是地址本身打不开，或对方服务器不允许跨域访问（CORS）。可以先在浏览器新标签页直接打开该地址验证——能打开，播放器才能播。" } },
             { "@type": "Question", "name": "我的播放地址会被上传或保存吗？", "acceptedAnswer": { "@type": "Answer", "text": "播放是纯前端行为，视频流不经过本站服务器。「最近播放」只存在你自己浏览器的 localStorage 里，不会上传，可随时清空。" } },
             { "@type": "Question", "name": "可以调整播放速度和画质吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。控制条提供 0.5× 到 2× 六档速度；对于多码率 HLS 流，画质菜单会列出各档分辨率，可手动锁定或自动切换。" } },
-            { "@type": "Question", "name": "如何加载字幕？", "acceptedAnswer": { "@type": "Answer", "text": "在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。" } }
+            { "@type": "Question", "name": "如何加载字幕？", "acceptedAnswer": { "@type": "Answer", "text": "在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。" } },
+            { "@type": "Question", "name": "能记住播放进度或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } }
           ]
         }
         </script>
@@ -327,7 +345,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
-    <script src="./js/player.js?v=a3004654"></script>
+    <script src="./js/player.js?v=a53bf0f8"></script>
 
 
 
