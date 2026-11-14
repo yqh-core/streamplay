@@ -117,6 +117,14 @@
             syncStats();
         });
 
+        hls.on(window.Hls.Events.AUDIO_TRACKS_UPDATED, function () {
+            populateAudioTracks();
+        });
+
+        hls.on(window.Hls.Events.AUDIO_TRACK_SWITCHED, function () {
+            if (audioSel && hls) audioSel.value = String(hls.audioTrack);
+        });
+
         hls.on(window.Hls.Events.ERROR, function (evt, data) {
             if (!data || !data.fatal) {
                 return;
@@ -179,6 +187,8 @@
         currentUrl = url;
         attempts = 0;          // 新地址重新计数
         recordRecent(url);
+        clearLoop();
+        syncNowPlaying();
         hideTip();
         releaseHls();
 
@@ -283,6 +293,19 @@
     var statsEl = document.getElementById('stats');
     var seeking = false;
 
+    /* A-B 循环状态 */
+    var loopA = null;
+    var loopB = null;
+    var loopActive = false;
+    var cLoopA = document.getElementById('c-loop-a');
+    var cLoopB = document.getElementById('c-loop-b');
+
+    /* 音轨选择 + 正在播放条 */
+    var audioSel = document.getElementById('audio');
+    var nowPlaying = document.getElementById('now-playing');
+    var npUrl = document.getElementById('np-url');
+    var npEq = document.getElementById('np-eq');
+
     function fmtTime(s) {
         if (!isFinite(s) || s < 0) s = 0;
         var h = Math.floor(s / 3600);
@@ -342,6 +365,16 @@
                 parts.push('缓冲 ' + buf.toFixed(1) + 's');
             } catch (e) { /* ignore */ }
         }
+        if (hls && hls.bandwidthEstimate) {
+            parts.push('带宽 ' + (hls.bandwidthEstimate / 1e6).toFixed(1) + 'Mbps');
+        }
+        if (video.getVideoPlaybackQuality) {
+            var q = video.getVideoPlaybackQuality();
+            if (q && q.totalVideoFrames) {
+                parts.push('丢帧 ' + q.droppedVideoFrames + '/' + q.totalVideoFrames);
+            }
+        }
+        if (loopActive) parts.push('A-B 循环 ' + fmtTime(loopA) + '–' + fmtTime(loopB));
         statsEl.textContent = parts.join(' · ');
     }
 
@@ -363,6 +396,78 @@
         qualitySel.innerHTML = html;
         qualitySel.value = String(hls.currentLevel);
     }
+
+    /* HLS 音轨选项：从 hls.audioTracks 填充，切换 hls.audioTrack。 */
+    function populateAudioTracks() {
+        if (!audioSel) return;
+        if (!hls || !hls.audioTracks || !hls.audioTracks.length) {
+            audioSel.innerHTML = '<option value="-1">默认</option>';
+            audioSel.disabled = true;
+            return;
+        }
+        audioSel.disabled = false;
+        var html = '';
+        hls.audioTracks.forEach(function (t, i) {
+            var label = t.name || t.lang || ('音轨 ' + (i + 1));
+            if (t.lang && t.name) label = t.name + ' (' + t.lang + ')';
+            html += '<option value="' + i + '">' + label + '</option>';
+        });
+        audioSel.innerHTML = html;
+        audioSel.value = String(hls.audioTrack);
+    }
+
+    /* A-B 循环：A 设起点，B 设终点并启用；timeupdate 到达 B 跳回 A。 */
+    function clearLoop() {
+        loopA = null; loopB = null; loopActive = false;
+        if (cLoopA) cLoopA.classList.remove('active');
+        if (cLoopB) cLoopB.classList.remove('active');
+    }
+    function setLoopA() {
+        loopA = video.currentTime;
+        loopB = null; loopActive = false;
+        if (cLoopA) { cLoopA.classList.add('active'); cLoopA.title = '起点 A = ' + fmtTime(loopA) + '（再点清除）'; }
+        if (cLoopB) cLoopB.classList.remove('active');
+        showTip('循环起点 A = ' + fmtTime(loopA) + '，再按 B 设终点', 'info');
+        syncStats();
+    }
+    function setLoopB() {
+        if (loopA === null) { showTip('请先按 A 设定循环起点', 'warn'); return; }
+        if (video.currentTime <= loopA) { showTip('终点 B 必须晚于起点 A', 'warn'); return; }
+        loopB = video.currentTime;
+        loopActive = true;
+        if (cLoopB) { cLoopB.classList.add('active'); cLoopB.title = '终点 B = ' + fmtTime(loopB) + '（再点清除）'; }
+        showTip('A-B 循环已启用：' + fmtTime(loopA) + ' → ' + fmtTime(loopB), 'info');
+        syncStats();
+    }
+    if (cLoopA) cLoopA.addEventListener('click', function () {
+        if (loopA !== null && !loopActive && cLoopA.classList.contains('active') && loopB === null) { clearLoop(); showTip('循环已清除', 'info'); syncStats(); return; }
+        if (loopActive) { clearLoop(); showTip('循环已清除', 'info'); syncStats(); return; }
+        setLoopA();
+    });
+    if (cLoopB) cLoopB.addEventListener('click', function () {
+        if (loopActive) { clearLoop(); showTip('循环已清除', 'info'); syncStats(); return; }
+        setLoopB();
+    });
+    video.addEventListener('timeupdate', function () {
+        if (loopActive && loopB !== null && video.currentTime >= loopB) {
+            video.currentTime = loopA;
+        }
+    });
+
+    /* 正在播放条：显示当前地址，播放时均衡器动画。 */
+    function syncNowPlaying() {
+        if (!nowPlaying) return;
+        if (currentUrl) {
+            nowPlaying.hidden = false;
+            if (npUrl) { npUrl.textContent = currentUrl; npUrl.title = currentUrl; }
+        } else {
+            nowPlaying.hidden = true;
+        }
+        if (npEq) npEq.classList.toggle('playing', !video.paused);
+    }
+    video.addEventListener('play', syncNowPlaying);
+    video.addEventListener('pause', syncNowPlaying);
+    video.addEventListener('emptied', syncNowPlaying);
 
     if (controls) {
         if (cPlay) cPlay.addEventListener('click', togglePlay);
@@ -400,6 +505,9 @@
         if (rateSel) rateSel.addEventListener('change', function () { video.playbackRate = Number(rateSel.value); });
         if (qualitySel) qualitySel.addEventListener('change', function () {
             if (hls) { hls.currentLevel = Number(qualitySel.value); syncStats(); }
+        });
+        if (audioSel) audioSel.addEventListener('change', function () {
+            if (hls) { hls.audioTrack = Number(audioSel.value); }
         });
         if (cPip) cPip.addEventListener('click', function () {
             if (document.pictureInPictureElement) {

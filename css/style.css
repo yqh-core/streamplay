@@ -270,6 +270,151 @@ a {
     background: var(--dd-text);
 }
 
+/* ---------------------------------------------------------------- 电影级氛围 */
+.player-glow {
+    position: relative;
+    height: 0;
+    z-index: 0;
+}
+
+.player-glow::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -30px;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 120px;
+    background: radial-gradient(ellipse at center,
+        color-mix(in srgb, var(--dd-primary) 38%, transparent) 0%,
+        color-mix(in srgb, #06b6d4 22%, transparent) 45%,
+        transparent 72%);
+    filter: blur(28px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.player-shell {
+    position: relative;
+    z-index: 1;
+}
+
+.now-playing {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    margin-bottom: 10px;
+    border-radius: 9px;
+    background: linear-gradient(100deg,
+        color-mix(in srgb, var(--dd-primary) 16%, var(--dd-surface)),
+        var(--dd-surface) 60%);
+    border: 1px solid color-mix(in srgb, var(--dd-primary) 30%, transparent);
+    font-size: 12.5px;
+}
+
+.np-label {
+    flex: none;
+    font-weight: 700;
+    color: var(--dd-primary);
+    letter-spacing: 0.5px;
+}
+
+.np-url {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--dd-text-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.np-eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+    flex: none;
+}
+
+.np-eq i {
+    width: 3px;
+    height: 4px;
+    background: var(--dd-primary);
+    border-radius: 1px;
+}
+
+.np-eq.playing i {
+    animation: np-bounce 0.9s ease-in-out infinite;
+}
+
+.np-eq.playing i:nth-child(2) {
+    animation-delay: 0.25s;
+}
+
+.np-eq.playing i:nth-child(3) {
+    animation-delay: 0.5s;
+}
+
+@keyframes np-bounce {
+    0%, 100% { height: 4px; }
+    50% { height: 14px; }
+}
+
+.loop-btn {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.loop-btn.active {
+    background: var(--dd-primary);
+    color: #fff;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--dd-primary) 40%, transparent);
+}
+
+/* 入场动效：主区块 staged fade-up */
+@keyframes sp-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.main > h1,
+.main > .subtitle,
+.main > .form,
+.main > .demo-bar,
+.main > .now-playing,
+.main > .player-shell,
+.main > .tool-grid,
+.main > .card {
+    animation: sp-rise 0.5s ease both;
+}
+
+.main > .subtitle { animation-delay: 0.05s; }
+.main > .form { animation-delay: 0.1s; }
+.main > .demo-bar { animation-delay: 0.15s; }
+.main > .player-shell { animation-delay: 0.2s; }
+.main > .tool-grid { animation-delay: 0.25s; }
+
+.main > h1 {
+    background: linear-gradient(95deg, var(--dd-text) 30%, var(--dd-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--dd-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .main > h1, .main > .subtitle, .main > .form, .main > .demo-bar,
+    .main > .now-playing, .main > .player-shell, .main > .tool-grid, .main > .card {
+        animation: none;
+    }
+    .np-eq.playing i {
+        animation: none;
+        height: 10px;
+    }
+}
+
 /* ---------------------------------------------------------------- 自定义控制条 */
 .player-shell {
     margin-bottom: 8px;
