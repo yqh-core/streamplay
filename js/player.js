@@ -906,6 +906,153 @@
         showTip(on ? '影院宽屏模式已开启' : '已退出影院宽屏模式', 'info');
     });
 
+    /* ------------------------------------------------------------ 第五轮：专业辅助与诊断 */
+    /* 对标 YouTube / video.js：详细统计面板（Stats for nerds）、快捷键帮助、播放诊断、字幕样式定制。 */
+    var cStats = document.getElementById('c-stats');
+    var statsPanel = document.getElementById('stats-panel');
+    var statsGrid = document.getElementById('stats-grid');
+    var statsClose = document.getElementById('stats-close');
+    var cHelp = document.getElementById('c-help');
+    var helpModal = document.getElementById('help-modal');
+    var helpClose = document.getElementById('help-close');
+    var cDiag = document.getElementById('c-diag');
+    var diagModal = document.getElementById('diag-modal');
+    var diagClose = document.getElementById('diag-close');
+    var diagBody = document.getElementById('diag-body');
+    var diagRun = document.getElementById('diag-run');
+    var statsTimer = null;
+
+    function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+    }
+
+    /* —— 详细统计面板：分辨率/编码/带宽/缓冲/丢帧/网络，打开时每秒刷新 —— */
+    function renderStatsPanel() {
+        if (!statsGrid) return;
+        var rows = [];
+        rows.push(['分辨率', video.videoWidth ? video.videoWidth + '×' + video.videoHeight : '—']);
+        if (hls && hls.levels && hls.levels.length) {
+            var idx = hls.currentLevel >= 0 ? hls.currentLevel : hls.loadLevel;
+            var lvl = hls.levels[idx];
+            if (lvl) {
+                rows.push(['画质档位', (lvl.height ? lvl.height + 'p' : '—') + ' @ ' + Math.round(lvl.bitrate / 1000) + ' kbps']);
+                var codecs = (lvl.attrs && lvl.attrs.CODECS) || lvl.codecSet || '';
+                if (codecs) rows.push(['编码', codecs]);
+            }
+            rows.push(['码率切换', hls.autoLevelEnabled ? '自动' : '手动锁定']);
+            if (hls.bandwidthEstimate) rows.push(['估算带宽', (hls.bandwidthEstimate / 1e6).toFixed(2) + ' Mbps']);
+        }
+        rows.push(['播放速度', video.playbackRate + '×']);
+        rows.push(['当前 / 总长', fmtTime(video.currentTime) + ' / ' + fmtTime(video.duration)]);
+        if (video.buffered.length > 0) {
+            try { rows.push(['缓冲健康', Math.max(0, video.buffered.end(video.buffered.length - 1) - video.currentTime).toFixed(1) + ' s']); } catch (e) { /* ignore */ }
+        }
+        if (video.getVideoPlaybackQuality) {
+            var q = video.getVideoPlaybackQuality();
+            if (q && q.totalVideoFrames) rows.push(['丢帧', q.droppedVideoFrames + ' / ' + q.totalVideoFrames]);
+        }
+        if (navigator.connection && navigator.connection.effectiveType) rows.push(['网络类型', navigator.connection.effectiveType]);
+        rows.push(['播放引擎', hls ? 'hls.js (MSE)' : '原生 HTML5']);
+        statsGrid.innerHTML = rows.map(function (r) {
+            return '<div class="sp-row"><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>';
+        }).join('');
+    }
+    function openStats() {
+        if (!statsPanel) return;
+        statsPanel.hidden = false;
+        if (cStats) cStats.classList.add('active');
+        renderStatsPanel();
+        statsTimer = setInterval(renderStatsPanel, 1000);
+    }
+    function closeStats() {
+        if (statsPanel) statsPanel.hidden = true;
+        if (cStats) cStats.classList.remove('active');
+        if (statsTimer) { clearInterval(statsTimer); statsTimer = null; }
+    }
+    if (cStats) cStats.addEventListener('click', function () { statsPanel.hidden ? openStats() : closeStats(); });
+    if (statsClose) statsClose.addEventListener('click', closeStats);
+
+    /* —— 快捷键帮助弹窗 —— */
+    function openHelp() { if (helpModal) helpModal.hidden = false; }
+    function closeHelp() { if (helpModal) helpModal.hidden = true; }
+    if (cHelp) cHelp.addEventListener('click', openHelp);
+    if (helpClose) helpClose.addEventListener('click', closeHelp);
+    if (helpModal) helpModal.addEventListener('click', function (e) { if (e.target === helpModal) closeHelp(); });
+
+    /* —— 播放诊断：MSE/hls.js/解码/网络/地址可达性，逐项给结论 —— */
+    function diagRow(state, label, detail) {
+        var cls = state === null ? 'neutral' : (state ? 'ok' : 'bad');
+        var ico = state === null ? '•' : (state ? '✓' : '✗');
+        return '<div class="diag-row ' + cls + '"><span class="diag-ico">' + ico + '</span><span class="diag-label">' + esc(label) + '</span><span class="diag-detail">' + esc(detail) + '</span></div>';
+    }
+    function runDiag() {
+        if (!diagBody) return;
+        var rows = [];
+        var mse = typeof window.MediaSource !== 'undefined';
+        rows.push(diagRow(mse, 'MSE 支持', mse ? 'MediaSource 可用' : '浏览器不支持 MediaSource'));
+        var hlsOk = !!(window.Hls && window.Hls.isSupported && window.Hls.isSupported());
+        rows.push(diagRow(hlsOk, 'hls.js 引擎', hlsOk ? '可用（MSE 转封装）' : '不可用'));
+        var nativeHls = !!video.canPlayType('application/vnd.apple.mpegurl');
+        rows.push(diagRow(nativeHls ? true : null, '原生 HLS', nativeHls ? '支持（Safari 系）' : '不支持（依赖 hls.js）'));
+        var h264 = !!video.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+        rows.push(diagRow(h264, 'H.264 / AAC 解码', h264 ? '支持' : '不支持'));
+        var vp9 = !!video.canPlayType('video/webm; codecs="vp9, opus"');
+        rows.push(diagRow(vp9 ? true : null, 'WebM / VP9 解码', vp9 ? '支持' : '不支持（mp4 仍可播）'));
+        rows.push(diagRow(navigator.onLine, '网络连接', navigator.onLine ? '在线' : '离线'));
+        if (navigator.connection && navigator.connection.effectiveType) {
+            rows.push(diagRow(null, '网络类型', navigator.connection.effectiveType + (navigator.connection.downlink ? ' · 约 ' + navigator.connection.downlink + ' Mbps' : '')));
+        }
+        var urlRow = currentUrl ? diagRow(null, '地址可达性', '检测中…') : diagRow(null, '地址可达性', '尚未播放任何地址');
+        diagBody.innerHTML = rows.join('') + '<div id="diag-url">' + urlRow + '</div>';
+        if (currentUrl) {
+            fetch(currentUrl, { method: 'HEAD', mode: 'cors', cache: 'no-store' }).then(function (r) {
+                var el = document.getElementById('diag-url');
+                if (el) el.innerHTML = diagRow(r.ok, '地址可达性', 'HTTP ' + r.status + (r.ok ? ' · 可达 · 允许跨域' : ' · 响应异常'));
+            }).catch(function () {
+                var el = document.getElementById('diag-url');
+                var msg = !navigator.onLine ? '当前离线' : '不可达或不允许跨域（CORS）；请在浏览器新标签直接打开该地址验证';
+                if (el) el.innerHTML = diagRow(false, '地址可达性', msg);
+            });
+        }
+    }
+    function openDiag() { if (diagModal) { diagModal.hidden = false; runDiag(); } }
+    function closeDiag() { if (diagModal) diagModal.hidden = true; }
+    if (cDiag) cDiag.addEventListener('click', openDiag);
+    if (diagClose) diagClose.addEventListener('click', closeDiag);
+    if (diagRun) diagRun.addEventListener('click', runDiag);
+    if (diagModal) diagModal.addEventListener('click', function (e) { if (e.target === diagModal) closeDiag(); });
+
+    /* —— 字幕样式定制：动态写入 #player::cue 规则（字号/颜色/背景） —— */
+    var cueSize = document.getElementById('cue-size');
+    var cueColor = document.getElementById('cue-color');
+    var cueBg = document.getElementById('cue-bg');
+    var cueStyleEl = document.getElementById('sp-cue-style');
+    if (!cueStyleEl) {
+        cueStyleEl = document.createElement('style');
+        cueStyleEl.id = 'sp-cue-style';
+        document.head.appendChild(cueStyleEl);
+    }
+    function applyCueStyle() {
+        var size = cueSize ? cueSize.value : '100';
+        var color = cueColor ? cueColor.value : '#ffffff';
+        var bg = cueBg ? cueBg.value : 'rgba(0,0,0,0.6)';
+        cueStyleEl.textContent = '#player::cue{font-size:' + size + '%;color:' + color + ';background:' + bg + ';}';
+    }
+    if (cueSize) cueSize.addEventListener('change', applyCueStyle);
+    if (cueColor) cueColor.addEventListener('change', applyCueStyle);
+    if (cueBg) cueBg.addEventListener('change', applyCueStyle);
+    applyCueStyle();
+
+    /* —— ? 打开帮助；Esc 关闭弹窗 —— */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeHelp(); closeDiag(); return; }
+        var tag = (e.target && e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'select' || tag === 'textarea' || e.target.isContentEditable) return;
+        if (e.key === '?') { e.preventDefault(); openHelp(); }
+    });
+
     /* ------------------------------------------------------------ 对外接口 */
     /* 兼容原版全局 play() 调用方式 */
     window.play = play;

@@ -502,6 +502,185 @@ body.sp-theater .player-wrap {
     .resume-bar { flex-wrap: wrap; }
 }
 
+/* ---------------------------------------------------------------- 第五轮：辅助与诊断 */
+/* 详细统计面板（播放器右上角浮层，对标 YouTube Stats for nerds） */
+.stats-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+    width: 250px;
+    max-width: calc(100% - 20px);
+    background: rgba(11, 18, 32, 0.9);
+    border: 1px solid color-mix(in srgb, var(--dd-primary) 40%, transparent);
+    border-radius: 9px;
+    padding: 10px 12px;
+    color: #e6edf3;
+    font-size: 12px;
+}
+
+.sp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    color: var(--dd-primary);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.sp-x {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #c9d4e0;
+    cursor: pointer;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sp-x:hover {
+    background: color-mix(in srgb, var(--dd-danger) 40%, transparent);
+    color: #fff;
+}
+
+.sp-grid { margin: 0; }
+
+.sp-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sp-row:last-child { border-bottom: none; }
+.sp-row dt { color: #8b98a9; flex: none; }
+.sp-row dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; word-break: break-all; }
+
+/* 通用弹窗（帮助 / 诊断）。注意：display:flex 会盖过 [hidden] 的 UA display:none，
+   必须显式补 .sp-modal[hidden]{display:none}，否则 hidden 属性失效、弹窗常显。 */
+.sp-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(8, 12, 20, 0.66);
+}
+
+.sp-modal[hidden] { display: none; }
+
+.sp-modal-card {
+    width: 100%;
+    max-width: 460px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: var(--dd-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    color: var(--dd-text);
+}
+
+.sp-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-size: 16px;
+}
+
+.sp-modal-head .sp-x {
+    background: var(--dd-surface-2);
+    color: var(--dd-text-soft);
+}
+
+/* 快捷键列表 */
+.shortcut-list { list-style: none; margin: 0 0 12px; padding: 0; }
+
+.shortcut-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.shortcut-list li span { margin-left: auto; color: var(--dd-text-soft); }
+
+.shortcut-list kbd {
+    background: var(--dd-surface-2);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 12px;
+    font-family: inherit;
+}
+
+/* 诊断报告 */
+.diag-body { margin-bottom: 14px; }
+
+.diag-row {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+}
+
+.diag-ico { flex: none; width: 18px; font-weight: 700; text-align: center; }
+.diag-row.ok .diag-ico { color: var(--dd-success, #16a34a); }
+.diag-row.bad .diag-ico { color: var(--dd-danger, #dc2626); }
+.diag-row.neutral .diag-ico { color: var(--dd-text-soft); }
+.diag-label { flex: none; font-weight: 600; color: var(--dd-text); }
+.diag-detail { margin-left: auto; text-align: right; color: var(--dd-text-soft); word-break: break-word; }
+
+/* 字幕样式控件（字幕卡内，浅色主题） */
+.cue-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin: 4px 0 10px;
+}
+
+.cue-row label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--dd-text-soft);
+}
+
+.cue-row select {
+    background: var(--dd-surface);
+    color: var(--dd-text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 12.5px;
+    cursor: pointer;
+    outline: none;
+}
+
+.cue-row select:focus-visible { border-color: var(--dd-primary); }
+
+@media (max-width: 640px) {
+    .stats-panel { width: 200px; font-size: 11px; top: 6px; right: 6px; }
+    .sp-modal { padding: 12px; }
+    .sp-modal-card { padding: 14px 16px; }
+    .diag-detail { font-size: 12px; }
+}
+
 /* 入场动效：主区块 staged fade-up */
 @keyframes sp-rise {
     from { opacity: 0; transform: translateY(14px); }

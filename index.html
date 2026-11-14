@@ -73,7 +73,11 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
       "最近播放列表（本地存储）",
       "断点续播（本地记忆进度）",
       "带时间点分享链接（?url=&t=）",
-      "影院宽屏模式"
+      "影院宽屏模式",
+      "字幕样式定制（字号/颜色/背景）",
+      "详细播放统计面板（分辨率/编码/带宽/丢帧）",
+      "播放诊断（MSE/解码/地址可达性）",
+      "快捷键帮助面板"
     ],
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
   }
@@ -169,6 +173,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="resume-go" class="mini-btn">继续播放</button>
                     <button type="button" id="resume-dismiss" class="mini-btn ghost">从头开始</button>
                 </div>
+                <div class="stats-panel" id="stats-panel" hidden aria-label="播放统计">
+                    <div class="sp-head"><span>播放统计</span><button type="button" id="stats-close" class="sp-x" aria-label="关闭统计">✕</button></div>
+                    <dl class="sp-grid" id="stats-grid"></dl>
+                </div>
             </div>
             <div class="controls" id="controls">
                 <div class="seek-row" id="seek-row">
@@ -207,12 +215,40 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="c-loop-b" class="cbtn loop-btn" aria-label="设定循环终点 B" title="A-B 循环：设终点 B">B</button>
                     <button type="button" id="c-share" class="cbtn" aria-label="复制带时间点的分享链接" title="复制分享链接（含当前时间点）">🔗</button>
                     <button type="button" id="c-theater" class="cbtn" aria-label="影院宽屏模式" title="影院宽屏模式">🎬</button>
+                    <button type="button" id="c-stats" class="cbtn" aria-label="播放统计面板" title="播放统计（分辨率/编码/带宽/丢帧）">📊</button>
+                    <button type="button" id="c-diag" class="cbtn" aria-label="播放诊断" title="播放诊断（MSE/解码/地址可达性）">🩺</button>
+                    <button type="button" id="c-help" class="cbtn" aria-label="快捷键帮助" title="快捷键帮助（?）">⌨</button>
                     <button type="button" id="c-full" class="cbtn" aria-label="全屏" title="全屏（F）">⛶</button>
                 </div>
                 <div class="stats" id="stats" aria-live="off"></div>
             </div>
         </div>
-        <p class="kbd-hint">快捷键：<kbd>空格</kbd> 播放/暂停 · <kbd>←</kbd>/<kbd>→</kbd> 快退/快进 5s · <kbd>J</kbd>/<kbd>L</kbd> 10s · <kbd>↑</kbd>/<kbd>↓</kbd> 音量 · <kbd>M</kbd> 静音 · <kbd>F</kbd> 全屏</p>
+        <p class="kbd-hint">快捷键：<kbd>空格</kbd> 播放/暂停 · <kbd>←</kbd>/<kbd>→</kbd> 快退/快进 5s · <kbd>J</kbd>/<kbd>L</kbd> 10s · <kbd>↑</kbd>/<kbd>↓</kbd> 音量 · <kbd>M</kbd> 静音 · <kbd>F</kbd> 全屏 · <kbd>?</kbd> 帮助</p>
+
+        <!-- ③-c 快捷键帮助 + 播放诊断（对标商业播放器的辅助/排障能力） -->
+        <div class="sp-modal" id="help-modal" hidden role="dialog" aria-modal="true" aria-label="键盘快捷键">
+            <div class="sp-modal-card">
+                <div class="sp-modal-head"><strong>键盘快捷键</strong><button type="button" class="sp-x" id="help-close" aria-label="关闭">✕</button></div>
+                <ul class="shortcut-list">
+                    <li><kbd>空格</kbd> / <kbd>K</kbd><span>播放 / 暂停</span></li>
+                    <li><kbd>←</kbd> / <kbd>→</kbd><span>快退 / 快进 5 秒</span></li>
+                    <li><kbd>J</kbd> / <kbd>L</kbd><span>快退 / 快进 10 秒</span></li>
+                    <li><kbd>↑</kbd> / <kbd>↓</kbd><span>音量加 / 减</span></li>
+                    <li><kbd>M</kbd><span>静音切换</span></li>
+                    <li><kbd>F</kbd><span>全屏切换</span></li>
+                    <li><kbd>?</kbd><span>打开本帮助</span></li>
+                    <li><kbd>Esc</kbd><span>关闭弹窗</span></li>
+                </ul>
+                <p class="note">控制条另有 🔗 分享 · 🎬 影院 · 📊 统计 · 🩺 诊断 · 📷 截图 · A/B 循环按钮。</p>
+            </div>
+        </div>
+        <div class="sp-modal" id="diag-modal" hidden role="dialog" aria-modal="true" aria-label="播放诊断">
+            <div class="sp-modal-card">
+                <div class="sp-modal-head"><strong>播放诊断</strong><button type="button" class="sp-x" id="diag-close" aria-label="关闭">✕</button></div>
+                <div class="diag-body" id="diag-body"></div>
+                <button type="button" id="diag-run" class="mini-btn">重新检测</button>
+            </div>
+        </div>
 
         <!-- ③-b 播放工具：字幕 + 最近播放（对标 video.js 插件生态的常用能力） -->
         <div class="tool-grid">
@@ -222,6 +258,25 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <input type="text" id="sub-url" placeholder="粘贴字幕地址（.vtt / .srt），回车加载" autocomplete="off" spellcheck="false">
                     <button type="button" id="sub-load" class="mini-btn">加载字幕</button>
                     <button type="button" id="sub-off" class="mini-btn ghost">关闭</button>
+                </div>
+                <div class="cue-row">
+                    <label>字号<select id="cue-size" aria-label="字幕字号">
+                        <option value="80">小</option>
+                        <option value="100" selected>标准</option>
+                        <option value="130">大</option>
+                        <option value="160">特大</option>
+                    </select></label>
+                    <label>颜色<select id="cue-color" aria-label="字幕颜色">
+                        <option value="#ffffff" selected>白</option>
+                        <option value="#ffe14d">黄</option>
+                        <option value="#5df2e0">青</option>
+                        <option value="#9dff5d">绿</option>
+                    </select></label>
+                    <label>背景<select id="cue-bg" aria-label="字幕背景">
+                        <option value="rgba(0,0,0,0.6)" selected>半透明黑</option>
+                        <option value="rgba(0,0,0,0.9)">深黑</option>
+                        <option value="transparent">无</option>
+                    </select></label>
                 </div>
                 <p class="note" id="sub-note">加载后在系统播放器字幕菜单中选择轨道；跨域字幕需对方允许 CORS。</p>
             </div>
@@ -312,6 +367,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <summary>能记住播放进度或分享指定时间点吗？</summary>
                 <p>能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。</p>
             </details>
+            <details>
+                <summary>如何排查播放问题或查看播放统计？</summary>
+                <p>点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。</p>
+            </details>
         </div>
         <script type="application/ld+json">
         {
@@ -323,7 +382,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             { "@type": "Question", "name": "我的播放地址会被上传或保存吗？", "acceptedAnswer": { "@type": "Answer", "text": "播放是纯前端行为，视频流不经过本站服务器。「最近播放」只存在你自己浏览器的 localStorage 里，不会上传，可随时清空。" } },
             { "@type": "Question", "name": "可以调整播放速度和画质吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。控制条提供 0.5× 到 2× 六档速度；对于多码率 HLS 流，画质菜单会列出各档分辨率，可手动锁定或自动切换。" } },
             { "@type": "Question", "name": "如何加载字幕？", "acceptedAnswer": { "@type": "Answer", "text": "在「字幕」工具中粘贴 .vtt 或 .srt 字幕地址并加载，然后在字幕菜单中选择轨道。跨域字幕需要对方服务器允许 CORS。" } },
-            { "@type": "Question", "name": "能记住播放进度或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } }
+            { "@type": "Question", "name": "能记住播放进度或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } },
+            { "@type": "Question", "name": "如何排查播放问题或查看播放统计？", "acceptedAnswer": { "@type": "Answer", "text": "点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。" } }
           ]
         }
         </script>
@@ -345,7 +405,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
-    <script src="./js/player.js?v=a53bf0f8"></script>
+    <script src="./js/player.js?v=64e2e654"></script>
 
 
 
