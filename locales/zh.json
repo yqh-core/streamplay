@@ -16,6 +16,6 @@
   "trust.text": "隐私说明：本站不存储任何视频文件，播放内容直接来自你输入链接所属的第三方源站。",
   "aria.themeToggle": "切换深色模式",
   "aria.langToggle": "切换语言",
-  "seo.title": "StreamPlay 流影 - M3U8 在线播放器",
-  "seo.description": "StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件，纯前端实现。"
+  "seo.title": "StreamPlay 流影 - M3U8/HLS 在线播放器｜测流诊断·清单分析·嵌入生成",
+  "seo.description": "StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件。内置播放失败诊断（CORS/解码/可达性）、M3U8 清单分析与 iframe 嵌入代码生成，纯前端不上传。"
 }

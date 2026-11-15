@@ -17,16 +17,16 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 @media (max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}
 </style>
 
-    <title>StreamPlay 流影 - M3U8 在线播放器</title>
+    <title>StreamPlay 流影 - M3U8/HLS 在线播放器｜测流诊断·清单分析·嵌入生成</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件，纯前端实现。">
+    <meta name="description" content="StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件。内置播放失败诊断（CORS/解码/可达性）、M3U8 清单分析与 iframe 嵌入代码生成，纯前端不上传。">
     <meta name="keywords" content="m3u8播放器,HLS在线播放,在线视频播放器,mp4播放,m3u8在线播放">
     <meta name="theme-color" content="#0f766e">
     <link rel="canonical" href="https://play.digdevbox.com/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="StreamPlay 流影 - M3U8 / HLS 在线播放器">
-    <meta property="og:description" content="轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式，纯前端实现，无需安装插件。">
+    <meta property="og:title" content="StreamPlay 流影 - M3U8/HLS 在线播放器｜测流诊断·清单分析·嵌入生成">
+    <meta property="og:description" content="轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式。内置播放失败诊断（CORS/解码/可达性）、M3U8 清单分析与 iframe 嵌入代码生成，纯前端不上传。">
     <meta property="og:url" content="https://play.digdevbox.com/">
     <meta property="og:site_name" content="StreamPlay 流影">
     <meta property="og:locale" content="zh_CN">
@@ -155,6 +155,14 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                  播放器只能报「地址不可达」。Apple 的 devstreaming-cdn 就不带该头，实测播不了，已换掉。 -->
             <button type="button" class="demo-btn" data-url="https://test-streams.mux.dev/tos_ismc/main.m3u8">测试流② 多码率(Tears of Steel)</button>
             <button type="button" class="demo-btn" data-url="https://stream.mux.com/v69RSHhFelSm4701snP22dYz2jICy4E4FUyk02rW4gxRM.m3u8">测试流③ 短视频</button>
+        </div>
+
+        <!-- ②-b 差异能力入口：纯 HTML 锚点直达（零 JS 零测量），复用 demo-btn 既有样式 -->
+        <div class="demo-bar">
+            <span class="demo-label">不止播放，还能：</span>
+            <a class="demo-btn" href="#analyzer" style="text-decoration:none">🧾 分析 M3U8 清单</a>
+            <a class="demo-btn" href="#embed" style="text-decoration:none">🧩 生成嵌入代码</a>
+            <a class="demo-btn" href="/guides" style="text-decoration:none">🩺 播不出来？看排查</a>
         </div>
 
         <div class="tip" id="tip" role="status" aria-live="polite"></div>
@@ -320,7 +328,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         </div>
 
         <!-- ③-e M3U8 清单分析器（对标 LivePlayer Analyzer：变体/音轨/字幕/分片/直播态/加密） -->
-        <div class="card analyzer-card">
+        <div class="card analyzer-card" id="analyzer">
             <p><strong>M3U8 清单分析 <span class="tag">开发者</span></strong></p>
             <div class="sub-row">
                 <input type="text" id="ma-url" placeholder="粘贴 m3u8 地址，回车分析" autocomplete="off" spellcheck="false">
@@ -347,7 +355,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         </div>
 
         <!-- ⑤ 开发者：嵌入代码生成器（对标 LivePlayer Embed Builder：配置 + 实时预览 + 一键复制） -->
-        <div class="card dev-card">
+        <div class="card dev-card" id="embed">
             <p><strong>嵌入到你的网站 <span class="tag">生成器</span></strong></p>
             <div class="emb-grid">
                 <div class="emb-form">
@@ -442,7 +450,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </details>
             <details>
                 <summary>如何分析 m3u8 清单里有哪些画质和音轨？</summary>
-                <p>在「M3U8 清单分析」工具粘贴地址并点分析：master 清单列出全部变体的分辨率/带宽/编码与音轨、字幕组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。</p>
+                <p>在「M3U8 清单分析」工具粘贴地址并点分析：master 清单列出全部变体的分辨率/带宽/编码与音轨、字幕组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。详见 <a href="/guides#analyzer">/guides#analyzer</a>。</p>
             </details>
             <details>
                 <summary>如何把播放器嵌入到我自己的网站？</summary>
@@ -462,7 +470,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             { "@type": "Question", "name": "能记住播放进度或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。播放进度只存在本机浏览器，再次打开同一地址会提示「继续播放」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } },
             { "@type": "Question", "name": "如何排查播放问题或查看播放统计？", "acceptedAnswer": { "@type": "Answer", "text": "点控制条 🩺 按钮打开播放诊断，自动检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。" } },
             { "@type": "Question", "name": "可以连续播放多个视频或边滚动边看吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「播放队列」添加多个地址，开启「自动连播」后播完自动播下一首，也可用上一首/下一首切换，「循环整片」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩小悬浮到右下角，点 ⤢ 还原、✕ 关闭。" } },
-            { "@type": "Question", "name": "如何分析 m3u8 清单里有哪些画质和音轨？", "acceptedAnswer": { "@type": "Answer", "text": "在「M3U8 清单分析」工具粘贴地址并点分析：master 清单列出全部变体的分辨率/带宽/编码与音轨、字幕组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。" } },
+            { "@type": "Question", "name": "如何分析 m3u8 清单里有哪些画质和音轨？", "acceptedAnswer": { "@type": "Answer", "text": "在「M3U8 清单分析」工具粘贴地址并点分析：master 清单列出全部变体的分辨率/带宽/编码与音轨、字幕组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。详见 /guides#analyzer。" } },
             { "@type": "Question", "name": "如何把播放器嵌入到我自己的网站？", "acceptedAnswer": { "@type": "Answer", "text": "用「嵌入代码生成器」填写播放地址、宽高、起始秒数与自动播放选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许静音自动播放，建议勾选静音。" } }
           ]
         }

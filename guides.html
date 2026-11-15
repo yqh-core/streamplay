@@ -20,13 +20,13 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
     <title>使用教程 - 播放 m3u8、嵌入网站与故障排查 | StreamPlay 流影</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="StreamPlay 流影使用教程：三步播放 m3u8、用 ?url= 参数嵌入自己的网站、五步排查播放故障，以及用 ffmpeg 生成可播放的 HLS 测试流。">
+    <meta name="description" content="StreamPlay 流影使用教程：三步播放 m3u8、用 ?url= 参数嵌入自己的网站、五步排查播放故障、M3U8 清单分析实战（变体/音轨/分片/加密），以及用 ffmpeg 生成可播放的 HLS 测试流。">
     <meta name="keywords" content="m3u8播放教程,HLS嵌入,iframe播放器,ffmpeg转m3u8,播放故障排查">
     <meta name="theme-color" content="#0f766e">
     <link rel="canonical" href="https://play.digdevbox.com/guides">
     <meta property="og:type" content="article">
     <meta property="og:title" content="使用教程 - 播放 m3u8、嵌入网站与故障排查">
-    <meta property="og:description" content="三步播放、?url= 嵌入、五步排查，以及用 ffmpeg 生成 HLS 测试流。">
+    <meta property="og:description" content="三步播放、?url= 嵌入、五步排查、M3U8 清单分析实战，以及用 ffmpeg 生成 HLS 测试流。">
     <meta property="og:url" content="https://play.digdevbox.com/guides">
     <meta property="og:site_name" content="StreamPlay 流影">
     <meta property="og:locale" content="zh_CN">
@@ -127,6 +127,17 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <td>按 F12 打开 Console，把红色报错记下来，到<a href="/contact">联系页面</a>反馈。</td>
             </tr>
         </table>
+
+        <h2 id="analyzer">实战：用 M3U8 清单分析读变体/音轨/分片/加密</h2>
+        <p>想先弄清一条流里有什么、或者播不出来想定位原因，可以先分析清单再播放。打开<a href="/#analyzer">首页的「M3U8 清单分析」工具</a>，粘贴 m3u8 地址点「分析」，也可直接点「用当前播放地址」。解析在浏览器本地完成，不经过本站服务器。</p>
+        <p><strong>master 清单（多码率入口）读什么：</strong>变体表列出每一档的分辨率、带宽、帧率、编码与对应的音轨组、字幕组，音轨/字幕组单独成表。想确认「这条流有几档画质、有没有多语言音轨」，看这里就够了。分析时还会自动尝试读取首个变体的媒体清单，失败会如实报告（变体表仍可用）。</p>
+        <p><strong>media 清单（实际分片列表）读什么：</strong>直播/点播状态（有无 ENDLIST）、HLS 版本、目标分片时长、分片数、总时长、加密方式与不连续点；下方给出分片时长的最短/最长/平均值，展开还能看到逐条分片列表。分片时长是否均匀、直播列表是否在滚动，都能从这里判断。</p>
+        <p><strong>前提与边界：</strong></p>
+        <ul>
+            <li>分析需要源站允许跨域（CORS），和播放是同一道门槛：响应头里没有 <code>Access-Control-Allow-Origin</code>，浏览器就会拦截读取，需先在源站配置，前端无法绕过。</li>
+            <li>加密流（<code>EXT-X-KEY</code>）只能分析结构（如加密方式），不能也不应绕过 DRM 播放。</li>
+        </ul>
+        <p>建议把清单分析和上面的五步排查配合使用：清单读得到但播不了，多半是编码或分片问题；清单都读不到，先解决地址可达性与跨域，再回<a href="/#analyzer">分析工具</a>复核。</p>
 
         <h2>进阶：用 ffmpeg 生成自己的 HLS 测试流</h2>
         <p>如果你想在本地验证一套 HLS 流程，可以用 ffmpeg 把一个 mp4 切成 m3u8 分片：</p>
