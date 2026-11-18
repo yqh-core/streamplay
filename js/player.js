@@ -2,10 +2,10 @@
    StreamPlay 流影 - 播放逻辑
    --------------------------------------------------------------------------
    设计要点：
-   1. 双引擎：m3u8 用 hls.js，mp4 等格式走浏览器原生播放
-   2. 自动降级：原生播放失败时，若浏览器支持 MSE 则自动改用 hls.js 重试
-   3. 有限重试：同一地址最多尝试 3 次，失败必然收敛到明确报错，不会无限重试
-   4. 全程本地依赖：仅依赖 ../libs/hls.min.js，不请求任何外网 CDN
+   1. m3u8 用本地 hls.js，mpd 用本地 dash.js，mp4 等走浏览器原生播放
+   2. 原生播放失败且地址不像普通媒体文件时，若浏览器支持 MSE 则改用 hls.js 再试
+   3. 有限重试：同一地址最多尝试 3 次；404、403、解析失败和 DRM 不空转
+   4. 播放器脚本在本地。dash.js 只在打开 MPD 时加载。页面上的广告脚本另计
    5. 兼容旧接口：保留全局 play() 方法，便于 iframe / 控制台直接调用
    ========================================================================== */
 
@@ -23,6 +23,16 @@
 
     var hls = null;          // 当前 hls.js 实例
     var currentUrl = '';     // 当前正在播放的地址
+    var dashPlayer = null;
+    var dashLoading = null;
+    var dashAuto = true;
+    var lowLatency = false;
+    var sessionFrags = [];
+    var errorLog = [];
+    var lastAdvice = null;
+    var wantDiagnose = false;
+    var DASH_SRC = './libs/dash.all.min.js?v=3a1db51e';
+    try { lowLatency = localStorage.getItem('streamplay:ll') === '1'; } catch (e) { /* 隐私模式 */ }
 
     /* ------------------------------------------------------------ 提示条 */
     function showTip(msg, type) {
@@ -65,6 +75,54 @@
         return /\.m3u8(\?|#|$)/i.test(url);
     }
 
+    function isDashUrl(url) {
+        return /\.mpd(\?|#|$)/i.test(url);
+    }
+
+    function noteFrag(rec) {
+        sessionFrags.push(rec);
+        if (sessionFrags.length > 480) sessionFrags.shift();
+        if (window.StreamBench) window.StreamBench.touch();
+    }
+
+    function noteError(advice, opts) {
+        if (!advice) return;
+        lastAdvice = advice;
+        var now = Date.now();
+        var last = errorLog[0];
+        if (last && last.details === advice.details && last.httpCode === advice.httpCode) {
+            last.ts = now;
+            if (opts && opts.focus) wantDiagnose = true;
+            if (window.StreamBench) window.StreamBench.touch(opts);
+            return;
+        }
+        if (!(last && last.details === advice.details && last.httpCode === advice.httpCode && now - (last.ts || 0) < 2500)) {
+            errorLog.unshift({
+                title: advice.title,
+                cause: advice.cause,
+                steps: advice.steps || [],
+                severity: advice.severity || 'error',
+                details: advice.details || '',
+                httpCode: advice.httpCode,
+                ts: now
+            });
+            if (errorLog.length > 12) errorLog.pop();
+        }
+        if (opts && opts.focus) wantDiagnose = true;
+        if (window.StreamBench) window.StreamBench.touch(opts);
+    }
+
+    function explainHls(data, fatal) {
+        if (!window.StreamCore) return null;
+        return window.StreamCore.explainPlaybackError({
+            protocol: 'hls',
+            details: data && data.details,
+            fatal: fatal,
+            httpCode: data && data.response && data.response.code,
+            message: data && data.error && data.error.message
+        });
+    }
+
     /* 明确的非 HLS 容器格式。这类地址加载失败就是真的失败了 ——
        再拿 hls.js 去解析一个 mp4 只会白等 3 次重试，最后还报个不相关的错。 */
     function isPlainMediaFile(url) {
@@ -99,8 +157,9 @@
 
         hls = new window.Hls({
             enableWorker: true,
-            lowLatencyMode: false,
-            maxBufferLength: 30
+            lowLatencyMode: lowLatency,
+            maxBufferLength: lowLatency ? 12 : 30,
+            backBufferLength: 30
         });
 
         hls.loadSource(url);
@@ -113,7 +172,11 @@
         });
 
         hls.on(window.Hls.Events.LEVEL_SWITCHED, function () {
-            if (qualitySel && hls) qualitySel.value = String(hls.currentLevel);
+            if (qualitySel && hls && hls.autoLevelEnabled) {
+                fillingLevels = true;
+                qualitySel.value = '-1';
+                fillingLevels = false;
+            }
             syncStats();
         });
 
@@ -125,15 +188,35 @@
             if (audioSel && hls) audioSel.value = String(hls.audioTrack);
         });
 
+        hls.on(window.Hls.Events.FRAG_LOADED, function (evt, data) {
+            if (!data || !data.frag) return;
+            var frag = data.frag;
+            var stats = frag.stats || {};
+            var loading = stats.loading || {};
+            var bytes = stats.total || stats.loaded || 0;
+            var ms = (loading.end && loading.start) ? (loading.end - loading.start) : 0;
+            noteFrag({
+                sn: frag.sn,
+                level: frag.level,
+                type: frag.type || 'main',
+                start: frag.start || 0,
+                duration: frag.duration || 0,
+                bytes: bytes,
+                loadMs: ms
+            });
+        });
+
         hls.on(window.Hls.Events.ERROR, function (evt, data) {
-            if (!data || !data.fatal) {
-                return;
-            }
+            if (!data) return;
+            var advice = explainHls(data, !!data.fatal);
+            if (advice && data.fatal) noteError(advice, { focus: false });
+            else if (advice && (data.details === 'bufferStalledError' || data.details === 'bufferSeekOverHole')) noteError(advice, { focus: false });
+            if (!data.fatal) return;
 
             /* 媒体错误：先用引擎自带机制恢复，限 2 次 */
             if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR && mediaRetry < 2) {
                 mediaRetry++;
-                showTip('媒体流解析异常，正在恢复（' + mediaRetry + '/2）…', 'warn');
+                showTip('这一段媒体解析异常，正在试着恢复（' + mediaRetry + '/2）…', 'warn');
                 try {
                     hls.recoverMediaError();
                     return;
@@ -150,11 +233,13 @@
     /* 注意：manifest 404 这类致命错误，hls.js 的 startLoad() 不会重新发起请求，
        必须重建实例才有意义。因此这里做应用层的有界重试，避免卡在“正在重试”不动。 */
     function handleFatal(url) {
+        var advice = lastAdvice;
+        var retry = !advice || advice.retry !== false;
         releaseHls();
 
-        if (attempts < MAX_ATTEMPTS) {
+        if (retry && attempts < MAX_ATTEMPTS) {
             attempts++;
-            showTip('连接失败，正在重试（' + attempts + '/' + MAX_ATTEMPTS + '）…', 'warn');
+            showTip((advice ? advice.title : '连接失败') + '，正在重试（' + attempts + '/' + MAX_ATTEMPTS + '）…', 'warn');
             retryTimer = setTimeout(function () {
                 retryTimer = null;
                 loadWithHls(url);
@@ -163,8 +248,104 @@
         }
 
         attempts = 0;
-        showTip('播放失败：地址不可达，或该地址不允许跨域访问。请确认该地址能在浏览器中直接打开。', 'error');
+        if (!advice && window.StreamCore) {
+            advice = window.StreamCore.explainPlaybackError({ details: 'manifestLoadError', httpCode: 0, fatal: true });
+        }
+        var msg = advice
+            ? (advice.title + '。' + advice.cause)
+            : '播放失败。请确认这个地址能在浏览器新标签里直接打开。';
+        showTip(msg, 'error');
+        noteError(advice, { focus: true });
         showRetry();
+    }
+
+    function releaseDash() {
+        if (dashPlayer) {
+            try { dashPlayer.reset(); } catch (e) { /* 忽略销毁异常 */ }
+            dashPlayer = null;
+        }
+    }
+
+    function ensureDash() {
+        if (window.dashjs && window.dashjs.MediaPlayer) return Promise.resolve();
+        if (dashLoading) return dashLoading;
+        dashLoading = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = DASH_SRC;
+            s.async = true;
+            s.onload = function () {
+                if (window.dashjs && window.dashjs.MediaPlayer) resolve();
+                else reject(new Error('DASH 引擎已下载，但没有准备好'));
+            };
+            s.onerror = function () { reject(new Error('DASH 引擎没有加载成功')); };
+            document.head.appendChild(s);
+        });
+        return dashLoading;
+    }
+
+    function loadWithDash(url) {
+        releaseHls();
+        releaseDash();
+        showTip('正在加载 DASH 清单…', 'info');
+        ensureDash().then(function () {
+            if (currentUrl !== url) return;
+            var player = window.dashjs.MediaPlayer().create();
+            dashPlayer = player;
+            dashAuto = true;
+            try {
+                player.updateSettings({
+                    streaming: {
+                        abr: { autoSwitchBitrate: { video: true, audio: true } },
+                        buffer: { stableBufferTime: lowLatency ? 8 : 18 }
+                    }
+                });
+            } catch (e) { /* 设置接口差异时忽略 */ }
+            var ev = window.dashjs.MediaPlayer.events || {};
+            player.initialize(video, url, true);
+            player.on(ev.STREAM_INITIALIZED || 'streamInitialized', function () {
+                populateLevels();
+                populateDashAudio();
+                safePlay();
+                if (window.StreamBench) window.StreamBench.touch();
+            });
+            player.on(ev.QUALITY_CHANGE_RENDERED || 'qualityChangeRendered', function () {
+                if (qualitySel && dashPlayer && !dashAuto) {
+                    try { qualitySel.value = String(dashPlayer.getQualityFor('video')); } catch (e2) { /* ignore */ }
+                }
+                syncStats();
+            });
+            player.on(ev.FRAGMENT_LOADING_COMPLETED || 'fragmentLoadingCompleted', function (e) {
+                var req = e && (e.request || (e.data && e.data.request));
+                if (!req) return;
+                var startMs = req.firstByteDate ? +new Date(req.firstByteDate) : 0;
+                var endMs = req.requestEndDate ? +new Date(req.requestEndDate) : 0;
+                noteFrag({
+                    sn: req.index != null ? req.index : sessionFrags.length,
+                    level: req.quality != null ? req.quality : 0,
+                    type: req.mediaType || req.type || 'video',
+                    start: Number(req.startTime || req.mediaStartTime || 0),
+                    duration: Number(req.duration || 0),
+                    bytes: req.bytesLoaded || req.bytesTotal || 0,
+                    loadMs: startMs && endMs ? Math.max(0, endMs - startMs) : 0
+                });
+            });
+            player.on(ev.ERROR || 'error', function (e) {
+                var err = (e && e.error) || e || {};
+                var advice = window.StreamCore.explainPlaybackError({
+                    protocol: 'dash',
+                    code: err.code,
+                    message: err.message,
+                    fatal: true
+                });
+                showTip(advice.title + '。' + advice.cause, 'error');
+                noteError(advice, { focus: true });
+                showRetry();
+            });
+        }).catch(function (err) {
+            var advice = window.StreamCore.explainPlaybackError({ protocol: 'dash', code: 11, message: err.message, fatal: true });
+            showTip(advice.title + '。' + (err.message || advice.cause), 'error');
+            noteError(advice, { focus: true });
+        });
     }
 
     /* ------------------------------------------------------------ 主入口 */
@@ -177,16 +358,19 @@
             return;
         }
 
-        /* 用户只填了 example.com/xxx.m3u8 这类裸域名时，自动补协议头 */
-        if (!/^(https?:)?\/\//i.test(url) && !/^\/[^/]/.test(url) && !/^\.\//.test(url)) {
-            if (/^[\w-]+(\.[\w-]+)+\//.test(url)) {
-                url = 'https://' + url;
-            }
+        if (window.StreamCore) {
+            url = window.StreamCore.normalizeUrl(url);
+        } else if (!/^(https?:)?\/\//i.test(url) && !/^\/[^/]/.test(url) && !/^\.\//.test(url)) {
+            if (/^[\w-]+(\.[\w-]+)+\//.test(url)) url = 'https://' + url;
         }
 
         input.value = url;
         currentUrl = url;
-        attempts = 0;          // 新地址重新计数
+        attempts = 0;
+        sessionFrags = [];
+        errorLog = [];
+        lastAdvice = null;
+        wantDiagnose = false;
         recordRecent(url);
         clearLoop();
         syncNowPlaying();
@@ -196,27 +380,36 @@
         hideSpin();
         hideTip();
         releaseHls();
+        releaseDash();
 
         video.removeAttribute('src');
         video.load();
 
-        showTip('正在加载：' + url, 'info');
+        showTip('正在打开：' + url, 'info');
+        if (window.StreamBench) window.StreamBench.touch();
 
-        if (isHlsUrl(url)) {
+        var kind = window.StreamCore ? window.StreamCore.classifySource(url) : (isHlsUrl(url) ? 'hls' : 'unknown');
+        if (!window.StreamCore && isDashUrl(url)) kind = 'dash';
+
+        if (kind === 'dash') {
+            loadWithDash(url);
+            return;
+        }
+
+        if (kind === 'hls') {
             if (hlsJsAvailable()) {
                 loadWithHls(url);
             } else if (nativeHlsSupported()) {
-                /* Safari / iOS Safari 原生支持 HLS */
                 video.src = url;
                 safePlay();
             } else {
-                showTip('当前浏览器不支持 HLS 播放，建议使用 Chrome / Edge / Firefox。', 'error');
+                showTip('这台浏览器播不了 HLS。换 Chrome、Edge 或 Firefox 再试。', 'error');
             }
-        } else {
-            /* mp4 等浏览器原生支持的格式 */
-            video.src = url;
-            safePlay();
+            return;
         }
+
+        video.src = url;
+        safePlay();
     }
 
     /* ------------------------------------------------------------ 事件绑定 */
@@ -246,20 +439,26 @@
     /* 原生播放失败时，自动降级到 hls.js 重试一次 */
     video.addEventListener('error', function () {
         /* 已由 hls.js 接管，或尚无播放地址，交给各自的错误处理 */
-        if (hls || !currentUrl) {
+        if (hls || dashPlayer || !currentUrl) {
             return;
         }
 
-        /* 地址本身是 m3u8，说明引擎已选对，此处只报告失败 */
-        if (isHlsUrl(currentUrl)) {
-            showTip('播放失败：m3u8 地址不可达，或该地址不允许跨域访问。', 'error');
+        if (isHlsUrl(currentUrl) || isDashUrl(currentUrl)) {
+            var hlsAdvice = window.StreamCore
+                ? window.StreamCore.explainPlaybackError({ details: 'manifestLoadError', httpCode: 0, fatal: true, protocol: isDashUrl(currentUrl) ? 'dash' : 'hls' })
+                : null;
+            showTip(hlsAdvice ? (hlsAdvice.title + '。' + hlsAdvice.cause) : '播放失败。先在新标签打开这个地址，确认它本身能访问。', 'error');
+            noteError(hlsAdvice, { focus: true });
             showRetry();
             return;
         }
 
-        /* mp4 这类明确格式：直接给结论，不要再拿 HLS 引擎兜一圈 */
         if (isPlainMediaFile(currentUrl)) {
-            showTip('播放失败：地址不可达，或该格式不受当前浏览器支持（建议用 mp4 / webm）。', 'error');
+            var fileAdvice = window.StreamCore
+                ? window.StreamCore.explainPlaybackError({ details: 'native-file', fatal: true })
+                : null;
+            showTip(fileAdvice ? (fileAdvice.title + '。' + fileAdvice.cause) : '这个文件没有播起来。', 'error');
+            noteError(fileAdvice, { focus: true });
             showRetry();
             return;
         }
@@ -296,6 +495,7 @@
     var vol = document.getElementById('vol');
     var rateSel = document.getElementById('rate');
     var qualitySel = document.getElementById('quality');
+    var fillingLevels = false;
     var curEl = document.getElementById('cur');
     var durEl = document.getElementById('dur');
     var statsEl = document.getElementById('stats');
@@ -364,7 +564,7 @@
         if (hls && hls.levels && hls.levels.length) {
             var lvl = hls.levels[hls.currentLevel];
             if (lvl) parts.push('画质 ' + (lvl.height ? lvl.height + 'p' : Math.round(lvl.bitrate / 1000) + 'kbps'));
-            parts.push(hls.currentLevel === -1 ? '自动切换' : '手动锁定');
+            parts.push(hls.autoLevelEnabled ? '自动切换' : '手动锁定');
         }
         parts.push('速度 ' + video.playbackRate + '×');
         if (video.buffered.length > 0) {
@@ -373,9 +573,9 @@
                 parts.push('缓冲 ' + buf.toFixed(1) + 's');
             } catch (e) { /* ignore */ }
         }
-        if (hls && hls.bandwidthEstimate) {
-            parts.push('带宽 ' + (hls.bandwidthEstimate / 1e6).toFixed(1) + 'Mbps');
-        }
+        var bwShow = measuredBandwidth(sessionFrags);
+        if (bwShow == null && hls && hls.bandwidthEstimate) bwShow = hls.bandwidthEstimate;
+        if (bwShow) parts.push('带宽 ' + (bwShow > 8e7 ? '≥80Mbps' : (bwShow / 1e6).toFixed(1) + 'Mbps'));
         if (video.getVideoPlaybackQuality) {
             var q = video.getVideoPlaybackQuality();
             if (q && q.totalVideoFrames) {
@@ -387,11 +587,59 @@
     }
 
     /* HLS 画质选项：从 hls.levels 填充（自动 + 各档），手动选择锁定档位。 */
+    function populateDashLevels() {
+        if (!qualitySel || !dashPlayer || !dashPlayer.getBitrateInfoListFor) return;
+        fillingLevels = true;
+        var list = [];
+        try { list = dashPlayer.getBitrateInfoListFor('video') || []; } catch (e) { list = []; }
+        if (!list.length) {
+            qualitySel.innerHTML = '<option value="-1">自动</option>';
+            qualitySel.disabled = true;
+            fillingLevels = false;
+            return;
+        }
+        qualitySel.disabled = false;
+        var html = '<option value="-1">自动</option>';
+        list.forEach(function (b) {
+            var idx = b.qualityIndex != null ? b.qualityIndex : 0;
+            var label = b.height ? (b.height + 'p') : ('档 ' + (idx + 1));
+            if (b.bitrate) label += ' · ' + Math.round(b.bitrate / 1000) + ' kbps';
+            html += '<option value="' + idx + '">' + label + '</option>';
+        });
+        qualitySel.innerHTML = html;
+        try {
+            qualitySel.value = dashAuto ? '-1' : String(dashPlayer.getQualityFor('video'));
+        } catch (e2) { qualitySel.value = '-1'; }
+        fillingLevels = false;
+    }
+
+    function populateDashAudio() {
+        if (!audioSel || !dashPlayer || !dashPlayer.getTracksFor) return;
+        var tracks = [];
+        try { tracks = dashPlayer.getTracksFor('audio') || []; } catch (e) { tracks = []; }
+        if (tracks.length < 2) {
+            audioSel.innerHTML = '<option value="-1">默认</option>';
+            audioSel.disabled = true;
+            return;
+        }
+        audioSel.disabled = false;
+        audioSel.innerHTML = tracks.map(function (t, i) {
+            var label = t.lang || t.id || ('音轨 ' + (i + 1));
+            return '<option value="' + i + '">' + label + '</option>';
+        }).join('');
+    }
+
     function populateLevels() {
         if (!qualitySel) return;
+        if (dashPlayer) {
+            populateDashLevels();
+            return;
+        }
+        fillingLevels = true;
         if (!hls || !hls.levels || !hls.levels.length) {
             qualitySel.innerHTML = '<option value="-1">自动</option>';
             qualitySel.disabled = true;
+            fillingLevels = false;
             return;
         }
         qualitySel.disabled = false;
@@ -402,7 +650,8 @@
             html += '<option value="' + i + '">' + label + '</option>';
         });
         qualitySel.innerHTML = html;
-        qualitySel.value = String(hls.currentLevel);
+        qualitySel.value = (hls.autoLevelEnabled ? '-1' : String(hls.currentLevel));
+        fillingLevels = false;
     }
 
     /* HLS 音轨选项：从 hls.audioTracks 填充，切换 hls.audioTrack。 */
@@ -512,9 +761,35 @@
         if (cMute) cMute.addEventListener('click', function () { video.muted = !video.muted; });
         if (rateSel) rateSel.addEventListener('change', function () { video.playbackRate = Number(rateSel.value); });
         if (qualitySel) qualitySel.addEventListener('change', function () {
-            if (hls) { hls.currentLevel = Number(qualitySel.value); syncStats(); }
+            if (fillingLevels) return;
+            var level = Number(qualitySel.value);
+            if (dashPlayer) {
+                try {
+                    if (level < 0) {
+                        dashAuto = true;
+                        dashPlayer.updateSettings({ streaming: { abr: { autoSwitchBitrate: { video: true } } } });
+                    } else {
+                        dashAuto = false;
+                        dashPlayer.updateSettings({ streaming: { abr: { autoSwitchBitrate: { video: false } } } });
+                        dashPlayer.setQualityFor('video', level);
+                    }
+                } catch (e) { /* 引擎尚未就绪 */ }
+                syncStats();
+                if (window.StreamBench) window.StreamBench.touch();
+                return;
+            }
+            if (hls) { hls.currentLevel = level; syncStats(); if (window.StreamBench) window.StreamBench.touch(); }
         });
         if (audioSel) audioSel.addEventListener('change', function () {
+            if (dashPlayer && dashPlayer.getTracksFor) {
+                var tracks = [];
+                try { tracks = dashPlayer.getTracksFor('audio') || []; } catch (e) { tracks = []; }
+                var track = tracks[Number(audioSel.value)];
+                if (track) {
+                    try { dashPlayer.setCurrentTrack(track); } catch (e2) { /* ignore */ }
+                }
+                return;
+            }
             if (hls) { hls.audioTrack = Number(audioSel.value); }
         });
         if (cPip) cPip.addEventListener('click', function () {
@@ -961,6 +1236,10 @@
         }).join('');
     }
     function openStats() {
+        if (window.StreamBench) {
+            window.StreamBench.show('quality');
+            return;
+        }
         if (!statsPanel) return;
         statsPanel.hidden = false;
         if (cStats) cStats.classList.add('active');
@@ -1018,7 +1297,11 @@
             });
         }
     }
-    function openDiag() { if (diagModal) { diagModal.hidden = false; runDiag(); } }
+    function openDiag() {
+        if (window.StreamBench) window.StreamBench.show('diagnose');
+        runDiag();
+        if (diagModal && !window.StreamBench) diagModal.hidden = false;
+    }
     function closeDiag() { if (diagModal) diagModal.hidden = true; }
     if (cDiag) cDiag.addEventListener('click', openDiag);
     if (diagClose) diagClose.addEventListener('click', closeDiag);
@@ -1095,15 +1378,7 @@
     video.addEventListener('pause', syncMiniPlay);
     /* 滚动自动悬浮：以 now-playing 条为哨兵（它不随 shell 悬浮移动，避免反馈环）。
        手动迷你（miniManual）时不自动还原，交由 ⤢/✕ 控制。 */
-    if ('IntersectionObserver' in window && nowPlaying) {
-        var miniIO = new IntersectionObserver(function (entries) {
-            entries.forEach(function (en) {
-                if (!en.isIntersecting && !video.paused && currentUrl && !isMini) { enterMini(); }
-                else if (en.isIntersecting && isMini && !miniManual) { exitMini(); }
-            });
-        }, { threshold: 0 });
-        miniIO.observe(nowPlaying);
-    }
+    /* 自动悬浮会盖住下面的检查面板，所以只保留按钮手动打开。 */
 
     /* —— 播放队列：增删播/上下首/自动连播/循环整片，仅存本机 —— */
     var QUEUE_KEY = 'streamplay:queue';
@@ -1235,59 +1510,10 @@
     }
 
     function parseManifest(text, baseUrl) {
-        var lines = text.split(/\r?\n/);
-        var info = {
-            isMaster: false, version: '', targetDuration: 0, mediaSequence: 0,
-            playlistType: '', endList: false, variants: [], media: [],
-            segments: [], totalDuration: 0, encrypted: false, keyMethod: '',
-            initSegment: '', discontinuities: 0
-        };
-        var pendingVariant = null;
-        var pendingExtinf = 0;
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].trim();
-            if (!line) continue;
-            if (line.indexOf('#EXT-X-STREAM-INF:') === 0) {
-                info.isMaster = true;
-                pendingVariant = parseAttrs(line.slice(18));
-            } else if (line.indexOf('#EXT-X-MEDIA:') === 0) {
-                info.media.push(parseAttrs(line.slice(13)));
-            } else if (line.indexOf('#EXT-X-VERSION:') === 0) {
-                info.version = line.slice(15);
-            } else if (line.indexOf('#EXT-X-TARGETDURATION:') === 0) {
-                info.targetDuration = parseFloat(line.slice(20)) || 0;
-            } else if (line.indexOf('#EXT-X-MEDIA-SEQUENCE:') === 0) {
-                info.mediaSequence = parseInt(line.slice(20), 10) || 0;
-            } else if (line.indexOf('#EXT-X-PLAYLIST-TYPE:') === 0) {
-                info.playlistType = line.slice(19);
-            } else if (line.indexOf('#EXT-X-ENDLIST') === 0) {
-                info.endList = true;
-            } else if (line.indexOf('#EXT-X-KEY:') === 0) {
-                var keyAttrs = parseAttrs(line.slice(11));
-                if (keyAttrs.METHOD && keyAttrs.METHOD !== 'NONE') {
-                    info.encrypted = true;
-                    info.keyMethod = keyAttrs.METHOD;
-                }
-            } else if (line.indexOf('#EXT-X-MAP:') === 0) {
-                var mapAttrs = parseAttrs(line.slice(11));
-                if (mapAttrs.URI) info.initSegment = resolveUrl(mapAttrs.URI, baseUrl);
-            } else if (line.indexOf('#EXT-X-DISCONTINUITY') === 0) {
-                info.discontinuities++;
-            } else if (line.indexOf('#EXTINF:') === 0) {
-                pendingExtinf = parseFloat(line.slice(8)) || 0;
-            } else if (line[0] !== '#') {
-                if (pendingVariant) {
-                    pendingVariant.uri = resolveUrl(line, baseUrl);
-                    info.variants.push(pendingVariant);
-                    pendingVariant = null;
-                } else if (!info.isMaster) {
-                    info.segments.push({ duration: pendingExtinf, uri: resolveUrl(line, baseUrl) });
-                    info.totalDuration += pendingExtinf;
-                    pendingExtinf = 0;
-                }
-            }
+        if (window.StreamCore && window.StreamCore.parseM3u8) {
+            return window.StreamCore.parseM3u8(text, baseUrl);
         }
-        return info;
+        return { valid: false, isMaster: false, variants: [], media: [], segments: [], totalDuration: 0, encrypted: false, discontinuities: 0 };
     }
 
     function fmtDuration(sec) {
@@ -1485,8 +1711,20 @@
         fetchText(url, 15000).then(function (r) {
             if (seq !== maSeq) return;
             var text = r.text;
-            if (text.trim().indexOf('#EXTM3U') !== 0) {
-                maSetStatus('内容不是 M3U8 清单（缺少 #EXTM3U 头）——可能是 HTML 错误页或媒体文件', 'error');
+            var trimmed = text.replace(/^\uFEFF/, '').trim();
+            var looksDash = (window.StreamCore && window.StreamCore.classifySource(url) === 'dash') || /^<\?xml|^<MPD/i.test(trimmed);
+            if (looksDash) {
+                var mpd = window.StreamCore.parseMpd(text, url);
+                if (!mpd.isMpd) {
+                    maSetStatus('内容不是 DASH 清单（没有 <MPD>）。可能是 HTML 错误页。', 'error');
+                    return;
+                }
+                renderMpd(mpd, text, maResult);
+                maSetStatus('分析完成：' + mpd.representations.length + ' 个 Representation', 'ok');
+                return;
+            }
+            if (trimmed.indexOf('#EXTM3U') !== 0) {
+                maSetStatus('内容不是 m3u8 清单（缺少 #EXTM3U）。可能是 HTML 错误页，或地址指到了别的文件。', 'error');
                 return;
             }
             var info = parseManifest(text, url);
@@ -1552,10 +1790,12 @@
                 : '预览使用当前站点地址；复制的代码指向正式域名 play.digdevbox.com。';
         }
         /* 预览用当前 origin（本地测试也能播），尺寸缩放到容器内 */
-        if (embPreview) {
+        var sharePane = document.getElementById('pane-share');
+        var shareOpen = !sharePane || !sharePane.hidden;
+        if (embPreview && shareOpen) {
             var previewSrc = buildEmbedSrc((window.location.origin + window.location.pathname.replace(/index\.html$/, '')).replace(/\/$/, ''));
-            embPreview.src = previewSrc;
-            var ph = Math.min(parseInt(h, 10) || 480, 260);
+            if (embPreview.getAttribute('src') !== previewSrc) embPreview.src = previewSrc;
+            var ph = Math.min(parseInt(h, 10) || 480, 220);
             embPreview.style.height = ph + 'px';
         }
     }
@@ -1605,15 +1845,184 @@
 
     /* ------------------------------------------------------------ 对外接口 */
     /* 兼容原版全局 play() 调用方式 */
+    function measuredBandwidth(frags) {
+        var rates = [];
+        var list = frags || [];
+        var start = Math.max(0, list.length - 12);
+        for (var i = start; i < list.length; i++) {
+            var f = list[i];
+            if (!f || !f.bytes || f.bytes < 1500 || !f.loadMs || f.loadMs < 15) continue;
+            if (f.type === 'audio' || f.type === 'subtitle') continue;
+            rates.push((f.bytes * 8000) / f.loadMs);
+        }
+        if (!rates.length) return null;
+        rates.sort(function (a, b) { return a - b; });
+        return rates[Math.floor(rates.length / 2)];
+    }
+
+    function readBufferRanges() {
+        var ranges = [];
+        try {
+            for (var i = 0; i < video.buffered.length; i++) {
+                ranges.push({ start: video.buffered.start(i), end: video.buffered.end(i) });
+            }
+        } catch (e) { /* 缓冲区间暂不可读 */ }
+        return ranges;
+    }
+
+    function readLevels() {
+        var levels = [];
+        var bitrate = 0;
+        var codecs = '';
+        var currentLevel = -1;
+        var playingLevel = -1;
+        var auto = true;
+        var bandwidth = null;
+        var latency = null;
+        var live = false;
+        if (dashPlayer && dashPlayer.getBitrateInfoListFor) {
+            var list = [];
+            try { list = dashPlayer.getBitrateInfoListFor('video') || []; } catch (e) { list = []; }
+            list.forEach(function (b) {
+                var idx = b.qualityIndex != null ? b.qualityIndex : levels.length;
+                levels.push({ index: idx, height: b.height || 0, bitrate: b.bitrate || 0, codecs: b.codec || '' });
+            });
+            try { playingLevel = dashPlayer.getQualityFor('video'); } catch (e2) { playingLevel = -1; }
+            currentLevel = dashAuto ? -1 : playingLevel;
+            auto = dashAuto;
+        } else if (hls && hls.levels && hls.levels.length) {
+            hls.levels.forEach(function (lvl, i) {
+                var c = (lvl.attrs && lvl.attrs.CODECS) || lvl.codecSet || '';
+                levels.push({ index: i, height: lvl.height || 0, bitrate: lvl.bitrate || 0, codecs: c });
+                if (lvl.details && lvl.details.live) live = true;
+            });
+            playingLevel = hls.currentLevel >= 0 ? hls.currentLevel : hls.loadLevel;
+            auto = !!hls.autoLevelEnabled;
+            currentLevel = auto ? -1 : playingLevel;
+            if (hls.bandwidthEstimate) bandwidth = hls.bandwidthEstimate;
+            if (typeof hls.latency === 'number' && isFinite(hls.latency)) latency = hls.latency;
+        }
+        var active = null;
+        for (var n = 0; n < levels.length; n++) {
+            if (levels[n].index === playingLevel) active = levels[n];
+        }
+        if (active) {
+            bitrate = active.bitrate || 0;
+            codecs = active.codecs || '';
+        }
+        var measured = measuredBandwidth(sessionFrags);
+        if (measured != null) bandwidth = measured;
+        return {
+            levels: levels,
+            bitrate: bitrate,
+            codecs: codecs,
+            currentLevel: currentLevel,
+            playingLevel: playingLevel,
+            auto: auto,
+            bandwidth: bandwidth,
+            latency: latency,
+            live: live
+        };
+    }
+
+    function playerState() {
+        var lv = readLevels();
+        var dropped = null;
+        var totalFrames = null;
+        if (video.getVideoPlaybackQuality) {
+            var q = video.getVideoPlaybackQuality();
+            if (q && q.totalVideoFrames) {
+                dropped = q.droppedVideoFrames || 0;
+                totalFrames = q.totalVideoFrames || 0;
+            }
+        }
+        var liveEdge = null;
+        if (lv.live) {
+            try {
+                if (video.seekable && video.seekable.length) {
+                    var edge = video.seekable.end(video.seekable.length - 1) - video.currentTime;
+                    if (isFinite(edge)) liveEdge = Math.max(0, edge);
+                }
+            } catch (e) { /* ignore */ }
+        }
+        var engine = dashPlayer ? 'dash' : (hls ? 'hls' : (currentUrl ? 'native' : ''));
+        return {
+            url: currentUrl,
+            engine: engine,
+            engineLabel: engine === 'dash' ? 'DASH · dash.js' : (engine === 'hls' ? 'HLS · hls.js' : (engine === 'native' ? '浏览器原生' : '')),
+            auto: lv.auto,
+            currentLevel: lv.currentLevel,
+            playingLevel: lv.playingLevel,
+            levels: lv.levels,
+            bitrate: lv.bitrate,
+            bandwidth: lv.bandwidth,
+            bufferAhead: currentUrl && window.StreamCore ? window.StreamCore.bufferAhead(video.currentTime, readBufferRanges()) : null,
+            dropped: dropped,
+            totalFrames: totalFrames,
+            videoWidth: video.videoWidth || 0,
+            videoHeight: video.videoHeight || 0,
+            latency: lv.latency,
+            liveEdge: liveEdge,
+            live: lv.live,
+            playbackRate: video.playbackRate,
+            codecs: lv.codecs,
+            currentTime: video.currentTime
+        };
+    }
+
+    function renderMpd(mpd, text, container) {
+        var chips = document.createElement('div');
+        chips.className = 'ma-chips';
+        chips.appendChild(maChip('类型', mpd.type === 'dynamic' ? '动态（直播）' : '静态（点播）'));
+        if (mpd.duration) chips.appendChild(maChip('时长', mpd.duration));
+        chips.appendChild(maChip('Representation', String(mpd.representations.length)));
+        container.appendChild(chips);
+        container.appendChild(maSection('表示（Representation）'));
+        container.appendChild(maTable(
+            ['#', '类型', '分辨率', '带宽', '编码', '地址'],
+            mpd.representations.map(function (r, i) {
+                var res = r.height ? (r.width + '×' + r.height) : '—';
+                var bw = r.bandwidth ? (r.bandwidth / 1000000).toFixed(2) + ' Mbps' : '—';
+                return [String(i + 1), r.contentType || '—', res, bw, r.codecs || '—', r.baseUrl || r.id || '—'];
+            })
+        ));
+        var raw = document.createElement('details');
+        raw.className = 'ma-raw';
+        var sum = document.createElement('summary');
+        sum.textContent = '清单原文（' + text.length + ' 字符）';
+        raw.appendChild(sum);
+        var pre = document.createElement('pre');
+        pre.className = 'ma-pre';
+        pre.textContent = text.length > 20000 ? text.slice(0, 20000) + '\n…' : text;
+        raw.appendChild(pre);
+        container.appendChild(raw);
+    }
+
     window.play = play;
     window.StreamPlay = {
         play: play,
         stop: function () {
             releaseHls();
+            releaseDash();
             video.pause();
             video.removeAttribute('src');
             video.load();
+            currentUrl = '';
             hideTip();
-        }
+        },
+        state: playerState,
+        getFrags: function () { return sessionFrags; },
+        getErrors: function () { return errorLog; },
+        consumeFocus: function () {
+            var w = wantDiagnose;
+            wantDiagnose = false;
+            return w;
+        },
+        setLowLatency: function (on) {
+            lowLatency = !!on;
+            try { localStorage.setItem('streamplay:ll', lowLatency ? '1' : '0'); } catch (e) { /* ignore */ }
+            if (currentUrl && (isHlsUrl(currentUrl) || isDashUrl(currentUrl))) play(currentUrl);
+        },
+        refreshEmbed: refreshEmbed
     };
 })();

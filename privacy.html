@@ -80,17 +80,18 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
     <div class="main about">
         <h1>隐私政策</h1>
-        <p class="subtitle">最后更新时间：2026 年 9 月</p>
+        <p class="subtitle">最后更新：2026 年 11 月</p>
 
         <div class="card">
-            <p><strong>一句话说明：本站没有后端服务器。</strong>播放完全在你的浏览器里进行，你填写的播放地址不会被发送到本站，我们也没有地方可以存储它。</p>
+            <p><strong>视频文件不会上传到本站。</strong>播放请求从你的浏览器直接发到你填写的源站。地址本身会留在这台浏览器里，方便你下次再打开；带 <code>?url=</code> 的分享链接则会把地址写进网址。</p>
         </div>
 
         <h2>一、我们收集哪些信息</h2>
         <ul>
-            <li><strong>播放地址（不收集）：</strong>你粘贴的 m3u8 / mp4 地址只在你的浏览器里使用，用于请求对应的流媒体服务器。它不经过本站服务器，我们无法查看，也不会记录。</li>
-            <li><strong>访问日志：</strong>与访问任何网站一样，你的 IP 地址、浏览器标识、访问时间会出现在托管方（Cloudflare Pages）的访问日志中，用于保障可用性与安全。</li>
-            <li><strong>我们不要求注册</strong>，也不收集姓名、手机号等个人信息。</li>
+            <li><strong>播放地址：</strong>你在输入框里播放时，媒体请求不去本站。浏览器会把最近地址、队列和播放进度记在 localStorage 里，只在这台设备上，你可以在「历史」里清空。</li>
+            <li><strong>分享链接：</strong>链接形如 <code>?url=地址&amp;t=秒数</code>。打开它的人看得到地址；托管方（Cloudflare）的访问日志里也会出现这条网址。</li>
+            <li><strong>访问日志：</strong>和访问任何网站一样，IP、浏览器标识和访问时间会出现在 Cloudflare Pages 的日志里，用来保证站点能打开。</li>
+            <li><strong>不要求注册</strong>，也不收集姓名或手机号。</li>
         </ul>
 
         <h2>二、信息如何使用</h2>
@@ -101,19 +102,19 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         </ul>
 
         <h2>三、Cookie 与本地存储</h2>
-        <p>本站可能使用浏览器本地存储保存界面偏好。这些数据只存在于你的设备上，不回传服务器，你可以通过浏览器设置随时清除。</p>
+        <p>本站用 localStorage 记住三件事：深色或浅色、最近播放和队列、播放进度。这些都留在你的设备上。清除站点数据就会一起消失。</p>
 
         <h2>四、第三方服务</h2>
         <p>使用本站时需要理解一点：<strong>你的播放请求是直接从你的浏览器发往你指定的流媒体服务器的</strong>，与本站无关。因此：</p>
         <ul>
-            <li>该流媒体服务器会看到你的 IP 与请求记录，适用其自身的隐私政策；</li>
-            <li>本站无法控制也无法得知你访问了哪些地址；</li>
-            <li>本站所有脚本与依赖（含 hls.js）均为本地部署，不请求任何外部 CDN，因此不会因第三方 CDN 产生额外的数据收集。</li>
+            <li>源站会看到你的 IP 和请求，适用它自己的隐私政策；</li>
+            <li>播放器脚本（hls.js、dash.js）放在本站，不从第三方 CDN 现拉；</li>
+            <li>页面会加载 Google AdSense。广告脚本不是播放器的一部分。</li>
         </ul>
-        <p>本站托管于 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Pages</a>，其隐私政策适用于托管层面的数据处理。</p>
+        <p>本站托管在 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Pages</a>。托管层的日志适用 Cloudflare 的政策。</p>
 
         <h2>五、广告</h2>
-        <p><strong>本站当前未接入任何广告或统计脚本。</strong>未来若接入 Google AdSense 等广告服务，本页面会同步更新。届时 Google 及其合作伙伴会使用 Cookie（含第三方 Cookie，如 DoubleClick）用于投放广告、控制同一广告的展示频次，以及根据你的浏览行为投放个性化广告。你可以通过以下方式管理：</p>
+        <p>页面里有 Google AdSense。Google 和它的合作伙伴可能使用 Cookie（包括用于控制展示次数的第三方 Cookie）来投放广告。你可以：</p>
         <ul>
             <li>访问 <a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google 广告设置</a> 关闭个性化广告；</li>
             <li>在浏览器中阻止或清除第三方 Cookie；</li>
@@ -122,8 +123,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
         <h2>六、数据保留</h2>
         <ul>
-            <li>播放地址：不保存，页面关闭即消失；</li>
-            <li>本地存储：由你的浏览器管理，可自行清除；</li>
+            <li>媒体文件：本站不保存；</li>
+            <li>本机记录的地址和进度：留到你清除浏览器数据，或在页面里点清空；</li>
             <li>访问日志：由托管方按其策略保留，本站不额外导出或长期留存。</li>
         </ul>
 
