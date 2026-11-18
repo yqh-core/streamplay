@@ -81,24 +81,23 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
     <div class="main about">
         <h1>关于 StreamPlay 流影</h1>
         <p>
-            StreamPlay 流影是一款纯前端的在线播放器，用于播放 m3u8 / HLS 直播与点播地址，
-            同时兼容浏览器原生的 mp4 等格式。它不依赖任何后端服务，把整个目录丢到静态服务器上就能跑。
+            StreamPlay 流影用来在浏览器里播放并检查一条流。HLS、不带 DRM 的 DASH，以及 mp4 都可以。页面是静态的，没有自己的媒体服务器。
         </p>
 
-        <h2>核心特性</h2>
+        <h2>你能在这里做什么</h2>
         <ul>
-            <li><strong>零外部依赖</strong>：不加载任何第三方 CDN 资源，hls.js 已本地化，断网 / CDN 故障也能正常打开。</li>
-            <li><strong>双引擎自动切换</strong>：m3u8 走 hls.js；mp4 等格式走浏览器原生播放；原生失败会自动降级到 hls.js 重试。</li>
-            <li><strong>移动端适配</strong>：响应式布局，支持 iOS 行内播放（playsinline）。</li>
-            <li><strong>深链播放</strong>：支持 <code>?url=</code> 参数直接指定播放地址，便于 iframe 嵌入。</li>
-            <li><strong>错误可见</strong>：加载中、网络异常、跨域受限、格式不支持等情况都会在页面上给出明确提示，不会静默失败。</li>
+            <li>播放，并手动锁定画质，或让它按带宽自己切。</li>
+            <li>看带宽、前方缓冲、丢帧，以及已经下载的分片时间线。</li>
+            <li>把主清单和子清单展开成表；MPD 会列出 Representation。</li>
+            <li>出错时读一段人话：原因是什么，下一步可以试什么。</li>
+            <li>复制带时间点的链接，或生成 iframe。历史和队列只留在这台浏览器。</li>
         </ul>
 
         <h2>技术栈</h2>
         <table>
             <tr>
                 <th>播放内核</th>
-                <td>hls.js 1.7.3（本地部署，用于 HLS 转封装）+ HTML5 <code>&lt;video&gt;</code></td>
+                <td>hls.js 1.7.3 与 dash.js 4.7.4，都放在本站，加上 HTML5 <code>&lt;video&gt;</code></td>
             </tr>
             <tr>
                 <th>样式</th>
@@ -120,7 +119,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 ├── about.html          关于页
 ├── css/style.css       样式表
 ├── js/player.js        播放逻辑
-├── libs/hls.min.js     HLS 播放内核（本地）
+├── js/stream-core.js   清单解析与报错说明
+├── js/bench.js         质量面板与时间线
+├── libs/hls.min.js     HLS 内核（本地）
+├── libs/dash.all.min.js DASH 内核（本地，播 MPD 时才加载）
 └── images/             图标资源</pre>
 
         <h2>部署方式</h2>
@@ -133,8 +135,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <h2>常见问题排查</h2>
         <table>
             <tr>
-                <th>页面提示「跨域被拦截」</th>
-                <td>目标 m3u8 所在服务器未开启 CORS。浏览器出于安全策略会阻止跨域拉流，需要在流媒体服务器上配置 <code>Access-Control-Allow-Origin</code>。</td>
+                <th>诊断说浏览器没有拿到清单</th>
+                <td>多半是源站没返回 <code>Access-Control-Allow-Origin</code>。先用新标签打开地址：文本能开、播放器不行，就是跨域。需要在源站开，播放器绕不过去。</td>
             </tr>
             <tr>
                 <th>一直停在加载中</th>

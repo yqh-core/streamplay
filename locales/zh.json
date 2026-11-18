@@ -9,13 +9,13 @@
   "topnav.docs": "HLS 文档",
   "topnav.faq": "常见问题",
   "topnav.about": "关于",
-  "h1.title": "StreamPlay 流影",
-  "hero.subtitle": "粘贴 m3u8 / HLS 或 mp4 地址，点击播放即可观看",
-  "placeholder.urlInput": "粘贴 m3u8 / HLS / mp4 播放地址",
+  "h1.title": "把一条流看清楚",
+  "hero.subtitle": "贴上 m3u8、MPD 或 MP4。画面在上面，码率、缓冲、分片和报错在下面。视频不会上传到这里。",
+  "placeholder.urlInput": "贴上 m3u8、mpd 或 mp4 地址",
   "btn.play": "播放",
   "trust.text": "隐私说明：本站不存储任何视频文件，播放内容直接来自你输入链接所属的第三方源站。",
   "aria.themeToggle": "切换深色模式",
   "aria.langToggle": "切换语言",
-  "seo.title": "StreamPlay 流影 - M3U8/HLS 在线播放器｜测流诊断·清单分析·嵌入生成",
-  "seo.description": "StreamPlay 流影是一款轻量级在线播放器，支持 m3u8 / HLS 直播与点播、mp4 等格式的浏览器直接播放，无需安装插件。内置播放失败诊断（CORS/解码/可达性）、M3U8 清单分析与 iframe 嵌入代码生成，纯前端不上传。"
+  "seo.title": "StreamPlay 流影 — 在浏览器里播放并检查 HLS、DASH 和 MP4",
+  "seo.description": "把 m3u8、MPD 或 MP4 贴进来就能播。旁边能看到码率、缓冲、丢帧和分片时间线，清单可以展开成表格，出错时会告诉你下一步可以试什么。视频留在你的浏览器和源站之间。"
 }

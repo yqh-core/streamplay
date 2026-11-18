@@ -1,6 +1,6 @@
 # StreamPlay
 
-A pure front-end HLS / m3u8 player built on HTML5 `<video>` and the open-source [hls.js](https://github.com/video-dev/hls.js), with native playback for mp4 and other browser-supported formats.
+A browser HLS / DASH / MP4 test bench. HLS uses local [hls.js](https://github.com/video-dev/hls.js). Clear (non-DRM) DASH uses local [dash.js](https://github.com/Dash-Industry-Forum/dash.js). MP4 and other files use the browser's own player.
 
 No plugins, no backend, no build step — drop the files on any static server and it works.
 
@@ -21,9 +21,10 @@ No plugins, no backend, no build step — drop the files on any static server an
 
 | 特性 | 说明 |
 | --- | --- |
-| 零外部依赖 | 不加载任何第三方 CDN，hls.js 已本地化；CDN 故障或内网环境同样可用 |
-| 双引擎自动切换 | m3u8 走 hls.js；mp4 等走浏览器原生播放；原生失败自动降级到 hls.js 重试 |
-| 深链播放 | 支持 `?url=` 参数指定地址，便于 iframe 嵌入 |
+| 播放器脚本在本地 | hls.js 随页面加载；dash.js 只在播放 MPD 时加载。页面另有 AdSense，不是播放器依赖 |
+| 三路播放 | m3u8 走 hls.js；mpd 走 dash.js；mp4 等走浏览器。不支持也不绕过 DRM |
+| 质量面板 | 带宽、缓冲、丢帧、直播边缘，以及分片时间线 |
+| 深链与嵌入 | `?url=` 与 `t=`，首页可复制 iframe |
 | 移动端适配 | 响应式布局，支持 iOS 行内播放 `playsinline` |
 | 错误可见 | 加载中 / 网络异常 / 跨域受限 / 格式不支持均有明确提示，不会静默失败 |
 | 无 License 依赖 | 不依赖任何需要授权或域名绑定的商业播放器 SDK |
