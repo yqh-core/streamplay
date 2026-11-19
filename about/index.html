@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="dd-theme-bootstrap">(function(){try{var t=localStorage.getItem('dd-theme'),h=document.documentElement;if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto')}else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto')}else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','')}}catch(e){}})();</script>
+<style id="dd-theme-style">.dd-theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:var(--dd-on-primary);border-radius:8px;cursor:pointer;font-size:16px;line-height:1;transition:background .15s,border-color .15s,transform .1s;flex:none;padding:0}.dd-theme-toggle:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.6)}.dd-theme-toggle:active{transform:scale(.94)}.dd-theme-toggle:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}@media(max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}</style>
+<title>About StreamPlay — Browser-Based M3U8 & HLS Player</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Learn how StreamPlay plays HLS/M3U8 and MP4 streams in your browser, inspects playlists, and helps diagnose CORS and codec issues.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0f766e">
+<link rel="canonical" href="https://play.digdevbox.com/about/">
+<link rel="alternate" hreflang="en" href="https://play.digdevbox.com/about/">
+<link rel="alternate" hreflang="x-default" href="https://play.digdevbox.com/about/">
+<link rel="alternate" hreflang="zh-CN" href="https://play.digdevbox.com/about.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="About StreamPlay — Browser-Based M3U8 & HLS Player">
+<meta property="og:description" content="Learn how StreamPlay plays HLS/M3U8 and MP4 streams in your browser, inspects playlists, and helps diagnose CORS and codec issues.">
+<meta property="og:url" content="https://play.digdevbox.com/about/">
+<meta property="og:site_name" content="StreamPlay">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="StreamPlay — online M3U8 and HLS player">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About StreamPlay — Browser-Based M3U8 & HLS Player">
+<meta name="twitter:description" content="Learn how StreamPlay plays HLS/M3U8 and MP4 streams in your browser, inspects playlists, and helps diagnose CORS and codec issues.">
+<meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
+<link rel="icon" href="/images/logo.ico">
+<link rel="apple-touch-icon" href="/images/logo.png">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/dd-tokens.css">
+<link rel="stylesheet" href="/css/dd-shell.css">
+<meta name="google-adsense-account" content="ca-pub-7944759654100814">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7944759654100814" crossorigin="anonymous"></script>
+<script defer src="/analytics-consent.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","name":"About StreamPlay","url":"https://play.digdevbox.com/about/","description":"About the browser-based StreamPlay M3U8 and HLS player."}</script>
+</head>
+<body>
+<div class="dd-brandbar slim"><div class="dd-shell-inner">
+<a class="dd-brand" href="https://www.digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
+<nav><a href="https://www.digdevbox.com/">Developer Tools</a><a href="https://play.digdevbox.com/">StreamPlay</a><a href="https://ip.digdevbox.com/">IP Lookup</a><a href="https://img.digdevbox.com/">Image Tools</a></nav>
+<button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
+</div></div>
+<header class="hd"><div class="link-list">
+<a class="brand" href="/"><img src="/images/logo.png" alt="StreamPlay logo"><span>StreamPlay</span></a>
+<nav><a href="/">Player</a><a href="/guides/">Guides</a><a href="/docs/">HLS Docs</a><a href="/faq/">FAQ</a><a href="/about/" aria-current="page">About</a><a href="/about.html" lang="zh-CN">中文</a></nav>
+</div></header>
+<main class="main about">
+<h1>About StreamPlay</h1>
+<p><strong>StreamPlay</strong> is a browser-based player for compatible M3U8 / HLS live and on-demand streams, plus MP4 URLs supported by your browser. It is designed for quick playback tests, playlist inspection and practical troubleshooting without installing a desktop application.</p>
+<h2>What you can do</h2>
+<ul><li>Play HLS live and video-on-demand streams when the source permits browser access.</li><li>Play MP4 and other formats supported by the browser's native media engine.</li><li>Inspect M3U8 master and media playlists, including variants, audio tracks, segments and key tags.</li><li>Generate a shareable player URL or iframe embed with the <code>?url=</code> parameter.</li><li>See clear playback errors for network failures, CORS restrictions and unsupported formats.</li></ul>
+<h2>How playback works</h2>
+<p>StreamPlay uses <a href="https://github.com/video-dev/hls.js">hls.js</a> for browsers that need Media Source Extensions to play HLS. Browsers with native HLS support may use their built-in playback engine. MP4 playback uses the HTML5 <code>&lt;video&gt;</code> element. The browser, stream server, codecs and cross-origin response headers determine whether a particular URL can play.</p>
+<h2>Privacy by design</h2>
+<p>The stream URL you enter is requested by your browser directly from the host you specify. StreamPlay does not proxy, host, record or distribute the media. The website itself is hosted on Cloudflare Pages and uses Google AdSense; optional Google Analytics 4 loads only after you grant analytics consent. Read the <a href="/privacy/">Privacy Policy</a> for details.</p>
+<h2>Technical stack</h2>
+<table><tr><th>HLS engine</th><td>hls.js, served from this site, plus native browser HLS where available</td></tr><tr><th>Media playback</th><td>HTML5 video and Media Source Extensions</td></tr><tr><th>Application</th><td>HTML, CSS and JavaScript</td></tr><tr><th>Backend</th><td>No media proxy or server-side transcoding</td></tr></table>
+<h2>Important limitations</h2>
+<ul><li>StreamPlay cannot bypass DRM, authentication, geo-restrictions, paywalls or access controls.</li><li>The source server must allow the browser to request the playlist and media segments, including appropriate CORS headers for cross-origin playback.</li><li>Codec support varies by browser and operating system. H.264 is broadly supported; HEVC/H.265 support is more limited.</li><li>StreamPlay does not download or record media.</li></ul>
+<p>For step-by-step help, see the <a href="/guides/">playback guides</a> and <a href="/docs/">HLS documentation</a>.</p>
+<div class="footer">
+<p class="links"><a href="/">← Back to player</a> | <a href="/about.html" lang="zh-CN">中文版本</a></p>
+<p class="links"><a href="/guides/">Guides</a> | <a href="/docs/">HLS docs</a> | <a href="/faq/">FAQ</a> | <a href="/about/">About</a> | <a href="/contact/">Contact</a> | <a href="/privacy/">Privacy</a> | <a href="/terms/">Terms</a> | <a href="/copyright/">Copyright</a></p>
+<p>&copy; 2026 StreamPlay · A DigDevBox tool</p>
+</div>
+</main>
+<footer class="dd-brandfoot compact"><div class="dd-shell-inner">
+<p class="dd-brandfoot-title">DigDevBox · Developer tools</p>
+<nav class="dd-brandfoot-nav"><a href="https://www.digdevbox.com/">Developer Tools</a><a href="https://ip.digdevbox.com/">IP Lookup</a><a href="https://img.digdevbox.com/">Image Tools</a></nav>
+</div></footer>
+<script id="dd-theme-toggle-script">(function(){var key='dd-theme',btn=document.getElementById('dd-theme-toggle');if(!btn)return;function systemDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}function current(){var t=document.documentElement.getAttribute('data-theme');return t||(systemDark()?'dark':'light')}function apply(t){var h=document.documentElement;if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto')}else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto')}else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','')}try{localStorage.setItem(key,t)}catch(e){}sync()}function sync(){var dark=current()==='dark';btn.textContent=dark?'☀️':'🌙';btn.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');btn.setAttribute('title',dark?'Switch to light mode':'Switch to dark mode')}btn.addEventListener('click',function(){apply(current()==='dark'?'light':'dark')});sync();if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){try{if(localStorage.getItem(key))return}catch(e){}sync()})})();</script>
+</body></html>
