@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="dd-theme-bootstrap">(function(){try{var t=localStorage.getItem('dd-theme'),h=document.documentElement;if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto')}else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto')}else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','')}}catch(e){}})();</script>
+<style id="dd-theme-style">.dd-theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:var(--dd-on-primary);border-radius:8px;cursor:pointer;font-size:16px;line-height:1;transition:background .15s,border-color .15s,transform .1s;flex:none;padding:0}.dd-theme-toggle:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.6)}.dd-theme-toggle:active{transform:scale(.94)}.dd-theme-toggle:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}@media(max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}</style>
+<title>HLS & M3U8 Documentation — Playlists, Tags, Segments and CORS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A practical HLS and M3U8 reference covering master and media playlists, EXT-X tags, MPEG-TS and fMP4 segments, AES-128, adaptive bitrate and CORS.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0f766e">
+<link rel="canonical" href="https://play.digdevbox.com/docs/">
+<link rel="alternate" hreflang="en" href="https://play.digdevbox.com/docs/">
+<link rel="alternate" hreflang="x-default" href="https://play.digdevbox.com/docs/">
+<link rel="alternate" hreflang="zh-CN" href="https://play.digdevbox.com/docs.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HLS & M3U8 Documentation — Playlists, Tags, Segments and CORS">
+<meta property="og:description" content="A practical HLS and M3U8 reference covering master and media playlists, EXT-X tags, MPEG-TS and fMP4 segments, AES-128, adaptive bitrate and CORS.">
+<meta property="og:url" content="https://play.digdevbox.com/docs/">
+<meta property="og:site_name" content="StreamPlay">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="StreamPlay — online M3U8 and HLS player">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HLS & M3U8 Documentation — Playlists, Tags, Segments and CORS">
+<meta name="twitter:description" content="A practical HLS and M3U8 reference covering master and media playlists, EXT-X tags, MPEG-TS and fMP4 segments, AES-128, adaptive bitrate and CORS.">
+<meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
+<link rel="icon" href="/images/logo.ico">
+<link rel="apple-touch-icon" href="/images/logo.png">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/dd-tokens.css">
+<link rel="stylesheet" href="/css/dd-shell.css">
+<meta name="google-adsense-account" content="ca-pub-7944759654100814">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7944759654100814" crossorigin="anonymous"></script>
+<script defer src="/analytics-consent.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"HLS and M3U8 Documentation","description":"A practical reference to HLS playlists, tags, segments, encryption, adaptive bitrate and browser playback.","url":"https://play.digdevbox.com/docs/","author":{"@type":"Organization","name":"DigDevBox"}}</script>
+</head>
+<body>
+<div class="dd-brandbar slim"><div class="dd-shell-inner">
+<a class="dd-brand" href="https://www.digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
+<nav><a href="https://www.digdevbox.com/">Developer Tools</a><a href="https://play.digdevbox.com/">StreamPlay</a><a href="https://ip.digdevbox.com/">IP Lookup</a><a href="https://img.digdevbox.com/">Image Tools</a></nav>
+<button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
+</div></div>
+<header class="hd"><div class="link-list">
+<a class="brand" href="/"><img src="/images/logo.png" alt="StreamPlay logo"><span>StreamPlay</span></a>
+<nav><a href="/">Player</a><a href="/guides/">Guides</a><a href="/docs/">HLS Docs</a><a href="/faq/">FAQ</a><a href="/about/" >About</a><a href="/docs.html" lang="zh-CN">中文</a></nav>
+</div></header>
+<main class="main about">
+<h1>HLS & M3U8 Documentation</h1>
+<p>HTTP Live Streaming (HLS) delivers audio and video as a playlist plus a sequence of media segments. An <code>.m3u8</code> file is a UTF-8 playlist that tells a player which variants, tracks and segments to request. StreamPlay can play compatible HLS URLs and inspect their playlist structure.</p>
+<h2>Master playlist vs. media playlist</h2>
+<p>A <strong>master playlist</strong> describes available renditions, bitrates, resolutions and alternate audio or subtitle tracks. It points to one or more media playlists.</p>
+<pre><code>#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-STREAM-INF:BANDWIDTH=2500000,RESOLUTION=1280x720
+720p/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=900000,RESOLUTION=640x360
+360p/index.m3u8</code></pre>
+<p>A <strong>media playlist</strong> describes the media segments for one rendition.</p>
+<pre><code>#EXTM3U
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:6.0,
+segment000.ts
+#EXTINF:6.0,
+segment001.ts
+#EXT-X-ENDLIST</code></pre>
+<h2>Common HLS tags</h2>
+<table><tr><th>Tag</th><th>Purpose</th></tr><tr><td><code>#EXTM3U</code></td><td>Identifies an M3U playlist.</td></tr><tr><td><code>#EXT-X-STREAM-INF</code></td><td>Declares a variant stream and its bandwidth or resolution.</td></tr><tr><td><code>#EXTINF</code></td><td>Gives the duration and optional title for the next segment.</td></tr><tr><td><code>#EXT-X-TARGETDURATION</code></td><td>Sets the maximum segment duration target.</td></tr><tr><td><code>#EXT-X-MEDIA-SEQUENCE</code></td><td>Identifies the sequence number of the first segment.</td></tr><tr><td><code>#EXT-X-ENDLIST</code></td><td>Indicates that no more segments will be added to the playlist.</td></tr><tr><td><code>#EXT-X-KEY</code></td><td>Describes encryption information, such as AES-128 key retrieval.</td></tr><tr><td><code>#EXT-X-MAP</code></td><td>Identifies an initialization section, commonly used with fragmented MP4.</td></tr><tr><td><code>#EXT-X-MEDIA</code></td><td>Describes alternate audio or subtitle renditions.</td></tr><tr><td><code>#EXT-X-DISCONTINUITY</code></td><td>Marks a change in the media timeline or encoding parameters.</td></tr></table>
+<h2>Segment formats</h2>
+<p>HLS commonly uses MPEG-TS segments (<code>.ts</code>) or fragmented MP4 segments (<code>.m4s</code>) with an initialization section. The playlist and segment MIME types, byte ranges and URL paths must be served correctly by the origin.</p>
+<h2>Adaptive bitrate streaming</h2>
+<p>A master playlist can offer multiple renditions. A compatible player selects a rendition based on bandwidth and playback conditions. StreamPlay's analyzer helps you inspect the variants advertised by the playlist; actual quality selection depends on the player engine and stream.</p>
+<h2>Encryption and DRM</h2>
+<p><code>#EXT-X-KEY</code> can describe HLS encryption such as AES-128. This does not mean a browser player can bypass protected content. StreamPlay does not circumvent DRM, license servers, authentication or access controls.</p>
+<h2>CORS and browser playback</h2>
+<p>When the playlist or segments are hosted on another origin, the source server must allow the browser's cross-origin requests. A stream may work in a desktop media player but fail in a browser because the browser enforces CORS. Check the playlist response and segment responses, not just the HTML page.</p>
+<h2>Diagnose a playlist</h2>
+<ol><li>Open the <a href="/">StreamPlay player</a> and paste the full HTTPS playlist URL.</li><li>Use the playlist analyzer on the home page to inspect variants, tracks, segments and key tags.</li><li>Open the browser Console and Network panel to identify CORS, HTTP status, MIME type or codec errors.</li></ol>
+<p>For common fixes, see the <a href="/guides/">HLS playback guides</a> and <a href="/faq/">FAQ</a>. The playback engine is based on <a href="https://github.com/video-dev/hls.js">hls.js</a>.</p>
+<div class="footer">
+<p class="links"><a href="/">← Back to player</a> | <a href="/docs.html" lang="zh-CN">中文版本</a></p>
+<p class="links"><a href="/guides/">Guides</a> | <a href="/docs/">HLS docs</a> | <a href="/faq/">FAQ</a> | <a href="/about/">About</a> | <a href="/contact/">Contact</a> | <a href="/privacy/">Privacy</a> | <a href="/terms/">Terms</a> | <a href="/copyright/">Copyright</a></p>
+<p>&copy; 2026 StreamPlay · A DigDevBox tool</p>
+</div>
+</main>
+<footer class="dd-brandfoot compact"><div class="dd-shell-inner">
+<p class="dd-brandfoot-title">DigDevBox · Developer tools</p>
+<nav class="dd-brandfoot-nav"><a href="https://www.digdevbox.com/">Developer Tools</a><a href="https://ip.digdevbox.com/">IP Lookup</a><a href="https://img.digdevbox.com/">Image Tools</a></nav>
+</div></footer>
+<script id="dd-theme-toggle-script">(function(){var key='dd-theme',btn=document.getElementById('dd-theme-toggle');if(!btn)return;function systemDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}function current(){var t=document.documentElement.getAttribute('data-theme');return t||(systemDark()?'dark':'light')}function apply(t){var h=document.documentElement;if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto')}else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto')}else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','')}try{localStorage.setItem(key,t)}catch(e){}sync()}function sync(){var dark=current()==='dark';btn.textContent=dark?'☀️':'🌙';btn.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');btn.setAttribute('title',dark?'Switch to light mode':'Switch to dark mode')}btn.addEventListener('click',function(){apply(current()==='dark'?'light':'dark')});sync();if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){try{if(localStorage.getItem(key))return}catch(e){}sync()})})();</script>
+</body></html>
