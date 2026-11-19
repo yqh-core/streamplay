@@ -100,6 +100,12 @@ jobs:
           if (!home.body.includes('Paste an m3u8 / HLS or mp4 URL and hit play')) throw new Error('English StreamPlay hero description missing from source HTML');
           if (!home.body.includes('content="StreamPlay"')) throw new Error('English Open Graph site name missing');
 
+          const visibleHtml = home.body.replace(/<script\b[\s\S]*?<\/script>/gi, '').replace(/<style\b[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+          const cjkCount = (visibleHtml.match(/[\u3400-\u9fff]/g) || []).length;
+          if (cjkCount > 0) throw new Error('English homepage source HTML contains ' + cjkCount + ' CJK characters outside scripts, styles and comments');
+          if (!home.body.includes('Are my stream URLs uploaded or stored?')) throw new Error('English privacy FAQ missing from source HTML');
+          if (!home.body.includes('How do I inspect available renditions and audio tracks')) throw new Error('English M3U8 analyzer FAQ missing from source HTML');
+
           const canonical = home.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
           if (canonical !== origin + '/') throw new Error('Unexpected homepage canonical: ' + canonical);
           if (!home.body.includes('"inLanguage": "en"')) throw new Error('English structured-data language missing');
