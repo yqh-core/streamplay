@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Online M3U8 & HLS Player — Test and Play Streams | StreamPlay</title>
+  <meta name="description" content="Play M3U8 and HLS streams or MP4 URLs in your browser. Test playback, inspect stream playlists, diagnose common CORS issues and generate iframe embeds.">
+  <link rel="canonical" href="https://play.digdevbox.com/m3u8-player/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Online M3U8 & HLS Player — StreamPlay">
+  <meta property="og:description" content="A browser-based HLS and M3U8 player with playlist analysis, playback diagnostics and iframe embed generation.">
+  <meta property="og:url" content="https://play.digdevbox.com/m3u8-player/">
+  <meta property="og:locale" content="en_US">
+  <meta name="robots" content="index,follow">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"StreamPlay Online M3U8 Player",
+    "url":"https://play.digdevbox.com/m3u8-player/",
+    "applicationCategory":"MultimediaApplication",
+    "operatingSystem":"Any",
+    "description":"A browser-based player for HLS/M3U8 streams and compatible MP4 URLs, with playlist analysis and playback diagnostics."
+  }
+  </script>
+  <style>
+    :root{color-scheme:light dark;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#e5edf8;line-height:1.65}main{max-width:900px;margin:auto;padding:48px 22px 72px}a{color:#7dd3fc}h1,h2{line-height:1.2}h1{font-size:clamp(2rem,6vw,3.4rem);letter-spacing:-.04em}h2{margin-top:2.2em}p,li{color:#c4d0e0}.eyebrow{color:#7dd3fc;font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem}.cta{display:inline-block;background:#0e7490;color:white;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700;margin:12px 0}.panel{border:1px solid #334155;border-radius:14px;padding:18px;margin:18px 0;background:#111c2e}nav,footer{border-top:1px solid #334155;margin-top:40px;padding-top:18px}small{color:#94a3b8}
+  </style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">StreamPlay · Browser video tools</p>
+  <h1>Online M3U8 and HLS Player</h1>
+  <p>Play a compatible HLS or M3U8 stream directly in your browser, or test an MP4 URL. StreamPlay also includes playlist inspection, playback diagnostics and an iframe embed builder for developers.</p>
+  <a class="cta" href="/">Open StreamPlay player</a>
+  <section class="panel">
+    <h2>What is an M3U8 or HLS stream?</h2>
+    <p>HTTP Live Streaming (HLS) uses a playlist, commonly an M3U8 file, to describe media segments and optional variant streams. A master playlist can advertise multiple resolutions and bitrates; a media playlist lists the segments for a particular rendition.</p>
+  </section>
+  <h2>How to play an HLS stream</h2>
+  <ol>
+    <li>Open the <a href="/">StreamPlay player</a>.</li>
+    <li>Paste a stream URL ending in <code>.m3u8</code>, or enter a compatible MP4 URL.</li>
+    <li>Select Play and allow the browser to load the stream from its source.</li>
+    <li>If playback fails, use the diagnostics and check the source server's CORS policy, URL availability, codec support and encryption requirements.</li>
+  </ol>
+  <h2>Inspect a playlist before playback</h2>
+  <p>The M3U8 analyzer can inspect a playlist when the source allows browser access. A master playlist may expose available variants, resolution and bandwidth metadata; a media playlist may expose segment counts, durations and encryption markers. Analysis is not a way to bypass access controls or DRM.</p>
+  <h2>Common playback problems</h2>
+  <ul>
+    <li><strong>CORS:</strong> the media host must allow requests from the page's origin for browser-based playlist inspection and some playback paths.</li>
+    <li><strong>Unsupported codecs:</strong> browser and device support varies. A valid playlist does not guarantee that every media codec can be decoded.</li>
+    <li><strong>Expired or protected URLs:</strong> signed URLs may expire, and DRM-protected streams require their authorized playback workflow.</li>
+    <li><strong>Mixed content or network errors:</strong> check HTTPS requirements, redirects and whether the media host is reachable.</li>
+  </ul>
+  <h2>Generate an iframe embed</h2>
+  <p>Use the embed builder in StreamPlay to configure the source URL, dimensions and supported playback options, then copy the generated iframe snippet into a page you control. Browser autoplay policies commonly require muted playback and may still vary by browser.</p>
+  <h2>Privacy and stream delivery</h2>
+  <p>Playback requests are made by your browser to the media source; StreamPlay does not host the video files. Your browser's network connection to the media origin is necessary for playback. Only use stream URLs that you are authorized to access.</p>
+  <h2>Frequently asked questions</h2>
+  <h3>Does StreamPlay support live HLS?</h3>
+  <p>It can play compatible live and on-demand HLS streams when the browser, codecs, source URL and server CORS configuration permit playback.</p>
+  <h3>Why can a stream play elsewhere but not in my browser?</h3>
+  <p>Different players may use different network paths, native playback support or authorization mechanisms. Check CORS, codec compatibility, URL expiry and source-server restrictions.</p>
+  <h3>Can it play DRM-protected content?</h3>
+  <p>The playlist analyzer may identify encryption markers, but it does not bypass DRM or access restrictions. Use the content provider's authorized player and license flow.</p>
+  <nav><a href="/">Open StreamPlay</a> · <a href="https://www.digdevbox.com/">DigDevBox Developer Tools</a> · <a href="https://notes.digdevbox.com/">Forge Notes</a></nav>
+  <footer><small>© 2026 StreamPlay. Use only media sources you are authorized to access.</small></footer>
+</main>
+</body>
+</html>
