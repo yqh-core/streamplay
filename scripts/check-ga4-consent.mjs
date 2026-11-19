@@ -25,14 +25,14 @@ for (const file of htmlFiles) {
 const script = fs.readFileSync(path.join(root, 'analytics-consent.js'), 'utf8');
 const checks = [
   ['correct StreamPlay Measurement ID', new RegExp(id)],
-  ['explicit consent storage', /localStorage\\.setItem\\(CONSENT_KEY, value\\)/],
+  ['explicit consent storage', /localStorage\.setItem\(CONSENT_KEY, value\)/],
   ['analytics denied by default', /analytics_storage:\\s*'denied'/],
-  ['query string excluded', /location\\.origin \\+ location\\.pathname/],
-  ['noindex page view blocked', /isNoindexPage\\(\\)/],
+  ['query string excluded', /location\.origin \+ location\.pathname/],
+  ['noindex page view blocked', /isNoindexPage\(\)/],
   ['duplicate route views blocked', /path === lastPage/],
   ['automatic page_view disabled', /send_page_view:\\s*false/],
   ['Google Analytics-specific consent labels', /Accept Google Analytics[\\s\\S]*Reject Google Analytics/],
-  ['stream URLs and playback content excluded', /never send M3U8\\/MP4 stream URLs, playback content, or URL query parameters/],
+  ['stream URLs and playback content excluded', /never send M3U8\/MP4 stream URLs, playback content, or URL query parameters/],
 ];
 for (const [label, pattern] of checks) if (!pattern.test(script)) failures.push('analytics-consent.js: ' + label);
 const privacy = fs.readFileSync(path.join(root, 'privacy.html'), 'utf8');
@@ -40,7 +40,7 @@ for (const term of ['Google Analytics 4', 'M3U8 / MP4', '不会发出 GA4 请求
   if (!privacy.includes(term)) failures.push('privacy.html: missing disclosure ' + term);
 }
 if (failures.length) {
-  console.error(failures.join('\\n'));
+  console.error(failures.join('\n'));
   process.exit(1);
 }
 console.log('[GA4 consent] PASS: all ten public HTML pages, correct ID, opt-in gate, safe URL and privacy disclosure');
