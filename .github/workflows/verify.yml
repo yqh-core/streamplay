@@ -34,3 +34,16 @@ jobs:
 
       - name: 静态资源版本串门禁自证（G-ASSET-VER --falsify）
         run: node scripts/check-asset-versioning.mjs --falsify
+
+      # SEO regression guard: crawlers must receive English metadata in the original HTML,
+      # rather than depending on the runtime locale script to replace a Chinese fallback.
+      - name: SEO homepage English source HTML gate (metadata + structured data)
+        run: |
+          set -euo pipefail
+          grep -Fq '<html lang="en" data-i18n-page="home">' index.html
+          grep -Fq '<title>Online M3U8 &amp; HLS Player' index.html
+          grep -Fq 'name="description" content="Play compatible M3U8 / HLS live and on-demand streams' index.html
+          grep -Fq 'property="og:locale" content="en_US"' index.html
+          grep -Fq '"inLanguage": "en"' index.html
+          grep -Fq '"priceCurrency": "USD"' index.html
+          echo "English-first StreamPlay homepage metadata and structured data verified"
