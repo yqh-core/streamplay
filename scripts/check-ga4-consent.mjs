@@ -26,7 +26,7 @@ const script = fs.readFileSync(path.join(root, 'analytics-consent.js'), 'utf8');
 const checks = [
   ['correct StreamPlay Measurement ID', new RegExp(id)],
   ['explicit consent storage', /localStorage\.setItem\(CONSENT_KEY, value\)/],
-  ['analytics denied by default', /analytics_storage:\\s*'denied'/],
+  ['analytics denied by default', /analytics_storage:\s*'denied'/],
   ['query string excluded', /location\.origin \+ location\.pathname/],
   ['noindex page view blocked', /isNoindexPage\(\)/],
   ['duplicate route views blocked', /path === lastPage/],
