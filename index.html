@@ -106,7 +106,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <a href="https://digdevbox.com/" data-i18n="nav.devtools">Dev Toolbox</a>
                 <a href="https://play.digdevbox.com/" aria-current="page" data-i18n="nav.player">StreamPlay</a>
                 <a href="https://ip.digdevbox.com/" data-i18n="nav.ip">IP Lookup</a>
-                <a href="https://fangdai.digdevbox.com/" data-i18n="nav.loan">Loan Calculator</a>
+                
                 <a href="https://img.digdevbox.com/" data-i18n="nav.imgtools">Image Compressor</a>
         </nav>
         <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
@@ -339,26 +339,24 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <p class="note">Analysis runs locally in your browser. The source must allow CORS. For a master playlist, the analyzer also attempts to read the first media variant. Encrypted streams can be inspected structurally; DRM playback is not bypassed.</p>
         </div>
 
-        <!-- ④ 使用说明 -->
-        <div class="card">
-            <p><strong>How to play a stream</strong></p>
+                <!-- ④ How-to -->
+        <div class="card" lang="en">
+            <p><strong>How to play an HLS stream in three steps</strong></p>
             <ol class="steps">
-                <li><strong>Get a stream URL</strong> — Paste an M3U8 / HLS URL into the field, or select one of the sample streams above.</li>
-                <li><strong>Select Play</strong> — Select the blue Play button or press <kbd>Enter</kbd> Enter.</li>
-                <li><strong>Watch</strong> — Once playback starts, use the controls to pause, adjust volume, seek and enter fullscreen. Landscape mode is recommended on phones.</li>
+                <li><strong>Get a stream URL</strong> — Paste an M3U8 / HLS playback URL into the input field, or select one of the sample streams above.</li>
+                <li><strong>Select Play</strong> — Select the Play button or press Enter.</li>
+                <li><strong>Watch and control playback</strong> — Move the pointer over the player to pause, adjust volume, seek or enter fullscreen. On phones, landscape orientation may provide a better viewing experience.</li>
             </ol>
-            <p class="note">
-                Tip: If the player stays on “Loading” or reports an error, the URL may be unavailable or the source may block cross-origin requests. Open the URL in a new browser tab first; if it cannot be reached there, the player cannot load it either.
-            </p>
+            <p class="note">If the player stays on Loading or reports an error, the URL may be unavailable or the media host may block cross-origin requests. Try opening the stream URL in a new browser tab first. A reachable URL is a useful first check, but playback can still depend on CORS, codecs and browser support.</p>
         </div>
 
-        <!-- ⑤ Developer：嵌入代码Builder（对标 LivePlayer Embed Builder：配置 + 实时预览 + 一键复制） -->
-        <div class="card dev-card" id="embed">
-            <p><strong>Embed on your website <span class="tag">Builder</span></strong></p>
+                <!-- ⑤ Developer tool: iframe embed builder -->
+        <div class="card dev-card" id="embed" lang="en">
+            <p><strong>Embed StreamPlay on your website <span class="tag">Builder</span></strong></p>
             <div class="emb-grid">
                 <div class="emb-form">
                     <label class="emb-field emb-url-field">Stream URL
-                        <input type="text" id="emb-url" placeholder="M3U8 / MP4 URL" autocomplete="off" spellcheck="false">
+                        <input type="text" id="emb-url" placeholder="M3U8 / HLS / MP4 URL" autocomplete="off" spellcheck="false">
                     </label>
                     <div class="emb-row">
                         <label class="emb-field">Width<input type="text" id="emb-width" value="100%" autocomplete="off"></label>
@@ -375,98 +373,51 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="emb-copy" class="mini-btn">Copy embed code</button>
                 </div>
                 <div class="emb-preview-wrap">
-                    <iframe id="emb-preview" title="Embed preview" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                    <iframe id="emb-preview" title="StreamPlay embed preview" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
                 </div>
             </div>
-            <p class="note">How it works: the page URL uses <code>?url=</code> to load a stream automatically, <code>&amp;t=seconds</code> sets the start time, <code>&amp;autoplay=1&amp;muted=1</code> Muted autoplay (most browsers only allow autoplay when muted). Use the share control to copy a link with the current timestamp.</p>
+            <p class="note">The embed URL uses <code>?url=</code> to load a stream and <code>&amp;t=seconds</code> to set the starting position. <code>&amp;autoplay=1&amp;muted=1</code> requests muted autoplay; browser policies vary and may still block it. Use the share control to copy a link with the current playback timestamp.</p>
         </div>
 
-        <!-- ⑥ 科普 -->
-        <div class="card">
-            <p>
-                StreamPlay is a browser-based online player built on HTML5 <code>&lt;video&gt;</code> and the open-source library
-                <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a>
-                It plays compatible .m3u8 HTTP Live Streaming (HLS) streams and browser-native formats such as MP4 without a browser plugin or desktop client. hls.js transmuxes supported MPEG-2 transport stream and AAC/MP3 media into ISO BMFF (MP4) segments for playback through the browser's Media Source Extensions API, with Web Workers handling background work. Actual playback depends on the source URL, CORS policy, codecs and browser support.
-            </p>
-
+                <!-- ⑥ HLS and M3U8 background -->
+        <div class="card" lang="en">
+            <p>StreamPlay is a browser-based player built with the HTML5 <code>&lt;video&gt;</code> element and the open-source <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a> library. It plays compatible HTTP Live Streaming (HLS) sources, commonly referenced by an <code>.m3u8</code> playlist, as well as browser-supported MP4 and other media formats. Your browser retrieves media from the source host; StreamPlay does not host video files.</p>
             <h2>What is an M3U8 file?</h2>
-            <p>
-                Files with the extension <a href="https://en.wikipedia.org/wiki/M3U#M3U8" target="_blank" rel="noopener">M3U8</a>
-                are UTF-8 encoded playlist files. They are plain-text playlists that tell a media player where to find audio and video resources.
-            </p>
-            <p>
-                For example, an M3U8 file can point to an internet radio stream or serve as a playlist for a personal collection of music or videos.
-            </p>
-            <p>
-                In either case, the playlist points the player to the media resources. An M3U8 file is a convenient way to organize and replay a set of streams.
-            </p>
-            <p>
-                Entries can use absolute paths, relative paths or full URLs to reference media files. Other lines can appear as comments that describe the playlist.
-            </p>
-            <p>
-                M3U8 playlists are used for audio and video streaming. They reference online media resources and are supported by many modern media players.
-            </p>
+            <p>An M3U8 file is a UTF-8 text playlist that describes media resources and how a player should request them. It may reference individual media segments or a master playlist that points to multiple stream variants.</p>
+            <p>A master playlist can describe several resolutions and bitrates so a compatible player can select a rendition based on device and network conditions. A media playlist lists the segments for one rendition and may describe timing, live-window behavior and encryption metadata.</p>
+            <p>Playlist entries can use absolute URLs, relative paths or full URLs to reference media segments. The playlist may also include comments and metadata that help describe the stream.</p>
+            <p>M3U8 is widely used with HLS for live and on-demand video. A valid playlist does not guarantee playback: the browser, codecs, source availability, authorization and CORS policy must also permit the request.</p>
         </div>
 
-        <!-- ⑦ Frequently asked questions（可见 FAQ + FAQPage 结构化数据，内容逐字一致） -->
-        <div class="card faq-card" id="faq">
+                <!-- ⑦ Frequently asked questions: visible copy and FAQPage structured data use the same English answers -->
+        <div class="card faq-card" id="faq" lang="en">
             <h2>Frequently asked questions</h2>
-            <details>
-                <summary>Which video formats are supported?</summary>
-                <p>The player supports M3U8 / HLS live and on-demand streams, plus browser-native formats such as MP4, WebM and Ogg. HLS is handled by hls.js; native formats use the browser's built-in player.</p>
-            </details>
-            <details>
-                <summary>Why does a video fail to load or keep buffering?</summary>
-                <p>The URL may be unavailable, or the source server may block cross-origin requests (CORS). Try opening the URL in a new browser tab to check that it is reachable.</p>
-            </details>
-            <details>
-                <summary>Are my stream URLs uploaded or stored?</summary>
-                <p>Playback runs in your browser and the video stream does not pass through our server. Recent URLs are stored only in this browser and can be cleared at any time.</p>
-            </details>
-            <details>
-                <summary>Can I change playback speed and quality?</summary>
-                <p>Yes. The controls offer six speeds from 0.5× to 2×. For multi-bitrate HLS streams, select a rendition from the quality menu or use automatic switching.</p>
-            </details>
-            <details>
-                <summary>How do I load subtitles?</summary>
-                <p>Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission.</p>
-            </details>
-            <details>
-                <summary>Can I resume playback or share a timestamp?</summary>
-                <p>Yes. Playback progress is stored only in this browser. Reopening the same URL offers a resume option, and the share control copies a timestamped URL (?url=URL&amp;t=seconds).</p>
-            </details>
-            <details>
-                <summary>How can I troubleshoot playback or view statistics?</summary>
-                <p>Select the diagnostics control to check MSE / hls.js support, H.264 / WebM decoding, network state, URL reachability and CORS. Select statistics to view resolution, codec, estimated bandwidth, buffer health and dropped frames.</p>
-            </details>
-            <details>
-                <summary>Can I queue multiple streams or keep watching while scrolling?</summary>
-                <p>Yes. Add URLs to the queue and enable Autoplay next to advance automatically. Use Previous / Next to navigate or Repeat current stream to loop one item. The mini-player floats while scrolling; use Restore or Close to control it.</p>
-            </details>
-            <details>
-                <summary>How do I inspect available renditions and audio tracks in an M3U8 playlist?</summary>
-                <p>Paste a URL into the M3U8 Playlist Analyzer and select Analyze. A master playlist lists variants, resolutions, bandwidth, codecs, audio tracks and subtitle groups. A media playlist reports segment count, duration, live / on-demand state and encryption markers. Analysis runs locally and requires CORS permission. See <a href="/guides#analyzer">/guides#analyzer</a>。</p>
-            </details>
-            <details>
-                <summary>How do I embed the player on my website?</summary>
-                <p>Use the Embed Builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code; it points to play.digdevbox.com. Most browsers allow autoplay only when muted.</p>
-            </details>
+            <details><summary>Which media formats does StreamPlay support?</summary><p>StreamPlay supports compatible M3U8 / HLS live and on-demand streams, plus browser-supported MP4, WebM and Ogg media. HLS playback uses hls.js where required; native formats use the browser's media support.</p></details>
+            <details><summary>Why does a stream fail to load or keep buffering?</summary><p>The URL may be unavailable, expired or protected, or the media host may block cross-origin requests (CORS). Codec support and browser capabilities also vary. Check the URL, CORS response headers and the playback diagnostics.</p></details>
+            <details><summary>Are my stream URLs uploaded or saved?</summary><p>Playback requests go from your browser to the media source; StreamPlay does not host the video files. Recent URLs and playback progress are stored locally in this browser and are not uploaded to this site. You can clear the local history at any time.</p></details>
+            <details><summary>Can I change playback speed and video quality?</summary><p>Yes. The player offers speed settings from 0.5× to 2×. For multi-bitrate HLS streams, the quality menu can show available renditions for manual selection or adaptive switching.</p></details>
+            <details><summary>How do I load subtitles?</summary><p>Enter a VTT or SRT subtitle URL in the Subtitles tool and load it, then select the track in the player's subtitle menu. The subtitle host must allow cross-origin requests when the browser requires them.</p></details>
+            <details><summary>Can StreamPlay remember playback progress or share a timestamp?</summary><p>Playback progress is stored locally in this browser. When you reopen the same URL, the player can offer to resume. Use the share control to copy a link with a timestamp so another person can open the stream at that position, subject to the source URL's access rules.</p></details>
+            <details><summary>How can I diagnose playback problems or inspect playback statistics?</summary><p>Open Playback diagnostics to check MSE / hls.js support, H.264 and WebM decoding capability, network state and URL reachability, including CORS-related checks. The statistics panel can show resolution, codec, estimated bandwidth, buffer health and dropped frames when the browser exposes those values.</p></details>
+            <details><summary>Can I play multiple streams in sequence or keep the player visible while scrolling?</summary><p>Yes. Add URLs to the Playback queue and enable Autoplay next to advance automatically. You can also move to the previous or next item, repeat the current stream, or use the floating mini-player while scrolling.</p></details>
+            <details><summary>Can I inspect available resolutions, audio tracks and segments in an M3U8 playlist?</summary><p>Yes. Paste a URL into the M3U8 playlist analyzer. A master playlist can expose variants, resolution, bandwidth, codecs, audio and subtitle groups. A media playlist can expose segment counts, durations, live or on-demand state and encryption markers. Analysis runs locally and requires the source host to allow CORS. It does not bypass DRM or access controls. See the <a href="/guides#analyzer">playlist analyzer guide</a>.</p></details>
+            <details><summary>How do I embed the player on my own website?</summary><p>Use the iframe embed builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code. The embed points to play.digdevbox.com and uses a URL parameter to load your stream. Most browsers restrict autoplay unless the video is muted, and behavior varies by browser.</p></details>
         </div>
         <script type="application/ld+json">
         {
           "@context": "https://schema.org",
           "@type": "FAQPage",
           "mainEntity": [
-            { "@type": "Question", "name": "Which video formats are supported?", "acceptedAnswer": { "@type": "Answer", "text": "The player supports M3U8 / HLS live and on-demand streams, plus browser-native formats such as MP4, WebM and Ogg. HLS is handled by hls.js; native formats use the browser's built-in player." } },
-            { "@type": "Question", "name": "Why does a video fail to load or keep buffering?", "acceptedAnswer": { "@type": "Answer", "text": "The URL may be unavailable, or the source server may block cross-origin requests (CORS). Try opening the URL in a new browser tab to check that it is reachable." } },
-            { "@type": "Question", "name": "Are my stream URLs uploaded or stored?", "acceptedAnswer": { "@type": "Answer", "text": "Playback runs in your browser and the video stream does not pass through our server. Recent URLs are stored only in this browser and can be cleared at any time." } },
-            { "@type": "Question", "name": "Can I change playback speed and quality?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The controls offer six speeds from 0.5× to 2×. For multi-bitrate HLS streams, select a rendition from the quality menu or use automatic switching." } },
-            { "@type": "Question", "name": "How do I load subtitles?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission." } },
-            { "@type": "Question", "name": "Can I resume playback or share a timestamp?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Playback progress is stored only in this browser. Reopening the same URL offers a resume option, and the share control copies a timestamped URL (?url=URL&amp;t=seconds)." } },
-            { "@type": "Question", "name": "How can I troubleshoot playback or view statistics?", "acceptedAnswer": { "@type": "Answer", "text": "Select the diagnostics control to check MSE / hls.js support, H.264 / WebM decoding, network state, URL reachability and CORS. Select statistics to view resolution, codec, estimated bandwidth, buffer health and dropped frames." } },
-            { "@type": "Question", "name": "Can I queue multiple streams or keep watching while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Add URLs to the queue and enable Autoplay next to advance automatically. Use Previous / Next to navigate or Repeat current stream to loop one item. The mini-player floats while scrolling; use Restore or Close to control it." } },
-            { "@type": "Question", "name": "How do I inspect available renditions and audio tracks in an M3U8 playlist?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a URL into the M3U8 Playlist Analyzer and select Analyze. A master playlist lists variants, resolutions, bandwidth, codecs, audio tracks and subtitle groups. A media playlist reports segment count, duration, live / on-demand state and encryption markers. Analysis runs locally and requires CORS permission. See /guides#analyzer。" } },
-            { "@type": "Question", "name": "How do I embed the player on my website?", "acceptedAnswer": { "@type": "Answer", "text": "Use the Embed Builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code; it points to play.digdevbox.com. Most browsers allow autoplay only when muted." } }
+            { "@type": "Question", "name": "Which media formats does StreamPlay support?", "acceptedAnswer": { "@type": "Answer", "text": "StreamPlay supports compatible M3U8 / HLS live and on-demand streams, plus browser-supported MP4, WebM and Ogg media. HLS playback uses hls.js where required; native formats use the browser's media support." } },
+            { "@type": "Question", "name": "Why does a stream fail to load or keep buffering?", "acceptedAnswer": { "@type": "Answer", "text": "The URL may be unavailable, expired or protected, or the media host may block cross-origin requests (CORS). Codec support and browser capabilities also vary. Check the URL, CORS response headers and the playback diagnostics." } },
+            { "@type": "Question", "name": "Are my stream URLs uploaded or saved?", "acceptedAnswer": { "@type": "Answer", "text": "Playback requests go from your browser to the media source; StreamPlay does not host the video files. Recent URLs and playback progress are stored locally in this browser and are not uploaded to this site. You can clear the local history at any time." } },
+            { "@type": "Question", "name": "Can I change playback speed and video quality?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The player offers speed settings from 0.5× to 2×. For multi-bitrate HLS streams, the quality menu can show available renditions for manual selection or adaptive switching." } },
+            { "@type": "Question", "name": "How do I load subtitles?", "acceptedAnswer": { "@type": "Answer", "text": "Enter a VTT or SRT subtitle URL in the Subtitles tool and load it, then select the track in the player's subtitle menu. The subtitle host must allow cross-origin requests when the browser requires them." } },
+            { "@type": "Question", "name": "Can StreamPlay remember playback progress or share a timestamp?", "acceptedAnswer": { "@type": "Answer", "text": "Playback progress is stored locally in this browser. When you reopen the same URL, the player can offer to resume. Use the share control to copy a link with a timestamp so another person can open the stream at that position, subject to the source URL's access rules." } },
+            { "@type": "Question", "name": "How can I diagnose playback problems or inspect playback statistics?", "acceptedAnswer": { "@type": "Answer", "text": "Open Playback diagnostics to check MSE / hls.js support, H.264 and WebM decoding capability, network state and URL reachability, including CORS-related checks. The statistics panel can show resolution, codec, estimated bandwidth, buffer health and dropped frames when the browser exposes those values." } },
+            { "@type": "Question", "name": "Can I play multiple streams in sequence or keep the player visible while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Add URLs to the Playback queue and enable Autoplay next to advance automatically. You can also move to the previous or next item, repeat the current stream, or use the floating mini-player while scrolling." } },
+            { "@type": "Question", "name": "Can I inspect available resolutions, audio tracks and segments in an M3U8 playlist?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Paste a URL into the M3U8 playlist analyzer. A master playlist can expose variants, resolution, bandwidth, codecs, audio and subtitle groups. A media playlist can expose segment counts, durations, live or on-demand state and encryption markers. Analysis runs locally and requires the source host to allow CORS. It does not bypass DRM or access controls." } },
+            { "@type": "Question", "name": "How do I embed the player on my own website?", "acceptedAnswer": { "@type": "Answer", "text": "Use the iframe embed builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code. The embed points to play.digdevbox.com and uses a URL parameter to load your stream. Most browsers restrict autoplay unless the video is muted, and behavior varies by browser." } }
           ]
         }
         </script>
@@ -520,7 +471,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
   // aria/title 交给 i18n 内核统一管理（按钮已带 data-i18n-attr="aria-label:aria.themeToggle"）。
   // 原因：本脚本的 init 挂在 DOMContentLoaded 上，执行晚于 defer 的 dd-i18n.js，
   // 若在这里硬编码中文 aria，会把内核刚写好的英文 aria 覆盖回中文（实测到的假通过点）。
-  // 未启用 i18n 的站点（无 window.DD_I18N）仍走原中文动态文案。
+  // 未启用 i18n 的站点（None window.DD_I18N）仍走原中文动态文案。
   function sync(){var b=document.getElementById('dd-theme-toggle');if(!b)return;
     var d=effective()==='dark';
     b.textContent=d?'☀️':'🌙';
