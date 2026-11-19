@@ -109,7 +109,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <a href="https://fangdai.digdevbox.com/" data-i18n="nav.loan">Loan Calculator</a>
                 <a href="https://img.digdevbox.com/" data-i18n="nav.imgtools">Image Compressor</a>
         </nav>
-        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
+        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
     </div>
 </div>
     <header class="hd">
@@ -135,7 +135,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <!-- ① 地址输入：已预填一个可用的测试流，打开页面就能直接Select Play -->
         <div class="form">
             <input type="text" id="url" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
-                placeholder="粘贴 m3u8 / HLS / mp4 Stream URL" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:placeholder.urlInput">
+                placeholder="Paste an M3U8 / HLS / MP4 stream URL" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:placeholder.urlInput">
             <button type="button" id="play-btn" title="播放">
                 <img src="./images/ic-play.png" alt="">
                 <span data-i18n="btn.play">Play</span>
@@ -228,10 +228,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="c-loop-b" class="cbtn loop-btn" aria-label="Set A-B loop end" title="A-B loop: set point B">B</button>
                     <button type="button" id="c-share" class="cbtn" aria-label="Copy share link with timestamp" title="Copy share link at current time">🔗</button>
                     <button type="button" id="c-theater" class="cbtn" aria-label="Theater mode" title="Theater mode">🎬</button>
-                    <button type="button" id="c-stats" class="cbtn" aria-label="Playback statistics面板" title="Playback statistics（分辨率/编码/带宽/丢帧）">📊</button>
-                    <button type="button" id="c-diag" class="cbtn" aria-label="Playback diagnostics" title="Playback diagnostics（MSE/解码/地址可达性）">🩺</button>
+                    <button type="button" id="c-stats" class="cbtn" aria-label="Playback statistics panel" title="Playback statistics (resolution, codec, bandwidth, dropped frames)">📊</button>
+                    <button type="button" id="c-diag" class="cbtn" aria-label="Playback diagnostics" title="Playback diagnostics (MSE, decoding and URL reachability)">🩺</button>
                     <button type="button" id="c-help" class="cbtn" aria-label="Keyboard shortcuts" title="Keyboard shortcuts（?）">⌨</button>
-                    <button type="button" id="c-mini" class="cbtn" aria-label="Mini player" title="Mini player（滚出画面Auto悬浮）">🪟</button>
+                    <button type="button" id="c-mini" class="cbtn" aria-label="Mini player" title="Mini player (floats when scrolled out of view)">🪟</button>
                     <button type="button" id="c-full" class="cbtn" aria-label="Fullscreen" title="Fullscreen（F）">⛶</button>
                 </div>
                 <div class="stats" id="stats" aria-live="off"></div>
@@ -253,10 +253,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <li><kbd>Space</kbd> / <kbd>K</kbd><span>Play / pause</span></li>
                     <li><kbd>←</kbd> / <kbd>→</kbd><span>Seek backward / forward 5 seconds</span></li>
                     <li><kbd>J</kbd> / <kbd>L</kbd><span>Seek backward / forward 10 seconds</span></li>
-                    <li><kbd>↑</kbd> / <kbd>↓</kbd><span>Volume加 / 减</span></li>
-                    <li><kbd>M</kbd><span>Muted切换</span></li>
-                    <li><kbd>F</kbd><span>Fullscreen切换</span></li>
-                    <li><kbd>?</kbd><span>打开本Help</span></li>
+                    <li><kbd>↑</kbd> / <kbd>↓</kbd><span>Increase / decrease volume</span></li>
+                    <li><kbd>M</kbd><span>Toggle mute</span></li>
+                    <li><kbd>F</kbd><span>Toggle fullscreen</span></li>
+                    <li><kbd>?</kbd><span>Open this help</span></li>
                     <li><kbd>Esc</kbd><span>Close dialog</span></li>
                 </ul>
                 <p class="note">The control bar also includes share, theater mode, statistics, diagnostics, screenshots and A-B loop controls.</p>
@@ -275,8 +275,8 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <div class="card tool-card">
                 <p><strong>Subtitles <span class="tag">.vtt / .srt</span></strong></p>
                 <div class="sub-row">
-                    <input type="text" id="sub-url" placeholder="粘贴Subtitles地址（.vtt / .srt），回车加载" autocomplete="off" spellcheck="false">
-                    <button type="button" id="sub-load" class="mini-btn">加载Subtitles</button>
+                    <input type="text" id="sub-url" placeholder="Paste a subtitle URL (.vtt / .srt) and press Enter to load" autocomplete="off" spellcheck="false">
+                    <button type="button" id="sub-load" class="mini-btn">Load subtitles</button>
                     <button type="button" id="sub-off" class="mini-btn ghost">Close</button>
                 </div>
                 <div class="cue-row">
@@ -284,7 +284,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                         <option value="80">Small</option>
                         <option value="100" selected>Normal</option>
                         <option value="130">Large</option>
-                        <option value="160">特Large</option>
+                        <option value="160">Extra large</option>
                     </select></label>
                     <label>Color<select id="cue-color" aria-label="SubtitlesColor">
                         <option value="#ffffff" selected>White</option>
@@ -298,54 +298,54 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                         <option value="transparent">无</option>
                     </select></label>
                 </div>
-                <p class="note" id="sub-note">加载后在系统播放器Subtitles菜单中选择轨道；跨域Subtitles需对方允许 CORS。</p>
+                <p class="note" id="sub-note">After loading, select the subtitle track in the player menu. Cross-origin subtitles require CORS permission from the source.</p>
             </div>
             <div class="card tool-card">
                 <p><strong>Recent streams <span class="tag" id="recent-count">0</span></strong>
                     <button type="button" id="recent-clear" class="mini-btn ghost clear-btn">Clear</button>
                 </p>
-                <ul class="recent-list" id="recent-list" aria-label="Recent streams地址"></ul>
-                <p class="note" id="recent-empty">播放过的地址会Auto记在这里（仅存于本机浏览器），点击即可重播。</p>
+                <ul class="recent-list" id="recent-list" aria-label="Recent stream URLs"></ul>
+                <p class="note" id="recent-empty">Played URLs are saved only in this browser. Select one to play it again.</p>
             </div>
         </div>
 
-        <!-- ③-d Playlist queue：Auto连播 / 上下首 / Repeat current stream（对标商业播放器的播放列表能力） -->
+        <!-- ③-d Playlist queue：Autoplay next / 上下首 / Repeat current stream（对标商业播放器的播放列表能力） -->
         <div class="card queue-card">
             <p><strong>Playlist queue <span class="tag" id="queue-count">0</span></strong>
-                <label class="queue-toggle"><input type="checkbox" id="queue-auto"> Auto连播</label>
+                <label class="queue-toggle"><input type="checkbox" id="queue-auto"> Autoplay next</label>
                 <label class="queue-toggle"><input type="checkbox" id="queue-repeat"> Repeat current stream</label>
                 <button type="button" id="queue-clear" class="mini-btn ghost clear-btn">Clear</button>
             </p>
             <div class="sub-row">
-                <input type="text" id="queue-url" placeholder="粘贴地址加入队列，回车Add" autocomplete="off" spellcheck="false">
+                <input type="text" id="queue-url" placeholder="Paste a URL and press Enter to add it to the queue" autocomplete="off" spellcheck="false">
                 <button type="button" id="queue-add" class="mini-btn">Add</button>
                 <button type="button" id="queue-prev" class="mini-btn ghost">⏮ Previous</button>
                 <button type="button" id="queue-next" class="mini-btn ghost">Next ⏭</button>
             </div>
             <ol class="queue-list" id="queue-list" aria-label="Playlist queue"></ol>
-            <p class="note" id="queue-empty">Add多个地址组成队列；开启「Auto连播」播完Auto播下一首，「Repeat current stream」单曲循环。队列仅存本机浏览器。</p>
+            <p class="note" id="queue-empty">Add多个地址组成队列；开启「Autoplay next」播完Auto播下一首，「Repeat current stream」单曲循环。队列仅存本机浏览器。</p>
         </div>
 
         <!-- ③-e M3U8 playlist analyzer器（对标 LivePlayer Analyzer：变体/Audio track/Subtitles/分片/直播态/加密） -->
         <div class="card analyzer-card" id="analyzer">
             <p><strong>M3U8 playlist analyzer <span class="tag">Developer</span></strong></p>
             <div class="sub-row">
-                <input type="text" id="ma-url" placeholder="粘贴 m3u8 地址，回车Analyze" autocomplete="off" spellcheck="false">
+                <input type="text" id="ma-url" placeholder="Paste an M3U8 URL and press Enter to analyze" autocomplete="off" spellcheck="false">
                 <button type="button" id="ma-run" class="mini-btn">Analyze</button>
                 <button type="button" id="ma-use-current" class="mini-btn ghost">Use current stream URL</button>
             </div>
             <p class="ma-status" id="ma-status" role="status" aria-live="polite"></p>
             <div class="ma-result" id="ma-result"></div>
-            <p class="note">解析在浏览器本地完成，不经过本站服务器。Analyze需要源站允许跨域（CORS）；master 清单会Auto尝试读取首个变体的媒体清单。加密流（EXT-X-KEY）只能Analyze结构，不能也不应绕过 DRM 播放。</p>
+            <p class="note">Analysis runs locally in your browser. The source must allow CORS. For a master playlist, the analyzer also attempts to read the first media variant. Encrypted streams can be inspected structurally; DRM playback is not bypassed.</p>
         </div>
 
         <!-- ④ 使用说明 -->
         <div class="card">
             <p><strong>How to play a stream</strong></p>
             <ol class="steps">
-                <li><strong>Get a stream URL</strong> —— 在输入框里粘贴你的 m3u8 / HLS 播放链接，或直接点上面的「测试流」按钮Auto填入。</li>
+                <li><strong>Get a stream URL</strong> — Paste an M3U8 / HLS URL into the field, or select one of the sample streams above.</li>
                 <li><strong>Select Play</strong> — Select the blue Play button or press <kbd>Enter</kbd> Enter.</li>
-                <li><strong>Watch</strong> —— 画面出现后，鼠标移到播放器上，用底部控制条暂停、调Volume、拖进度、Fullscreen。手机浏览器横屏Watch效果更好。</li>
+                <li><strong>Watch</strong> — Once playback starts, use the controls to pause, adjust volume, seek and enter fullscreen. Landscape mode is recommended on phones.</li>
             </ol>
             <p class="note">
                 Tip: If the player stays on “Loading” or reports an error, the URL may be unavailable or the source may block cross-origin requests. Open the URL in a new browser tab first; if it cannot be reached there, the player cannot load it either.
@@ -358,7 +358,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <div class="emb-grid">
                 <div class="emb-form">
                     <label class="emb-field emb-url-field">Stream URL
-                        <input type="text" id="emb-url" placeholder="m3u8 / mp4 地址" autocomplete="off" spellcheck="false">
+                        <input type="text" id="emb-url" placeholder="M3U8 / MP4 URL" autocomplete="off" spellcheck="false">
                     </label>
                     <div class="emb-row">
                         <label class="emb-field">Width<input type="text" id="emb-width" value="100%" autocomplete="off"></label>
@@ -366,7 +366,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                         <label class="emb-field">Start time (seconds)<input type="number" id="emb-t" value="0" min="0" step="1"></label>
                     </div>
                     <div class="emb-row">
-                        <label class="emb-check"><input type="checkbox" id="emb-autoplay"> Auto播放</label>
+                        <label class="emb-check"><input type="checkbox" id="emb-autoplay"> Autoplay</label>
                         <label class="emb-check"><input type="checkbox" id="emb-muted" checked> Muted</label>
                         <button type="button" id="emb-use-current" class="mini-btn ghost">Use current stream URL</button>
                     </div>
@@ -375,16 +375,16 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <button type="button" id="emb-copy" class="mini-btn">Copy embed code</button>
                 </div>
                 <div class="emb-preview-wrap">
-                    <iframe id="emb-preview" title="嵌入预览" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                    <iframe id="emb-preview" title="Embed preview" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
                 </div>
             </div>
-            <p class="note">How it works: the page URL uses <code>?url=</code> Auto加载播放，<code>&amp;t=seconds</code> sets the start time, <code>&amp;autoplay=1&amp;muted=1</code> MutedAuto播放（多数浏览器只允许MutedAuto播放）。控制条 🔗 按钮可一键复制带当前时间点的分享链接。</p>
+            <p class="note">How it works: the page URL uses <code>?url=</code> to load a stream automatically, <code>&amp;t=seconds</code> sets the start time, <code>&amp;autoplay=1&amp;muted=1</code> MutedAutoplay（多数浏览器只允许MutedAutoplay）。控制条 🔗 按钮可一键复制带当前时间点的分享链接。</p>
         </div>
 
         <!-- ⑥ 科普 -->
         <div class="card">
             <p>
-                StreamPlay是一款纯前端的在线播放器，基于 HTML5 <code>&lt;video&gt;</code> and the open-source library
+                StreamPlay is a browser-based online player built on HTML5 <code>&lt;video&gt;</code> and the open-source library
                 <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a>
                 It plays compatible .m3u8 HTTP Live Streaming (HLS) streams and browser-native formats such as MP4 without a browser plugin or desktop client. hls.js transmuxes supported MPEG-2 transport stream and AAC/MP3 media into ISO BMFF (MP4) segments for playback through the browser's Media Source Extensions API, with Web Workers handling background work. Actual playback depends on the source URL, CORS policy, codecs and browser support.
             </p>
@@ -404,7 +404,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 Entries can use absolute paths, relative paths or full URLs to reference media files. Other lines can appear as comments that describe the playlist.
             </p>
             <p>
-                M3U8 最初是为播放 MP3 等音频文件而设计，如今越来越多的场景用它来承载视频播放列表，它同样可以指定在线流媒体的音视频源。目前主流的播放器与软件Large多支持 M3U8 格式。
+                M3U8 playlists are used for audio and video streaming. They reference online media resources and are supported by many modern media players.
             </p>
         </div>
 
@@ -420,36 +420,36 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <p>The URL may be unavailable, or the source server may block cross-origin requests (CORS). Try opening the URL in a new browser tab to check that it is reachable.</p>
             </details>
             <details>
-                <summary>我的Stream URL会被上传或保存吗？</summary>
-                <p>播放是纯前端行为，视频流不经过本站服务器。「Recent streams」只存在你自己浏览器的 localStorage 里，不会上传，可随时Clear。</p>
+                <summary>Are my stream URLs uploaded or stored?</summary>
+                <p>Playback runs in your browser and the video stream does not pass through our server. Recent URLs are stored only in this browser and can be cleared at any time.</p>
             </details>
             <details>
-                <summary>可以调整Playback speed和Quality吗？</summary>
-                <p>可以。控制条提供 0.5× 到 2× 六档Speed；对于多码率 HLS 流，Quality菜单会列出各档分辨率，可手动锁定或Auto切换。</p>
+                <summary>Can I change playback speed and quality?</summary>
+                <p>Yes. The controls offer six speeds from 0.5× to 2×. For multi-bitrate HLS streams, select a rendition from the quality menu or use automatic switching.</p>
             </details>
             <details>
-                <summary>如何加载Subtitles？</summary>
-                <p>在「Subtitles」工具中粘贴 .vtt 或 .srt Subtitles地址并加载，然后在Subtitles菜单中选择轨道。跨域Subtitles需要对方服务器允许 CORS。</p>
+                <summary>如何Load subtitles？</summary>
+                <p>Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission.</p>
             </details>
             <details>
-                <summary>能记住Playback progress或分享指定时间点吗？</summary>
-                <p>能。Playback progress只存在本机浏览器，再次打开同一地址会提示「Resume」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。</p>
+                <summary>Can I resume playback or share a timestamp?</summary>
+                <p>Yes. Playback progress is stored only in this browser. Reopening the same URL offers a resume option, and the share control copies a timestamped URL (?url=URL&amp;t=seconds).</p>
             </details>
             <details>
-                <summary>如何排查播放问题或查看Playback statistics？</summary>
-                <p>点控制条 🩺 按钮打开Playback diagnostics，Auto检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。</p>
+                <summary>How can I troubleshoot playback or view statistics?</summary>
+                <p>Select the diagnostics control to check MSE / hls.js support, H.264 / WebM decoding, network state, URL reachability and CORS. Select statistics to view resolution, codec, estimated bandwidth, buffer health and dropped frames.</p>
             </details>
             <details>
                 <summary>Can I queue multiple streams or keep watching while scrolling?</summary>
-                <p>可以。在「Playlist queue」Add多个地址，开启「Auto连播」后播完Auto播下一首，也可用上一首/下一首切换，「Repeat current stream」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩Small悬浮到右下角，点 ⤢ 还原、✕ Close。</p>
+                <p>可以。在「Playlist queue」Add多个地址，开启「Autoplay next」后播完Auto播下一首，也可用上一首/下一首切换，「Repeat current stream」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩Small悬浮到右下角，点 ⤢ 还原、✕ Close。</p>
             </details>
             <details>
-                <summary>如何Analyze m3u8 清单里有哪些Quality和Audio track？</summary>
-                <p>在「M3U8 playlist analyzer」工具粘贴地址并点Analyze：master 清单列出全部变体的分辨率/带宽/编码与Audio track、Subtitles组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。详见 <a href="/guides#analyzer">/guides#analyzer</a>。</p>
+                <summary>How do I inspect available renditions and audio tracks in an M3U8 playlist?</summary>
+                <p>Paste a URL into the M3U8 Playlist Analyzer and select Analyze. A master playlist lists variants, resolutions, bandwidth, codecs, audio tracks and subtitle groups. A media playlist reports segment count, duration, live / on-demand state and encryption markers. Analysis runs locally and requires CORS permission. See <a href="/guides#analyzer">/guides#analyzer</a>。</p>
             </details>
             <details>
                 <summary>How do I embed the player on my website?</summary>
-                <p>用「嵌入代码Builder」填写Stream URL、宽高、Start time (seconds)与Auto播放选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许MutedAuto播放，建议勾选Muted。</p>
+                <p>用「嵌入代码Builder」填写Stream URL、宽高、Start time (seconds)与Autoplay选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许MutedAutoplay，建议勾选Muted。</p>
             </details>
         </div>
         <script type="application/ld+json">
@@ -459,14 +459,14 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
           "mainEntity": [
             { "@type": "Question", "name": "Which video formats are supported?", "acceptedAnswer": { "@type": "Answer", "text": "The player supports M3U8 / HLS live and on-demand streams, plus browser-native formats such as MP4, WebM and Ogg. HLS is handled by hls.js; native formats use the browser's built-in player." } },
             { "@type": "Question", "name": "Why does a video fail to load or keep buffering?", "acceptedAnswer": { "@type": "Answer", "text": "The URL may be unavailable, or the source server may block cross-origin requests (CORS). Try opening the URL in a new browser tab to check that it is reachable." } },
-            { "@type": "Question", "name": "我的Stream URL会被上传或保存吗？", "acceptedAnswer": { "@type": "Answer", "text": "播放是纯前端行为，视频流不经过本站服务器。「Recent streams」只存在你自己浏览器的 localStorage 里，不会上传，可随时Clear。" } },
-            { "@type": "Question", "name": "可以调整Playback speed和Quality吗？", "acceptedAnswer": { "@type": "Answer", "text": "可以。控制条提供 0.5× 到 2× 六档Speed；对于多码率 HLS 流，Quality菜单会列出各档分辨率，可手动锁定或Auto切换。" } },
-            { "@type": "Question", "name": "如何加载Subtitles？", "acceptedAnswer": { "@type": "Answer", "text": "在「Subtitles」工具中粘贴 .vtt 或 .srt Subtitles地址并加载，然后在Subtitles菜单中选择轨道。跨域Subtitles需要对方服务器允许 CORS。" } },
-            { "@type": "Question", "name": "能记住Playback progress或分享指定时间点吗？", "acceptedAnswer": { "@type": "Answer", "text": "能。Playback progress只存在本机浏览器，再次打开同一地址会提示「Resume」；点控制条 🔗 按钮可复制带当前时间点的分享链接（?url=地址&t=秒数），对方打开即从该时间点开始。" } },
-            { "@type": "Question", "name": "如何排查播放问题或查看Playback statistics？", "acceptedAnswer": { "@type": "Answer", "text": "点控制条 🩺 按钮打开Playback diagnostics，Auto检测 MSE/hls.js 支持、H.264/WebM 解码能力、网络状态与地址可达性（含跨域），逐项给出结论；点 📊 按钮查看分辨率、编码、估算带宽、缓冲健康与丢帧等实时统计。" } },
-            { "@type": "Question", "name": "Can I queue multiple streams or keep watching while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「Playlist queue」Add多个地址，开启「Auto连播」后播完Auto播下一首，也可用上一首/下一首切换，「Repeat current stream」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩Small悬浮到右下角，点 ⤢ 还原、✕ Close。" } },
-            { "@type": "Question", "name": "如何Analyze m3u8 清单里有哪些Quality和Audio track？", "acceptedAnswer": { "@type": "Answer", "text": "在「M3U8 playlist analyzer」工具粘贴地址并点Analyze：master 清单列出全部变体的分辨率/带宽/编码与Audio track、Subtitles组，media 清单给出分片数、总时长、直播/点播状态与加密信息；解析在浏览器本地完成，需要源站允许跨域（CORS）。详见 /guides#analyzer。" } },
-            { "@type": "Question", "name": "How do I embed the player on my website?", "acceptedAnswer": { "@type": "Answer", "text": "用「嵌入代码Builder」填写Stream URL、宽高、Start time (seconds)与Auto播放选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许MutedAuto播放，建议勾选Muted。" } }
+            { "@type": "Question", "name": "Are my stream URLs uploaded or stored?", "acceptedAnswer": { "@type": "Answer", "text": "Playback runs in your browser and the video stream does not pass through our server. Recent URLs are stored only in this browser and can be cleared at any time." } },
+            { "@type": "Question", "name": "Can I change playback speed and quality?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The controls offer six speeds from 0.5× to 2×. For multi-bitrate HLS streams, select a rendition from the quality menu or use automatic switching." } },
+            { "@type": "Question", "name": "如何Load subtitles？", "acceptedAnswer": { "@type": "Answer", "text": "Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission." } },
+            { "@type": "Question", "name": "Can I resume playback or share a timestamp?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Playback progress is stored only in this browser. Reopening the same URL offers a resume option, and the share control copies a timestamped URL (?url=URL&amp;t=seconds)." } },
+            { "@type": "Question", "name": "How can I troubleshoot playback or view statistics?", "acceptedAnswer": { "@type": "Answer", "text": "Select the diagnostics control to check MSE / hls.js support, H.264 / WebM decoding, network state, URL reachability and CORS. Select statistics to view resolution, codec, estimated bandwidth, buffer health and dropped frames." } },
+            { "@type": "Question", "name": "Can I queue multiple streams or keep watching while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「Playlist queue」Add多个地址，开启「Autoplay next」后播完Auto播下一首，也可用上一首/下一首切换，「Repeat current stream」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩Small悬浮到右下角，点 ⤢ 还原、✕ Close。" } },
+            { "@type": "Question", "name": "How do I inspect available renditions and audio tracks in an M3U8 playlist?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a URL into the M3U8 Playlist Analyzer and select Analyze. A master playlist lists variants, resolutions, bandwidth, codecs, audio tracks and subtitle groups. A media playlist reports segment count, duration, live / on-demand state and encryption markers. Analysis runs locally and requires CORS permission. See /guides#analyzer。" } },
+            { "@type": "Question", "name": "How do I embed the player on my website?", "acceptedAnswer": { "@type": "Answer", "text": "用「嵌入代码Builder」填写Stream URL、宽高、Start time (seconds)与Autoplay选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许MutedAutoplay，建议勾选Muted。" } }
           ]
         }
         </script>
@@ -494,12 +494,12 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 
 <footer class="dd-brandfoot compact">
     <div class="dd-shell-inner">
-        <p class="dd-brandfoot-title">DigDevBox · 免费在线Developer工具集</p>
+        <p class="dd-brandfoot-title">DigDevBox · Free online developer tools</p>
         <nav class="dd-brandfoot-nav">
-                <a href="https://digdevbox.com/">Dev 工具箱</a>
-                <a href="https://ip.digdevbox.com/">IP 查询</a>
-                <a href="https://fangdai.digdevbox.com/">房贷计算器</a>
-                <a href="https://img.digdevbox.com/">图片压缩</a>
+                <a href="https://digdevbox.com/">Developer Tools</a>
+                <a href="https://ip.digdevbox.com/">IP Lookup</a>
+                <a href="https://fangdai.digdevbox.com/">Loan Calculator</a>
+                <a href="https://img.digdevbox.com/">Image Compressor</a>
         </nav>
     </div>
 </footer>
