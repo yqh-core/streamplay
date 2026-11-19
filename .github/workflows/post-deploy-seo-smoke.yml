@@ -95,9 +95,9 @@ jobs:
             await sleep(10000);
           }
           if (!home) throw new Error('Production homepage did not expose expected English HTML after exact deployment');
-          if (!/<main\\b[^>]*\\bclass=["']main["']/i.test(home.body)) throw new Error('Homepage is missing its main landmark');
+          if (!/<main\b[^>]*\bclass=["']main["']/i.test(home.body)) throw new Error('Homepage is missing its main landmark');
           for (const [id, label] of [['url', 'Stream URL'], ['sub-url', 'Subtitle URL'], ['queue-url', 'Queue stream URL'], ['ma-url', 'M3U8 playlist URL']]) {
-            const input = home.body.match(new RegExp('<input\\\\b[^>]*id="' + id + '"[^>]*>', 'i'))?.[0] || '';
+            const input = home.body.match(new RegExp('<input\\b[^>]*id="' + id + '"[^>]*>', 'i'))?.[0] || '';
             if (!input.includes('aria-label="' + label + '"')) throw new Error(id + ' is missing its accessible name');
           }
 
