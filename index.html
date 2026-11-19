@@ -129,13 +129,13 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         </div>
     </header>
 
-    <div class="main">
+    <main class="main">
         <h1 data-i18n="h1.title">StreamPlay</h1>
         <p class="subtitle" data-i18n="hero.subtitle">Paste an m3u8 / HLS or mp4 URL and hit play</p>
 
         <!-- ① 地址输入：已预填一个可用的测试流，打开页面就能直接Select Play -->
         <div class="form">
-            <input type="text" id="url" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+            <input type="text" id="url" aria-label="Stream URL" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
                 placeholder="Paste an M3U8 / HLS / MP4 stream URL" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:placeholder.urlInput">
             <button type="button" id="play-btn" title="Play">
                 <img src="./images/ic-play.png" alt="">
@@ -276,7 +276,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <div class="card tool-card">
                 <p><strong>Subtitles <span class="tag">.vtt / .srt</span></strong></p>
                 <div class="sub-row">
-                    <input type="text" id="sub-url" placeholder="Paste a subtitle URL (.vtt / .srt) and press Enter to load" autocomplete="off" spellcheck="false">
+                    <input type="text" id="sub-url" aria-label="Subtitle URL" placeholder="Paste a subtitle URL (.vtt / .srt) and press Enter to load" autocomplete="off" spellcheck="false">
                     <button type="button" id="sub-load" class="mini-btn">Load subtitles</button>
                     <button type="button" id="sub-off" class="mini-btn ghost">Close</button>
                 </div>
@@ -318,7 +318,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <button type="button" id="queue-clear" class="mini-btn ghost clear-btn">Clear</button>
             </p>
             <div class="sub-row">
-                <input type="text" id="queue-url" placeholder="Paste a URL and press Enter to add it to the queue" autocomplete="off" spellcheck="false">
+                <input type="text" id="queue-url" aria-label="Queue stream URL" placeholder="Paste a URL and press Enter to add it to the queue" autocomplete="off" spellcheck="false">
                 <button type="button" id="queue-add" class="mini-btn">Add</button>
                 <button type="button" id="queue-prev" class="mini-btn ghost">⏮ Previous</button>
                 <button type="button" id="queue-next" class="mini-btn ghost">Next ⏭</button>
@@ -331,7 +331,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <div class="card analyzer-card" id="analyzer">
             <p><strong>M3U8 playlist analyzer <span class="tag">Developer</span></strong></p>
             <div class="sub-row">
-                <input type="text" id="ma-url" placeholder="Paste an M3U8 URL and press Enter to analyze" autocomplete="off" spellcheck="false">
+                <input type="text" id="ma-url" aria-label="M3U8 playlist URL" placeholder="Paste an M3U8 URL and press Enter to analyze" autocomplete="off" spellcheck="false">
                 <button type="button" id="ma-run" class="mini-btn">Analyze</button>
                 <button type="button" id="ma-use-current" class="mini-btn ghost">Use current stream URL</button>
             </div>
@@ -436,7 +436,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <a href="/terms/">Terms</a> | <a href="/copyright/">Copyright & Disclaimer</a></p>
             <p>&copy; 2026 StreamPlay</p>
         </div>
-    </div>
+    </main>
 
     <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
     <script src="./libs/hls.min.js?v=a12e7ee1"></script>
