@@ -31,7 +31,7 @@ const checks = [
   ['noindex page view blocked', /isNoindexPage\(\)/],
   ['duplicate route views blocked', /path === lastPage/],
   ['automatic page_view disabled', /send_page_view:\s*false/],
-  ['Google Analytics-specific consent labels', /Accept Google Analytics[\\s\\S]*Reject Google Analytics/],
+  ['Google Analytics-specific consent labels', /Accept Google Analytics[\s\S]*Reject Google Analytics/],
   ['stream URLs and playback content excluded', /never send M3U8\/MP4 stream URLs, playback content, or URL query parameters/],
 ];
 for (const [label, pattern] of checks) if (!pattern.test(script)) failures.push('analytics-consent.js: ' + label);
