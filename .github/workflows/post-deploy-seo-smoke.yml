@@ -100,7 +100,7 @@ jobs:
           if (!csp.includes("default-src 'self'") || !csp.includes("connect-src 'self' https:")) {
             throw new Error('Production CSP is missing the baseline required for secure HLS requests');
           }
-          if (/\\bframe-ancestors\\b/i.test(csp)) {
+          if (/\bframe-ancestors\b/i.test(csp)) {
             throw new Error('StreamPlay must remain embeddable in third-party iframes; do not restrict frame-ancestors');
           }
 
@@ -192,7 +192,7 @@ jobs:
               throw new Error(path + ' unexpectedly carries noindex');
             }
             if (!sitemap.body.includes(origin + path + '</loc>')) throw new Error(path + ' is missing from sitemap.xml');
-            if (!/<h1\\b/i.test(page.body)) throw new Error(path + ' is missing its primary heading');
+            if (!/<h1\b/i.test(page.body)) throw new Error(path + ' is missing its primary heading');
           }
 
           // Preserve the Chinese originals as noindex pages at their .html URLs.
@@ -200,7 +200,7 @@ jobs:
           for (const path of excludedChinesePages) {
             const page = await get(path);
             if (!page.response.ok) throw new Error(path + ' should remain accessible (HTTP ' + page.response.status + ')');
-            if (!/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex\\s*,?\\s*follow/i.test(page.body)) {
+            if (!/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex\s*,?\s*follow/i.test(page.body)) {
               throw new Error(path + ' must carry noindex, follow');
             }
             if (sitemap.body.includes(origin + path + '</loc>')) {
