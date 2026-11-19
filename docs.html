@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head><script id="dd-theme-bootstrap">/* inject-dd-shell: 主题防闪烁 */
 (function(){try{var t=localStorage.getItem('dd-theme');var h=document.documentElement;
@@ -17,20 +17,19 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
 @media (max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}
 </style>
 
-    <title>HLS 文档 - m3u8 结构、常用标签与工作原理 | StreamPlay 流影</title>
+    <title>HLS & M3U8 Documentation: Playlists, Segments and CORS | StreamPlay</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="系统讲解 HLS 与 m3u8：协议原理、Master Playlist 与 Media Playlist 的区别、EXT-X 常用标签速查、分片格式、AES-128 加密、自适应码率、CORS 与延迟优化。">
-    <meta name="robots" content="noindex, follow">
-    <meta name="keywords" content="HLS协议,m3u8格式,EXT-X-STREAM-INF,Master Playlist,Media Playlist,AES-128加密,自适应码率,HLS延迟">
+    <meta name="description" content="Understand HLS and M3U8 master playlists, media playlists, variants, segments, codecs and CORS. Learn how to inspect streaming manifests with StreamPlay.">
+<meta name="keywords" content="HLS协议,m3u8格式,EXT-X-STREAM-INF,Master Playlist,Media Playlist,AES-128加密,自适应码率,HLS延迟">
     <meta name="theme-color" content="#0f766e">
     <link rel="canonical" href="https://play.digdevbox.com/docs">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="HLS 文档 - m3u8 结构、常用标签与工作原理">
-    <meta property="og:description" content="协议原理、两类播放列表、EXT-X 标签速查、加密、自适应码率与延迟优化。">
+    <meta property="og:title" content="HLS & M3U8 Documentation: Playlists, Segments and CORS | StreamPlay">
+    <meta property="og:description" content="Understand HLS and M3U8 master playlists, media playlists, variants, segments, codecs and CORS. Learn how to inspect streaming manifests with StreamPlay.">
     <meta property="og:url" content="https://play.digdevbox.com/docs">
-    <meta property="og:site_name" content="StreamPlay 流影">
-    <meta property="og:locale" content="zh_CN">
+    <meta property="og:site_name" content="StreamPlay">
+    <meta property="og:locale" content="en_US">
 
     <link rel="icon" href="./images/logo.ico">
     <link rel="apple-touch-icon" href="./images/logo.png">
@@ -40,7 +39,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
     <meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="StreamPlay 流影 - M3U8 / HLS 在线播放器">
+    <meta property="og:image:alt" content="StreamPlay — online M3U8 and HLS playlist analyzer">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
 
@@ -55,13 +54,13 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
     <div class="dd-shell-inner">
         <a class="dd-brand" href="https://digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
         <nav>
-                <a href="https://digdevbox.com/" data-i18n="nav.devtools">Dev 工具箱</a>
-                <a href="https://play.digdevbox.com/" aria-current="page" data-i18n="nav.player">流影播放器</a>
-                <a href="https://ip.digdevbox.com/" data-i18n="nav.ip">IP 查询</a>
-                <a href="https://fangdai.digdevbox.com/" data-i18n="nav.loan">房贷计算器</a>
-                <a href="https://img.digdevbox.com/" data-i18n="nav.imgtools">图片压缩</a>
+                <a href="https://digdevbox.com/" data-i18n="nav.devtools">Developer tools</a>
+                <a href="https://play.digdevbox.com/" aria-current="page" data-i18n="nav.player">StreamPlay</a>
+                <a href="https://ip.digdevbox.com/" data-i18n="nav.ip">IP Lookup</a>
+                <a href="https://fangdai.digdevbox.com/" data-i18n="nav.loan">Mortgage calculator</a>
+                <a href="https://img.digdevbox.com/" data-i18n="nav.imgtools">Image tools</a>
         </nav>
-        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
+        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
     </div>
 </div>
     <header class="hd">
@@ -71,190 +70,57 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <span>StreamPlay 流影</span>
             </a>
             <nav>
-                <a href="/" data-i18n="topnav.home">首页</a>
-                <a href="/guides" data-i18n="topnav.guides">使用教程</a>
-                <a href="/docs" aria-current="page" data-i18n="topnav.docs">HLS 文档</a>
-                <a href="/faq" data-i18n="topnav.faq">常见问题</a>
-                <a href="/about" data-i18n="topnav.about">关于</a>
+                <a href="/" data-i18n="topnav.home">Home</a>
+                <a href="/guides" data-i18n="topnav.guides">Guides</a>
+                <a href="/docs" aria-current="page" data-i18n="topnav.docs">Documentation</a>
+                <a href="/faq" data-i18n="topnav.faq">FAQ</a>
+                <a href="/about" data-i18n="topnav.about">About</a>
             </nav>
         </div>
     </header>
 
     <div class="main about">
-        <h1>HLS 文档</h1>
-        <p class="subtitle">理解 m3u8 与 HLS 的技术基础</p>
-
-        <h2>1. HLS 是什么</h2>
-        <p>HLS（HTTP Live Streaming）是苹果公司提出的基于 HTTP 的自适应码率流媒体传输协议。它的核心思路很朴素：<strong>把一整段视频切成许多小分片，用一个文本播放列表描述这些分片的顺序与位置，播放器依次下载并连续播放。</strong></p>
-        <p>因为跑在标准 HTTP 之上，HLS 不需要专用流媒体服务器，能直接利用现有的 CDN 与缓存体系，这也是它被广泛采用的主要原因。</p>
-
-        <h2>2. m3u8 文件长什么样</h2>
-        <p>m3u8 就是那个「播放列表」，本质是 UTF-8 编码的纯文本文件，用文本编辑器就能打开。一个最简单的点播列表示例：</p>
-        <pre>#EXTM3U
-#EXT-X-VERSION:3
-#EXT-X-TARGETDURATION:10
-#EXT-X-MEDIA-SEQUENCE:0
-#EXTINF:9.009,
-seg_000.ts
-#EXTINF:9.009,
-seg_001.ts
-#EXTINF:9.009,
-seg_002.ts
-#EXT-X-ENDLIST</pre>
-        <p>每一行 <code>#EXT-X-</code> / <code>#EXT</code> 开头的是标签（指令），其余行是分片地址。</p>
-
-        <h2>3. 两类播放列表：Master 与 Media</h2>
-        <table>
-            <tr>
-                <th>类型</th>
-                <th>作用</th>
-                <th>是否含分片地址</th>
-            </tr>
-            <tr>
-                <td><strong>Master Playlist</strong><br>（主播放列表）</td>
-                <td>本身不含分片，而是列出多个不同码率/分辨率的子列表地址，供播放器按网速选择。</td>
-                <td>否</td>
-            </tr>
-            <tr>
-                <td><strong>Media Playlist</strong><br>（媒体播放列表）</td>
-                <td>真正列出一串分片（.ts 或 .m4s）及其时长。</td>
-                <td>是</td>
-            </tr>
-        </table>
-        <p>判断方法：打开 m3u8，如果里面有 <code>EXT-X-STREAM-INF</code>，它就是 Master Playlist。</p>
-        <p>一个多码率主列表示例：</p>
-        <pre>#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=1280000,RESOLUTION=720x480
-low/index.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=2560000,RESOLUTION=1280x720
-mid/index.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=7680000,RESOLUTION=1920x1080
-high/index.m3u8</pre>
-
-        <h2>4. 常用标签速查</h2>
-        <table>
-            <tr>
-                <th>标签</th>
-                <th>含义</th>
-            </tr>
-            <tr>
-                <td><code>#EXTM3U</code></td>
-                <td>文件头，必须位于第一行</td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-VERSION</code></td>
-                <td>协议版本号，决定可使用哪些特性</td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-TARGETDURATION</code></td>
-                <td>任意分片的最大时长（秒），取整</td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-MEDIA-SEQUENCE</code></td>
-                <td>第一个分片的序号，直播中随窗口滑动递增</td>
-            </tr>
-            <tr>
-                <td><code>#EXTINF</code></td>
-                <td>紧随其后的那个分片的时长</td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-STREAM-INF</code></td>
-                <td>描述一路码率流，带 BANDWIDTH、RESOLUTION、CODECS 等属性</td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-ENDLIST</code></td>
-                <td>表示列表结束——<strong>有点播（VOD），无直播</strong></td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-KEY</code></td>
-                <td>分片加密方式与密钥获取地址</td>
-            </tr>
-            <tr>
-                <td><code>#EXT-X-MAP</code></td>
-                <td>fMP4 容器的初始化段（init segment）位置</td>
-            </tr>
-        </table>
-        <p>一个实用判断：<strong>有没有 <code>EXT-X-ENDLIST</code> 可以区分直播与点播</strong>。直播列表会不断追加新分片并移除旧分片，永远不写这个标签。</p>
-
-        <h2>5. 分片格式：TS 与 fMP4</h2>
+        <h1>HLS &amp; M3U8 Documentation</h1>
+        <p class="subtitle">Understand playlist structure, adaptive streaming and common playback constraints</p>
+        <h2>1. What are HLS and M3U8?</h2>
+        <p>HTTP Live Streaming (HLS) is an adaptive streaming protocol. A player downloads a text playlist, then requests media segments over HTTP or HTTPS. M3U8 is the UTF-8 playlist format commonly used to describe those streams.</p>
+        <p>A playlist is not the video itself. It is a manifest that points to variant playlists, audio tracks, initialization data and media segments.</p>
+        <h2>2. Master playlists and media playlists</h2>
+        <p>A <strong>master playlist</strong> describes available renditions. Each variant can specify bandwidth, resolution, codecs and a URI for its media playlist. A player can switch between variants as network conditions change.</p>
+        <p>A <strong>media playlist</strong> describes the media segments for one rendition. It commonly contains an <code>#EXTINF</code> duration followed by a segment URI for each item.</p>
+        <h2>3. Important HLS tags</h2>
         <ul>
-            <li><strong>MPEG-2 TS（.ts）</strong>：HLS 传统格式，兼容性最好，每个分片可独立解码。</li>
-            <li><strong>fMP4（.m4s）</strong>：较新的封装方式，与 DASH 共用同一套文件，便于一套源同时服务 HLS 与 DASH。使用时需要 <code>EXT-X-MAP</code> 指向初始化段。</li>
+          <li><code>#EXT-X-STREAM-INF</code> — declares a variant stream and its attributes.</li>
+          <li><code>#EXTINF</code> — gives the duration and optional title for the next media segment.</li>
+          <li><code>#EXT-X-TARGETDURATION</code> — declares the maximum segment duration target.</li>
+          <li><code>#EXT-X-MEDIA-SEQUENCE</code> — identifies the sequence number of the first segment in a playlist.</li>
+          <li><code>#EXT-X-ENDLIST</code> — indicates that no more media segments will be added.</li>
+          <li><code>#EXT-X-KEY</code> — describes encryption key information.</li>
+          <li><code>#EXT-X-MAP</code> — points to an initialization section, often used with fragmented MP4.</li>
+          <li><code>#EXT-X-DISCONTINUITY</code> — marks a change in the media timeline or encoding parameters.</li>
         </ul>
-        <p>hls.js 这类库的工作，就是把 TS / fMP4 分片<strong>转封装</strong>成浏览器能直接喂给 <code>&lt;video&gt;</code> 的格式，并通过 Media Source Extensions 连续播放。Safari 则原生支持 HLS，不需要这层转换。</p>
-
-        <h2>6. 加密与 DRM</h2>
-        <p>HLS 支持分片级加密。最常见的 AES-128 通过 <code>EXT-X-KEY</code> 声明：</p>
-        <pre>#EXT-X-KEY:METHOD=AES-128,URI="https://example.com/key.bin",IV=0x...</pre>
-        <p>播放器需要先拿到 URI 指向的密钥，才能解密后续分片。需要注意：<strong>这只是内容加密，不是强版权保护</strong>——密钥获取方式是自定义的，真正的 DRM（如 FairPlay、Widevine）需要额外的授权体系与浏览器支持，本站不涉及。</p>
-
-        <h2>7. 自适应码率（ABR）</h2>
-        <p>Master Playlist 里列出的每一路 <code>EXT-X-STREAM-INF</code> 都带 <code>BANDWIDTH</code>。播放器会持续测量当前网速与缓冲水位，在多个档位间自动切换：网速好时升到高清，网速变差时降到流畅档，避免卡顿。这也是为什么同一条流在不同网络下清晰度会变。</p>
-
-        <h2>8. 为什么跨域（CORS）这么关键</h2>
-        <p>浏览器安全策略要求：网页要读取另一个域名的资源，对方必须显式允许。对 HLS 来说，就是 m3u8 与分片文件的响应头里要带上：</p>
-        <pre>Access-Control-Allow-Origin: *</pre>
-        <p>或指定具体来源。少了这个头，浏览器会在网络层直接拦掉请求，播放器只能报「地址不可达」——这是 m3u8 播放失败<strong>最常见的原因</strong>，且需要在源站侧修复，播放器无法绕过。</p>
-
-        <h2>9. 延迟从哪来，怎么优化</h2>
-        <p>HLS 的天然延迟主要来自分片时长：播放器通常要等至少一个完整分片下载完才开始播。若分片为 6 秒，叠加缓冲，端到端延迟轻松达到 10–30 秒。</p>
-        <ul>
-            <li><strong>缩短分片</strong>：把 <code>-hls_time</code> 降到 2–4 秒，延迟下降，但请求数上升。</li>
-            <li><strong>LL-HLS（低延迟 HLS）</strong>：引入部分分片（Partial Segment）与预加载提示，可把延迟降到 2–5 秒，但需要源站与播放器同时支持。</li>
-            <li><strong>权衡：</strong>延迟越低，对网络抖动的容忍度越差，卡顿风险上升。直播互动类场景才值得为低延迟付出代价。</li>
-        </ul>
-
-        <h2>10. HLS、DASH 与普通 MP4 怎么选</h2>
-        <table>
-            <tr>
-                <th>方案</th>
-                <th>优点</th>
-                <th>局限</th>
-            </tr>
-            <tr>
-                <td><strong>HLS</strong></td>
-                <td>iOS / Safari 原生支持；生态成熟；CDN 友好</td>
-                <td>延迟相对较高（传统模式下）</td>
-            </tr>
-            <tr>
-                <td><strong>DASH</strong></td>
-                <td>国际标准；与 fMP4 天然契合；Android / 智能电视支持好</td>
-                <td>苹果设备支持较弱</td>
-            </tr>
-            <tr>
-                <td><strong>普通 MP4</strong></td>
-                <td>最简单，一个文件丢上去就能播</td>
-                <td>无自适应码率；长视频首播慢；拖动需等缓冲</td>
-            </tr>
-        </table>
-        <p>实践中的常见做法是：短视频用 MP4 直传；长视频与直播用 HLS（需要覆盖苹果设备时）或 HLS + DASH 双轨。</p>
-
-        <h2>延伸阅读</h2>
-        <ul>
-            <li><a href="/guides" data-i18n="topnav.guides">使用教程</a> — 三步播放、iframe 嵌入、五步排查</li>
-            <li><a href="/faq" data-i18n="topnav.faq">常见问题</a> — 跨域、编码、延迟等高频疑问</li>
-            <li><a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js 项目</a> — 本站使用的播放内核</li>
-        </ul>
-
-        <div class="footer">
-            <p class="links">
-                <a href="/">← 返回首页</a> |
-                <a href="/guides" data-i18n="topnav.guides">使用教程</a> |
-                <a href="/faq" data-i18n="topnav.faq">常见问题</a> | <a href="/copyright">版权与免责</a></p>
-            <p>&copy; 2026 StreamPlay 流影</p>
-        </div>
+        <h2>4. Variants, bandwidth and codecs</h2>
+        <p>Adaptive bitrate streaming publishes multiple renditions of the same content. The player selects a suitable rendition based on available bandwidth, device capability and buffer health. Resolution alone does not determine quality: codec, bitrate, frame rate and encoding settings also matter.</p>
+        <p>Common media formats include MPEG-TS segments (<code>.ts</code>) and fragmented MP4 segments (<code>.m4s</code> or <code>.mp4</code>). The codecs declared in the playlist must be supported by the browser or playback library.</p>
+        <h2>5. Live streams and video on demand</h2>
+        <p>A live media playlist is updated as new segments become available and usually does not contain <code>#EXT-X-ENDLIST</code>. A video-on-demand playlist is generally complete and may include the end-list tag. A short playlist is not necessarily broken: a live window may intentionally expose only recent segments.</p>
+        <h2>6. CORS and HTTPS</h2>
+        <p>Browsers enforce cross-origin rules. A playlist may load in a desktop player but fail in a browser if the server does not return suitable CORS headers for the manifest, media segments, keys or initialization files. HTTPS pages also cannot freely load insecure HTTP media because of mixed-content restrictions.</p>
+        <p>When debugging, inspect the browser network panel for the exact request that fails. A 403 can indicate authorization or an expired signed URL; a 404 can indicate a stale segment path; a CORS error means the browser did not allow the requesting page to read the response.</p>
+        <h2>7. Inspect a playlist with StreamPlay</h2>
+        <p>Open the <a href="/">StreamPlay analyzer</a>, enter an accessible M3U8 URL and review the detected variants, segment list, durations and manifest details. The analyzer helps you inspect the manifest; it does not host the video or bypass origin access controls.</p>
+        <div class="footer"><p class="links"><a href="/">← Back to StreamPlay</a> | <a href="/guides">Guides</a> | <a href="/faq">FAQ</a> | <a href="/copyright">Copyright</a></p><p>&copy; 2026 StreamPlay</p></div>
     </div>
-
 
 
 <footer class="dd-brandfoot compact">
     <div class="dd-shell-inner">
-        <p class="dd-brandfoot-title">DigDevBox · 免费在线开发者工具集</p>
+        <p class="dd-brandfoot-title">DigDevBox · Free online developer tools</p>
         <nav class="dd-brandfoot-nav">
-                <a href="https://digdevbox.com/">Dev 工具箱</a>
-                <a href="https://ip.digdevbox.com/">IP 查询</a>
-                <a href="https://fangdai.digdevbox.com/">房贷计算器</a>
-                <a href="https://img.digdevbox.com/">图片压缩</a>
+                <a href="https://digdevbox.com/">Developer tools</a>
+                <a href="https://ip.digdevbox.com/">IP Lookup</a>
+                <a href="https://fangdai.digdevbox.com/">Mortgage calculator</a>
+                <a href="https://img.digdevbox.com/">Image tools</a>
         </nav>
     </div>
 </footer>
@@ -280,8 +146,8 @@ high/index.m3u8</pre>
     var d=effective()==='dark';
     b.textContent=d?'☀️':'🌙';
     if(window.DD_I18N&&window.DD_I18N.t)return;
-    b.setAttribute('aria-label', d?'切换到浅色模式':'切换到深色模式');
-    b.setAttribute('title', d?'切换到浅色模式':'切换到深色模式');}
+    b.setAttribute('aria-label', d?'Switch to light mode':'Switch to dark mode');
+    b.setAttribute('title', d?'Switch to light mode':'Switch to dark mode');}
   function toggle(){var c=effective();apply(c==='dark'?'light':'dark');}
   function init(){var b=document.getElementById('dd-theme-toggle');if(b)b.addEventListener('click',toggle);sync();}
   if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
