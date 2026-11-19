@@ -30,7 +30,7 @@ const checks = [
   ['query string excluded', /location\.origin \+ location\.pathname/],
   ['noindex page view blocked', /isNoindexPage\(\)/],
   ['duplicate route views blocked', /path === lastPage/],
-  ['automatic page_view disabled', /send_page_view:\\s*false/],
+  ['automatic page_view disabled', /send_page_view:\s*false/],
   ['Google Analytics-specific consent labels', /Accept Google Analytics[\\s\\S]*Reject Google Analytics/],
   ['stream URLs and playback content excluded', /never send M3U8\/MP4 stream URLs, playback content, or URL query parameters/],
 ];
