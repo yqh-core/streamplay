@@ -136,7 +136,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <div class="form">
             <input type="text" id="url" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
                 placeholder="Paste an M3U8 / HLS / MP4 stream URL" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:placeholder.urlInput">
-            <button type="button" id="play-btn" title="播放">
+            <button type="button" id="play-btn" title="Play">
                 <img src="./images/ic-play.png" alt="">
                 <span data-i18n="btn.play">Play</span>
             </button>
@@ -177,7 +177,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <div class="player-shell">
             <div class="player-wrap">
                 <video id="player" preload="auto" playsinline webkit-playsinline></video>
-                <button type="button" class="big-play" id="big-play" aria-label="播放">▶</button>
+                <button type="button" class="big-play" id="big-play" aria-label="Play">▶</button>
                 <div class="buffer-spin" id="buffer-spin" hidden aria-hidden="true"><span></span></div>
                 <button type="button" class="retry-overlay" id="retry-overlay" hidden>⟳ Playback failed. Click to retry</button>
                 <div class="resume-bar" id="resume-bar" hidden>
@@ -323,7 +323,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <button type="button" id="queue-next" class="mini-btn ghost">Next ⏭</button>
             </div>
             <ol class="queue-list" id="queue-list" aria-label="Playlist queue"></ol>
-            <p class="note" id="queue-empty">Add多个地址组成队列；开启「Autoplay next」播完Auto播下一首，「Repeat current stream」单曲循环。队列仅存本机浏览器。</p>
+            <p class="note" id="queue-empty">Add multiple URLs to build a queue. Enable Autoplay next to advance automatically, or Repeat current stream to loop the current item. The queue is stored only in this browser.</p>
         </div>
 
         <!-- ③-e M3U8 playlist analyzer器（对标 LivePlayer Analyzer：变体/Audio track/Subtitles/分片/直播态/加密） -->
@@ -378,7 +378,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                     <iframe id="emb-preview" title="Embed preview" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
                 </div>
             </div>
-            <p class="note">How it works: the page URL uses <code>?url=</code> to load a stream automatically, <code>&amp;t=seconds</code> sets the start time, <code>&amp;autoplay=1&amp;muted=1</code> MutedAutoplay（多数浏览器只允许MutedAutoplay）。控制条 🔗 按钮可一键复制带当前时间点的分享链接。</p>
+            <p class="note">How it works: the page URL uses <code>?url=</code> to load a stream automatically, <code>&amp;t=seconds</code> sets the start time, <code>&amp;autoplay=1&amp;muted=1</code> Muted autoplay (most browsers only allow autoplay when muted). Use the share control to copy a link with the current timestamp.</p>
         </div>
 
         <!-- ⑥ 科普 -->
@@ -428,7 +428,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
                 <p>Yes. The controls offer six speeds from 0.5× to 2×. For multi-bitrate HLS streams, select a rendition from the quality menu or use automatic switching.</p>
             </details>
             <details>
-                <summary>如何Load subtitles？</summary>
+                <summary>How do I load subtitles?</summary>
                 <p>Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission.</p>
             </details>
             <details>
@@ -441,7 +441,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </details>
             <details>
                 <summary>Can I queue multiple streams or keep watching while scrolling?</summary>
-                <p>可以。在「Playlist queue」Add多个地址，开启「Autoplay next」后播完Auto播下一首，也可用上一首/下一首切换，「Repeat current stream」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩Small悬浮到右下角，点 ⤢ 还原、✕ Close。</p>
+                <p>Yes. Add URLs to the queue and enable Autoplay next to advance automatically. Use Previous / Next to navigate or Repeat current stream to loop one item. The mini-player floats while scrolling; use Restore or Close to control it.</p>
             </details>
             <details>
                 <summary>How do I inspect available renditions and audio tracks in an M3U8 playlist?</summary>
@@ -449,7 +449,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </details>
             <details>
                 <summary>How do I embed the player on my website?</summary>
-                <p>用「嵌入代码Builder」填写Stream URL、宽高、Start time (seconds)与Autoplay选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许MutedAutoplay，建议勾选Muted。</p>
+                <p>Use the Embed Builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code; it points to play.digdevbox.com. Most browsers allow autoplay only when muted.</p>
             </details>
         </div>
         <script type="application/ld+json">
@@ -461,12 +461,12 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             { "@type": "Question", "name": "Why does a video fail to load or keep buffering?", "acceptedAnswer": { "@type": "Answer", "text": "The URL may be unavailable, or the source server may block cross-origin requests (CORS). Try opening the URL in a new browser tab to check that it is reachable." } },
             { "@type": "Question", "name": "Are my stream URLs uploaded or stored?", "acceptedAnswer": { "@type": "Answer", "text": "Playback runs in your browser and the video stream does not pass through our server. Recent URLs are stored only in this browser and can be cleared at any time." } },
             { "@type": "Question", "name": "Can I change playback speed and quality?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The controls offer six speeds from 0.5× to 2×. For multi-bitrate HLS streams, select a rendition from the quality menu or use automatic switching." } },
-            { "@type": "Question", "name": "如何Load subtitles？", "acceptedAnswer": { "@type": "Answer", "text": "Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission." } },
+            { "@type": "Question", "name": "How do I load subtitles?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a .vtt or .srt URL into the Subtitles tool, load it, then select the track in the player menu. Cross-origin subtitles require CORS permission." } },
             { "@type": "Question", "name": "Can I resume playback or share a timestamp?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Playback progress is stored only in this browser. Reopening the same URL offers a resume option, and the share control copies a timestamped URL (?url=URL&amp;t=seconds)." } },
             { "@type": "Question", "name": "How can I troubleshoot playback or view statistics?", "acceptedAnswer": { "@type": "Answer", "text": "Select the diagnostics control to check MSE / hls.js support, H.264 / WebM decoding, network state, URL reachability and CORS. Select statistics to view resolution, codec, estimated bandwidth, buffer health and dropped frames." } },
-            { "@type": "Question", "name": "Can I queue multiple streams or keep watching while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "可以。在「Playlist queue」Add多个地址，开启「Autoplay next」后播完Auto播下一首，也可用上一首/下一首切换，「Repeat current stream」则单曲循环；点 🪟 按钮或播放时向下滚动，播放器会缩Small悬浮到右下角，点 ⤢ 还原、✕ Close。" } },
+            { "@type": "Question", "name": "Can I queue multiple streams or keep watching while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Add URLs to the queue and enable Autoplay next to advance automatically. Use Previous / Next to navigate or Repeat current stream to loop one item. The mini-player floats while scrolling; use Restore or Close to control it." } },
             { "@type": "Question", "name": "How do I inspect available renditions and audio tracks in an M3U8 playlist?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a URL into the M3U8 Playlist Analyzer and select Analyze. A master playlist lists variants, resolutions, bandwidth, codecs, audio tracks and subtitle groups. A media playlist reports segment count, duration, live / on-demand state and encryption markers. Analysis runs locally and requires CORS permission. See /guides#analyzer。" } },
-            { "@type": "Question", "name": "How do I embed the player on my website?", "acceptedAnswer": { "@type": "Answer", "text": "用「嵌入代码Builder」填写Stream URL、宽高、Start time (seconds)与Autoplay选项，实时预览后一键复制 iframe 代码；代码指向 play.digdevbox.com，通过 ?url= 参数加载你的流。多数浏览器只允许MutedAutoplay，建议勾选Muted。" } }
+            { "@type": "Question", "name": "How do I embed the player on my website?", "acceptedAnswer": { "@type": "Answer", "text": "Use the Embed Builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code; it points to play.digdevbox.com. Most browsers allow autoplay only when muted." } }
           ]
         }
         </script>
