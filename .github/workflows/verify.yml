@@ -35,6 +35,12 @@ jobs:
       - name: 静态资源版本串门禁自证（G-ASSET-VER --falsify）
         run: node scripts/check-asset-versioning.mjs --falsify
 
+      - name: GA4 consent 静态门禁（ID / 页面覆盖 / 隐私边界）
+        run: node scripts/check-ga4-consent.mjs
+
+      - name: GA4 consent 运行时回归（同意 / 拒绝 / noindex / 撤回）
+        run: node scripts/test-ga4-consent-runtime.mjs
+
       # SEO regression guard: crawlers must receive English metadata in the original HTML,
       # rather than depending on the runtime locale script to replace a Chinese fallback.
       - name: SEO homepage English source HTML gate (metadata + structured data)
