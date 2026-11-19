@@ -128,13 +128,13 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         </div>
     </header>
 
-    <div class="main">
+    <div class="main" role="main">
         <h1 data-i18n="h1.title">StreamPlay</h1>
         <p class="subtitle" data-i18n="hero.subtitle">Paste an m3u8 / HLS or mp4 URL and hit play</p>
 
         <!-- ① 地址输入：已预填一个可用的测试流，打开页面就能直接Select Play -->
         <div class="form">
-            <input type="text" id="url" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+            <input type="text" id="url" aria-label="M3U8, HLS or MP4 stream URL" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
                 placeholder="Paste an M3U8 / HLS / MP4 stream URL" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:placeholder.urlInput">
             <button type="button" id="play-btn" title="Play">
                 <img src="./images/ic-play.png" alt="">
@@ -275,7 +275,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <div class="card tool-card">
                 <p><strong>Subtitles <span class="tag">.vtt / .srt</span></strong></p>
                 <div class="sub-row">
-                    <input type="text" id="sub-url" placeholder="Paste a subtitle URL (.vtt / .srt) and press Enter to load" autocomplete="off" spellcheck="false">
+                    <input type="text" id="sub-url" aria-label="Subtitle file URL" placeholder="Paste a subtitle URL (.vtt / .srt) and press Enter to load" autocomplete="off" spellcheck="false">
                     <button type="button" id="sub-load" class="mini-btn">Load subtitles</button>
                     <button type="button" id="sub-off" class="mini-btn ghost">Close</button>
                 </div>
@@ -312,12 +312,12 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <!-- ③-d Playlist queue：Autoplay next / 上下首 / Repeat current stream（对标商业播放器的播放列表能力） -->
         <div class="card queue-card">
             <p><strong>Playlist queue <span class="tag" id="queue-count">0</span></strong>
-                <label class="queue-toggle"><input type="checkbox" id="queue-auto"> Autoplay next</label>
-                <label class="queue-toggle"><input type="checkbox" id="queue-repeat"> Repeat current stream</label>
+                <label class="queue-toggle"><input type="checkbox" id="queue-auto" aria-label="Automatically play the next queue item"> Autoplay next</label>
+                <label class="queue-toggle"><input type="checkbox" id="queue-repeat" aria-label="Repeat the playback queue"> Repeat current stream</label>
                 <button type="button" id="queue-clear" class="mini-btn ghost clear-btn">Clear</button>
             </p>
             <div class="sub-row">
-                <input type="text" id="queue-url" placeholder="Paste a URL and press Enter to add it to the queue" autocomplete="off" spellcheck="false">
+                <input type="text" id="queue-url" aria-label="Stream URL to add to the queue" placeholder="Paste a URL and press Enter to add it to the queue" autocomplete="off" spellcheck="false">
                 <button type="button" id="queue-add" class="mini-btn">Add</button>
                 <button type="button" id="queue-prev" class="mini-btn ghost">⏮ Previous</button>
                 <button type="button" id="queue-next" class="mini-btn ghost">Next ⏭</button>
@@ -330,7 +330,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         <div class="card analyzer-card" id="analyzer">
             <p><strong>M3U8 playlist analyzer <span class="tag">Developer</span></strong></p>
             <div class="sub-row">
-                <input type="text" id="ma-url" placeholder="Paste an M3U8 URL and press Enter to analyze" autocomplete="off" spellcheck="false">
+                <input type="text" id="ma-url" aria-label="M3U8 playlist URL to analyze" placeholder="Paste an M3U8 URL and press Enter to analyze" autocomplete="off" spellcheck="false">
                 <button type="button" id="ma-run" class="mini-btn">Analyze</button>
                 <button type="button" id="ma-use-current" class="mini-btn ghost">Use current stream URL</button>
             </div>
@@ -356,16 +356,16 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <div class="emb-grid">
                 <div class="emb-form">
                     <label class="emb-field emb-url-field">Stream URL
-                        <input type="text" id="emb-url" placeholder="M3U8 / HLS / MP4 URL" autocomplete="off" spellcheck="false">
+                        <input type="text" id="emb-url" aria-label="Stream URL for the iframe embed" placeholder="M3U8 / HLS / MP4 URL" autocomplete="off" spellcheck="false">
                     </label>
                     <div class="emb-row">
-                        <label class="emb-field">Width<input type="text" id="emb-width" value="100%" autocomplete="off"></label>
-                        <label class="emb-field">Height<input type="number" id="emb-height" value="480" min="120" step="10"></label>
-                        <label class="emb-field">Start time (seconds)<input type="number" id="emb-t" value="0" min="0" step="1"></label>
+                        <label class="emb-field">Width<input type="text" id="emb-width" aria-label="Embedded player width" value="100%" autocomplete="off"></label>
+                        <label class="emb-field">Height<input type="number" id="emb-height" aria-label="Embedded player height" value="480" min="120" step="10"></label>
+                        <label class="emb-field">Start time (seconds)<input type="number" id="emb-t" aria-label="Embedded player start time in seconds" value="0" min="0" step="1"></label>
                     </div>
                     <div class="emb-row">
-                        <label class="emb-check"><input type="checkbox" id="emb-autoplay"> Autoplay</label>
-                        <label class="emb-check"><input type="checkbox" id="emb-muted" checked> Muted</label>
+                        <label class="emb-check"><input type="checkbox" id="emb-autoplay" aria-label="Autoplay embedded player"> Autoplay</label>
+                        <label class="emb-check"><input type="checkbox" id="emb-muted" aria-label="Mute embedded player by default" checked> Muted</label>
                         <button type="button" id="emb-use-current" class="mini-btn ghost">Use current stream URL</button>
                     </div>
                     <p class="note" id="emb-note">The preview uses this site. Copied embed code points to the production domain play.digdevbox.com.</p>
