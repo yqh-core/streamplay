@@ -15,6 +15,14 @@ const htmlFiles = [
   'guides.html',
   'privacy.html',
   'terms.html',
+  'about/index.html',
+  'contact/index.html',
+  'copyright/index.html',
+  'docs/index.html',
+  'faq/index.html',
+  'guides/index.html',
+  'privacy/index.html',
+  'terms/index.html',
 ];
 const failures = [];
 for (const file of htmlFiles) {
@@ -43,4 +51,4 @@ if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('[GA4 consent] PASS: all ten public HTML pages, correct ID, opt-in gate, safe URL and privacy disclosure');
+console.log('[GA4 consent] PASS: all eighteen public HTML pages, correct ID, opt-in gate, safe URL and privacy disclosure');
