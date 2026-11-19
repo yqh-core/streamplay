@@ -113,6 +113,10 @@ jobs:
             exit 1
           fi
           echo "产物符合 Cloudflare 限制（<=20000 文件，单文件 <=25MiB）"
+          test -f dist/m3u8-player/index.html
+          grep -q 'https://play.digdevbox.com/m3u8-player/' dist/sitemap.xml
+          grep -q 'lang="en"' dist/m3u8-player/index.html
+          echo "English M3U8 landing page and sitemap entry verified"
 
       - name: 上传产物供部署使用
         uses: actions/upload-artifact@v4
