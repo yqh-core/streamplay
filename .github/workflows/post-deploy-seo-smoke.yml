@@ -185,6 +185,38 @@ jobs:
           }
           if (!sitemap) throw new Error('Production sitemap did not include the English landing page');
 
+          // Google Search Console still reports historical no-slash URLs. Verify
+          // each one issues a permanent redirect to its exact trailing-slash canonical.
+          const slashRedirects = {
+            '/about': '/about/',
+            '/contact': '/contact/',
+            '/copyright': '/copyright/',
+            '/docs': '/docs/',
+            '/faq': '/faq/',
+            '/guides': '/guides/',
+            '/privacy': '/privacy/',
+            '/terms': '/terms/',
+            '/m3u8-player': '/m3u8-player/',
+          };
+          for (const [sourcePath, canonicalPath] of Object.entries(slashRedirects)) {
+            const response = await fetch(origin + sourcePath, {
+              redirect: 'manual',
+              headers: { 'user-agent': ua, 'cache-control': 'no-cache' },
+              signal: AbortSignal.timeout(10000),
+            });
+            if (response.status !== 301) {
+              throw new Error(sourcePath + ' must return HTTP 301, got ' + response.status);
+            }
+            const location = response.headers.get('location');
+            const destination = location ? new URL(location, origin).toString() : '';
+            if (destination !== origin + canonicalPath) {
+              throw new Error(sourcePath + ' redirects to ' + destination + ' instead of ' + origin + canonicalPath);
+            }
+            if (sitemap.body.includes(origin + sourcePath + '</loc>')) {
+              throw new Error('Non-canonical no-slash URL appears in sitemap: ' + sourcePath);
+            }
+          }
+
           // English support pages are indexable at clean trailing-slash URLs.
           const englishSupportPages = ['/about/', '/contact/', '/copyright/', '/docs/', '/faq/', '/guides/', '/privacy/', '/terms/'];
           for (const path of englishSupportPages) {
