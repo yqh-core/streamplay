@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script id="dd-theme-bootstrap">(function(){try{var t=localStorage.getItem('dd-theme'),h=document.documentElement;if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto')}else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto')}else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','')}}catch(e){}})();</script>
+<style id="dd-theme-style">.dd-theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:var(--dd-on-primary);border-radius:8px;cursor:pointer;font-size:16px;line-height:1;transition:background .15s,border-color .15s,transform .1s;flex:none;padding:0}.dd-theme-toggle:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.6)}.dd-theme-toggle:active{transform:scale(.94)}.dd-theme-toggle:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}@media(max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}</style>
+<title>M3U8 & HLS Player Guide — Play, Embed and Troubleshoot Streams</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Step-by-step instructions for playing M3U8 streams, embedding StreamPlay, inspecting playlists and diagnosing CORS, HTTP and codec errors."><meta name="robots" content="index, follow"><meta name="theme-color" content="#0f766e">
+<link rel="canonical" href="https://play.digdevbox.com/guides/"><link rel="alternate" hreflang="en" href="https://play.digdevbox.com/guides/"><link rel="alternate" hreflang="x-default" href="https://play.digdevbox.com/guides/">
+<meta property="og:type" content="website"><meta property="og:title" content="M3U8 & HLS Player Guide — Play, Embed and Troubleshoot Streams"><meta property="og:description" content="Step-by-step instructions for playing M3U8 streams, embedding StreamPlay, inspecting playlists and diagnosing CORS, HTTP and codec errors."><meta property="og:url" content="https://play.digdevbox.com/guides/"><meta property="og:site_name" content="StreamPlay"><meta property="og:locale" content="en_US"><meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="StreamPlay — online M3U8 and HLS player">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="M3U8 & HLS Player Guide — Play, Embed and Troubleshoot Streams"><meta name="twitter:description" content="Step-by-step instructions for playing M3U8 streams, embedding StreamPlay, inspecting playlists and diagnosing CORS, HTTP and codec errors."><meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
+<link rel="icon" href="/images/logo.ico"><link rel="apple-touch-icon" href="/images/logo.png"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/dd-tokens.css"><link rel="stylesheet" href="/css/dd-shell.css">
+<meta name="google-adsense-account" content="ca-pub-7944759654100814"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7944759654100814" crossorigin="anonymous"></script><script defer src="/analytics-consent.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"M3U8 and HLS Player Guide","description":"How to play, embed and troubleshoot HLS streams with StreamPlay.","url":"https://play.digdevbox.com/guides/","author":{"@type":"Organization","name":"DigDevBox"}}</script>
+</head>
+<body>
+<div class="dd-brandbar slim"><div class="dd-shell-inner"><a class="dd-brand" href="https://www.digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a><nav><a href="https://www.digdevbox.com/">Developer Tools</a><a href="https://play.digdevbox.com/">StreamPlay</a><a href="https://ip.digdevbox.com/">IP Lookup</a><a href="https://img.digdevbox.com/">Image Tools</a></nav><button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button></div></div>
+<header class="hd"><div class="link-list"><a class="brand" href="/"><img src="/images/logo.png" alt="StreamPlay logo"><span>StreamPlay</span></a><nav><a href="/">Player</a><a href="/guides/">Guides</a><a href="/docs/">HLS Docs</a><a href="/faq/" >FAQ</a><a href="/about/">About</a><a href="/guides.html" lang="zh-CN">中文</a></nav></div></header>
+<main class="main about">
+<h1>M3U8 & HLS Player Guide</h1>
+<p>This guide covers the common tasks people use StreamPlay for: testing an HLS URL, understanding a playlist, embedding a player and diagnosing browser playback errors.</p>
+<h2>1. Play an M3U8 or MP4 URL</h2>
+<ol><li>Open the <a href="/">StreamPlay player</a>.</li><li>Paste the complete HTTPS M3U8 or MP4 URL into the player input.</li><li>Select Play. If playback fails, copy the exact error and check the browser Console and Network panels.</li></ol>
+<p>For HLS, use the master playlist URL when one is available. A media playlist URL may play a single rendition without alternate quality or audio tracks.</p>
+<h2>2. Embed StreamPlay on a website</h2>
+<p>StreamPlay supports a <code>?url=</code> parameter for opening a supplied stream in the player. URL-encode the stream address before placing it in the iframe URL.</p>
+<pre><code>&lt;iframe
+  src="https://play.digdevbox.com/?url=https%3A%2F%2Fexample.com%2Flive.m3u8"
+  title="HLS video player"
+  width="100%"
+  height="480"
+  allow="autoplay; fullscreen; picture-in-picture"
+  allowfullscreen
+  loading="lazy"&gt;
+&lt;/iframe&gt;</code></pre>
+<p>Only embed streams you are authorized to use. The source host must permit requests from the browser; the iframe does not bypass CORS, authentication or DRM.</p>
+<h2>3. Diagnose CORS errors</h2>
+<ul><li>Open the playlist URL directly in a new browser tab to confirm that it is reachable.</li><li>In DevTools → Network, inspect the playlist, segment and encryption-key requests.</li><li>Check that the source returns appropriate CORS headers on every cross-origin resource, not only the first playlist.</li><li>Ask the stream provider to configure CORS. A player page cannot override the browser's same-origin security policy.</li></ul>
+<h2>4. Diagnose HTTP errors</h2>
+<ul><li><strong>401 / 403:</strong> the server requires authentication or denies the request. Use an authorized URL; StreamPlay cannot bypass access controls.</li><li><strong>404:</strong> the playlist or one of its segment paths may have expired or moved.</li><li><strong>5xx:</strong> the source server or CDN may be unavailable.</li><li><strong>Mixed content:</strong> an HTTPS page may not load an insecure HTTP stream. Use an HTTPS source where available.</li></ul>
+<h2>5. Diagnose codec and autoplay issues</h2>
+<p>H.264 video with AAC audio is broadly supported. HEVC/H.265 and less common audio codecs vary by browser and device. Autoplay with sound is commonly blocked; press Play if playback does not start automatically.</p>
+<h2>6. Inspect the playlist</h2>
+<p>Use the <a href="/#analyzer">M3U8 playlist analyzer</a> on the home page to inspect variant streams, resolutions, bandwidth values, alternate audio tracks, segment URLs and encryption tags. Compare the master playlist with the media playlist requested by the player.</p>
+<h2>7. Generate a local HLS test stream</h2>
+<p>If you have a local video file and FFmpeg installed, you can create a simple VOD test playlist:</p>
+<pre><code>ffmpeg -i input.mp4 -c:v libx264 -c:a aac -f hls -hls_time 6 -hls_playlist_type vod output.m3u8</code></pre>
+<p>Serve the output directory over HTTP with correct MIME types and CORS headers before testing it in a browser.</p>
+<p>For protocol details, see the <a href="/docs/">HLS documentation</a>. For quick answers, see the <a href="/faq/">FAQ</a>.</p>
+<div class="footer"><p class="links"><a href="/">← Back to player</a> | <a href="/guides.html" lang="zh-CN">中文版本</a></p><p class="links"><a href="/guides/">Guides</a> | <a href="/docs/">HLS docs</a> | <a href="/faq/">FAQ</a> | <a href="/about/">About</a> | <a href="/contact/">Contact</a> | <a href="/privacy/">Privacy</a> | <a href="/terms/">Terms</a> | <a href="/copyright/">Copyright</a></p><p>&copy; 2026 StreamPlay · A DigDevBox tool</p></div>
+</main>
+<footer class="dd-brandfoot compact"><div class="dd-shell-inner"><p class="dd-brandfoot-title">DigDevBox · Developer tools</p><nav class="dd-brandfoot-nav"><a href="https://www.digdevbox.com/">Developer Tools</a><a href="https://ip.digdevbox.com/">IP Lookup</a><a href="https://img.digdevbox.com/">Image Tools</a></nav></div></footer>
+<script id="dd-theme-toggle-script">(function(){var key='dd-theme',btn=document.getElementById('dd-theme-toggle');if(!btn)return;function systemDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}function current(){var t=document.documentElement.getAttribute('data-theme');return t||(systemDark()?'dark':'light')}function apply(t){var h=document.documentElement;if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto')}else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto')}else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','')}try{localStorage.setItem(key,t)}catch(e){}sync()}function sync(){var dark=current()==='dark';btn.textContent=dark?'☀️':'🌙';btn.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');btn.setAttribute('title',dark?'Switch to light mode':'Switch to dark mode')}btn.addEventListener('click',function(){apply(current()==='dark'?'light':'dark')});sync();if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){try{if(localStorage.getItem(key))return}catch(e){}sync()})})();</script>
+</body></html>

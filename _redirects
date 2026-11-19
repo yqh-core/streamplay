@@ -1,0 +1,11 @@
+# Canonical trailing-slash routes for the English support pages.
+# The directory index.html files contain the English, indexable versions.
+/about /about/ 301
+/contact /contact/ 301
+/copyright /copyright/ 301
+/docs /docs/ 301
+/faq /faq/ 301
+/guides /guides/ 301
+/privacy /privacy/ 301
+/terms /terms/ 301
+/m3u8-player /m3u8-player/ 301

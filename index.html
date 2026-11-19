@@ -121,10 +121,10 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </a>
             <nav>
                 <a href="/" aria-current="page" data-i18n="topnav.home">Home</a>
-                <a href="/guides" data-i18n="topnav.guides">Guides</a>
-                <a href="/docs" data-i18n="topnav.docs">HLS Docs</a>
-                <a href="/faq" data-i18n="topnav.faq">FAQ</a>
-                <a href="/about" data-i18n="topnav.about">About</a>
+                <a href="/guides/" data-i18n="topnav.guides">Guides</a>
+                <a href="/docs/" data-i18n="topnav.docs">HLS Docs</a>
+                <a href="/faq/" data-i18n="topnav.faq">FAQ</a>
+                <a href="/about/" data-i18n="topnav.about">About</a>
             </nav>
         </div>
     </header>
@@ -162,7 +162,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <span class="demo-label">More than playback:</span>
             <a class="demo-btn" href="#analyzer" style="text-decoration:none">🧾 Analyze an M3U8 playlist</a>
             <a class="demo-btn" href="#embed" style="text-decoration:none">🧩 Generate an embed</a>
-            <a class="demo-btn" href="/guides" style="text-decoration:none">🩺 Troubleshoot playback</a>
+            <a class="demo-btn" href="/guides/" style="text-decoration:none">🩺 Troubleshoot playback</a>
         </div>
 
         <div class="tip" id="tip" role="status" aria-live="polite"></div>
@@ -401,7 +401,7 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <details><summary>Can StreamPlay remember playback progress or share a timestamp?</summary><p>Playback progress is stored locally in this browser. When you reopen the same URL, the player can offer to resume. Use the share control to copy a link with a timestamp so another person can open the stream at that position, subject to the source URL's access rules.</p></details>
             <details><summary>How can I diagnose playback problems or inspect playback statistics?</summary><p>Open Playback diagnostics to check MSE / hls.js support, H.264 and WebM decoding capability, network state and URL reachability, including CORS-related checks. The statistics panel can show resolution, codec, estimated bandwidth, buffer health and dropped frames when the browser exposes those values.</p></details>
             <details><summary>Can I play multiple streams in sequence or keep the player visible while scrolling?</summary><p>Yes. Add URLs to the Playback queue and enable Autoplay next to advance automatically. You can also move to the previous or next item, repeat the current stream, or use the floating mini-player while scrolling.</p></details>
-            <details><summary>How do I inspect available renditions and audio tracks in an M3U8 playlist?</summary><p>Yes. Paste a URL into the M3U8 playlist analyzer. A master playlist can expose variants, resolution, bandwidth, codecs, audio and subtitle groups. A media playlist can expose segment counts, durations, live or on-demand state and encryption markers. Analysis runs locally and requires the source host to allow CORS. It does not bypass DRM or access controls. See the <a href="/guides#analyzer">playlist analyzer guide</a>.</p></details>
+            <details><summary>How do I inspect available renditions and audio tracks in an M3U8 playlist?</summary><p>Yes. Paste a URL into the M3U8 playlist analyzer. A master playlist can expose variants, resolution, bandwidth, codecs, audio and subtitle groups. A media playlist can expose segment counts, durations, live or on-demand state and encryption markers. Analysis runs locally and requires the source host to allow CORS. It does not bypass DRM or access controls. See the <a href="/guides/#analyzer">playlist analyzer guide</a>.</p></details>
             <details><summary>How do I embed the player on my own website?</summary><p>Use the iframe embed builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code. The embed points to play.digdevbox.com and uses a URL parameter to load your stream. Most browsers restrict autoplay unless the video is muted, and behavior varies by browser.</p></details>
         </div>
         <script type="application/ld+json">
@@ -427,13 +427,13 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             <p>This site provides playback technology only. It does not store, create or distribute audio or video content. Media resources are supplied by third parties; contact us about copyright concerns.</p>
                         <p class="links">
                 <a href="/" data-i18n="topnav.home">Home</a> |
-                <a href="/guides" data-i18n="topnav.guides">Guides</a> |
-                <a href="/docs" data-i18n="topnav.docs">HLS Docs</a> |
-                <a href="/faq" data-i18n="topnav.faq">FAQ</a> |
-                <a href="/about" data-i18n="topnav.about">About</a> |
-                <a href="/contact">Contact</a> |
-                <a href="/privacy">Privacy</a> |
-                <a href="/terms">Terms</a> | <a href="/copyright">Copyright & Disclaimer</a></p>
+                <a href="/guides/" data-i18n="topnav.guides">Guides</a> |
+                <a href="/docs/" data-i18n="topnav.docs">HLS Docs</a> |
+                <a href="/faq/" data-i18n="topnav.faq">FAQ</a> |
+                <a href="/about/" data-i18n="topnav.about">About</a> |
+                <a href="/contact/">Contact</a> |
+                <a href="/privacy/">Privacy</a> |
+                <a href="/terms/">Terms</a> | <a href="/copyright/">Copyright & Disclaimer</a></p>
             <p>&copy; 2026 StreamPlay</p>
         </div>
     </div>
