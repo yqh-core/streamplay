@@ -106,6 +106,21 @@ jobs:
           if (!home.body.includes('Are my stream URLs uploaded or stored?')) throw new Error('English privacy FAQ missing from source HTML');
           if (!home.body.includes('How do I inspect available renditions and audio tracks')) throw new Error('English M3U8 analyzer FAQ missing from source HTML');
 
+          const networkLinks = [
+            "https://www.digdevbox.com/",
+            "https://img.digdevbox.com/",
+            "https://ip.digdevbox.com/",
+            "https://draw.digdevbox.com/",
+            "https://ttsreader.digdevbox.com/",
+            "https://notes.digdevbox.com/"
+          ];
+          const missingNetworkLinks = networkLinks.filter((url) => !home.body.includes(url));
+          if (missingNetworkLinks.length) throw new Error('Product discovery links missing: ' + missingNetworkLinks.join(', '));
+          if (/href=["']https:\/\/(?:fangdai|geek-typing)\.digdevbox\.com\//i.test(home.body)) {
+            throw new Error('Deferred China-only product link remains on the English site');
+          }
+          if (home.body.includes('href="https://digdevbox.com/')) throw new Error('Stale bare-domain internal link remains');
+          
           const canonical = home.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
           if (canonical !== origin + '/') throw new Error('Unexpected homepage canonical: ' + canonical);
           if (!home.body.includes('"inLanguage": "en"')) throw new Error('English structured-data language missing');
