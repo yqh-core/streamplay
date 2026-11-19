@@ -123,6 +123,24 @@ jobs:
           
           const canonical = home.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
           if (canonical !== origin + '/') throw new Error('Unexpected homepage canonical: ' + canonical);
+          if (!home.body.includes('role="main"')) throw new Error('Homepage main landmark is missing');
+          const requiredControls = [
+            'M3U8, HLS or MP4 stream URL',
+            'Subtitle file URL',
+            'Automatically play the next queue item',
+            'Repeat the playback queue',
+            'Stream URL to add to the queue',
+            'M3U8 playlist URL to analyze',
+            'Stream URL for the iframe embed',
+            'Embedded player width',
+            'Embedded player height',
+            'Embedded player start time in seconds',
+            'Autoplay embedded player',
+            'Mute embedded player by default',
+          ];
+          for (const label of requiredControls) {
+            if (!home.body.includes('aria-label="' + label + '"')) throw new Error('Missing accessible player control label: ' + label);
+          }
           if (!home.body.includes('"inLanguage": "en"')) throw new Error('English structured-data language missing');
           if (!home.body.includes('"priceCurrency": "USD"')) throw new Error('USD offer metadata missing');
           if (!home.body.includes('How to play an HLS stream in three steps') || !home.body.includes('What is an M3U8 file?') || !home.body.includes('Which media formats does StreamPlay support?')) {
@@ -172,6 +190,7 @@ jobs:
             if (!page.response.ok) throw new Error(item.path + ' returned HTTP ' + page.response.status);
             if (!page.body.includes('<html lang="en"')) throw new Error(item.path + ' must serve English source HTML');
             if (!page.body.includes(item.heading)) throw new Error(item.path + ' is missing its English content heading');
+            if (!page.body.includes('role="main"')) throw new Error(item.path + ' is missing its main landmark');
             if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(page.body)) {
               throw new Error(item.path + ' unexpectedly carries noindex');
             }
