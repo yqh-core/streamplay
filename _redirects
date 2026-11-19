@@ -9,3 +9,13 @@
 /privacy /privacy/ 301
 /terms /terms/ 301
 /m3u8-player /m3u8-player/ 301
+
+# Consolidate legacy Chinese .html routes onto the English canonical pages.
+/about.html /about/ 301
+/contact.html /contact/ 301
+/copyright.html /copyright/ 301
+/docs.html /docs/ 301
+/faq.html /faq/ 301
+/guides.html /guides/ 301
+/privacy.html /privacy/ 301
+/terms.html /terms/ 301

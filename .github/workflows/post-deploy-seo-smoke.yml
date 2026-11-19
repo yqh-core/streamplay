@@ -195,18 +195,34 @@ jobs:
             if (!/<h1\b/i.test(page.body)) throw new Error(path + ' is missing its primary heading');
           }
 
-          // Preserve the Chinese originals as noindex pages at their .html URLs.
-          const excludedChinesePages = ['/about.html', '/contact.html', '/copyright.html', '/docs.html', '/faq.html', '/guides.html', '/privacy.html', '/terms.html'];
-          for (const path of excludedChinesePages) {
-            const page = await get(path);
-            if (!page.response.ok) throw new Error(path + ' should remain accessible (HTTP ' + page.response.status + ')');
-            if (!/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex\s*,?\s*follow/i.test(page.body)) {
-              throw new Error(path + ' must carry noindex, follow');
+          // Legacy .html URLs must resolve directly to the matching English canonical page.
+          const legacyRoutes = {
+            '/about.html': '/about/',
+            '/contact.html': '/contact/',
+            '/copyright.html': '/copyright/',
+            '/docs.html': '/docs/',
+            '/faq.html': '/faq/',
+            '/guides.html': '/guides/',
+            '/privacy.html': '/privacy/',
+            '/terms.html': '/terms/',
+          };
+          for (const [legacyPath, canonicalPath] of Object.entries(legacyRoutes)) {
+            const page = await get(legacyPath);
+            if (!page.response.ok) throw new Error(legacyPath + ' did not resolve successfully (HTTP ' + page.response.status + ')');
+            if (page.response.url !== origin + canonicalPath) {
+              throw new Error(legacyPath + ' did not resolve to ' + canonicalPath + '; final URL: ' + page.response.url);
             }
-            if (sitemap.body.includes(origin + path + '</loc>')) {
-              throw new Error(path + ' must not appear in the indexable sitemap while noindexed');
+            if (!page.body.includes('<html lang="en"')) {
+              throw new Error(legacyPath + ' did not resolve to English HTML');
+            }
+            const canonical = page.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
+            if (canonical !== origin + canonicalPath) {
+              throw new Error(legacyPath + ' resolved page has unexpected canonical: ' + canonical);
+            }
+            if (sitemap.body.includes(origin + legacyPath + '</loc>')) {
+              throw new Error(legacyPath + ' must not appear in sitemap.xml');
             }
           }
 
-          console.log('PASS: exact Cloudflare commit, CSP, iframe compatibility, English support pages, canonical URLs, sitemap and preserved noindex Chinese pages');
+          console.log('PASS: exact Cloudflare commit, CSP, iframe compatibility, English support pages, canonical URLs, sitemap and legacy-route consolidation');
           NODE
