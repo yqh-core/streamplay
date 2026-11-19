@@ -96,6 +96,16 @@ jobs:
           }
           if (!home) throw new Error('Production homepage did not expose expected English HTML after exact deployment');
 
+          if (!home.body.includes('/analytics-consent.js')) throw new Error('Homepage is missing the consent-gated GA4 loader');
+          if (home.body.includes('googletagmanager.com/gtag/js')) throw new Error('GA4 must not load directly before consent');
+          const gaScript = await get('/analytics-consent.js');
+          if (!gaScript.response.ok || !gaScript.body.includes('G-2Y9T6LFG5W') ||
+              !gaScript.body.includes("analytics_storage: 'denied'") ||
+              !gaScript.body.includes('send_page_view: false') ||
+              !gaScript.body.includes('Reject Google Analytics')) {
+            throw new Error('Production GA4 consent script is missing, misconfigured or not consent-gated');
+          }
+
           if (!home.body.includes('>StreamPlay</h1>')) throw new Error('English StreamPlay H1 missing from source HTML');
           if (!home.body.includes('Paste an m3u8 / HLS or mp4 URL and hit play')) throw new Error('English StreamPlay hero description missing from source HTML');
           if (!home.body.includes('content="StreamPlay"')) throw new Error('English Open Graph site name missing');
@@ -135,6 +145,7 @@ jobs:
           const landing = await get(landingPath);
           if (!landing.response.ok) throw new Error('English landing page returned HTTP ' + landing.response.status);
           if (!landing.body.includes('<html lang="en"')) throw new Error('English landing page source lang missing');
+          if (!landing.body.includes('/analytics-consent.js')) throw new Error('English landing page is missing the GA4 consent loader');
           const landingCanonical = landing.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
           if (landingCanonical !== origin + landingPath) throw new Error('Unexpected landing canonical: ' + landingCanonical);
           if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(landing.body)) {
