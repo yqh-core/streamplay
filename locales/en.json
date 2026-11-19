@@ -16,6 +16,7 @@
   "trust.text": "Privacy: we do not store any video files — playback streams straight from the third-party origin of the URL you enter.",
   "aria.themeToggle": "Toggle dark mode",
   "aria.langToggle": "Switch language",
-  "seo.title": "StreamPlay — Online M3U8 / HLS Player",
-  "seo.description": "StreamPlay is a lightweight online player for m3u8 / HLS live and on-demand streams plus mp4 files. Runs entirely in your browser — no plugins, no installation."
+  "seo.title": "Free Online M3U8 / HLS Player — StreamPlay",
+  "seo.description": "Play M3U8 and HLS live or on-demand streams online. Paste a playlist URL, test playback, inspect stream variants and troubleshoot common browser playback errors.",
+  "seo.landingLink": "Read the M3U8 and HLS player guide"
 }
