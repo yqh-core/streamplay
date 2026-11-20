@@ -289,9 +289,25 @@ jobs:
             if (internalLegacyLinks.length) {
               throw new Error(path + ' contains internal .html links: ' + internalLegacyLinks.join(', '));
             }
+            const localRefs = [...page.body.matchAll(/(?:href|src)=["']([^"']+)["']/g)].map((match) => match[1]);
+            const relativeLocalRefs = localRefs.filter((ref) =>
+              !/^(?:https?:|\\/\\/|#|mailto:|tel:|data:)/i.test(ref) && !ref.startsWith('/')
+            );
+            if (relativeLocalRefs.length) {
+              throw new Error(path + ' contains relative local asset/link paths: ' + relativeLocalRefs.join(', '));
+            }
             if (sitemap.body.includes(origin + path + '</loc>')) {
               throw new Error(path + ' must remain outside sitemap.xml');
             }
+          }
+
+          // Nested Chinese routes must load shared assets from the site root, not their own subdirectory.
+          for (const assetPath of ['/images/logo.png', '/images/logo.ico', '/css/style.css', '/css/dd-tokens.css', '/css/dd-shell.css']) {
+            const asset = await fetch(origin + assetPath, {
+              headers: { 'user-agent': ua, 'cache-control': 'no-cache' },
+              signal: AbortSignal.timeout(10000),
+            });
+            if (!asset.ok) throw new Error(assetPath + ' returned HTTP ' + asset.status);
           }
 
           // Legacy .html URLs must resolve directly to the matching English canonical page.
