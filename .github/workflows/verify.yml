@@ -47,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           grep -Fq '<html lang="en" data-i18n-page="home">' index.html
-          grep -Fq '<title>Online M3U8 &amp; HLS Player' index.html
+          grep -Fq '<title>M3U8 &amp; HLS Player — Analyze, Play &amp; Embed | StreamPlay</title>' index.html
           grep -Fq 'name="description" content="Play compatible M3U8 / HLS live and on-demand streams' index.html
           grep -Fq 'property="og:locale" content="en_US"' index.html
           grep -Fq '"inLanguage": "en"' index.html
