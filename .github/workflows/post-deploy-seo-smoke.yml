@@ -242,7 +242,56 @@ jobs:
             if (internalLegacyLinks.length) {
               throw new Error(path + ' contains internal .html redirect links: ' + internalLegacyLinks.join(', '));
             }
+            const slug = path.split('/')[1];
+            if (!page.body.includes('href="/zh/' + slug + '/"')) {
+              throw new Error(path + ' is missing its direct Chinese-language link');
+            }
             if (!/<h1\b/i.test(page.body)) throw new Error(path + ' is missing its primary heading');
+          }
+
+          // Chinese support pages remain accessible for language-switch users, but stay noindex and outside the sitemap.
+          const chineseIndex = await get('/zh/');
+          if (!chineseIndex.response.ok || chineseIndex.response.url !== origin + '/zh/') {
+            throw new Error('/zh/ did not resolve directly to HTTP 200');
+          }
+          if (!chineseIndex.body.includes('<html lang="zh-CN"') ||
+              !/name=["']robots["'] content=["']noindex,\s*follow["']/i.test(chineseIndex.body)) {
+            throw new Error('/zh/ must be Simplified Chinese and noindex, follow');
+          }
+          if (sitemap.body.includes(origin + '/zh/</loc>')) throw new Error('/zh/ must not appear in the indexable sitemap');
+
+          const chineseSupportPages = ['/zh/about/','/zh/contact/','/zh/copyright/','/zh/docs/','/zh/faq/','/zh/guides/','/zh/privacy/','/zh/terms/'];
+          for (const path of chineseSupportPages) {
+            const page = await get(path);
+            if (!page.response.ok || page.response.url !== origin + path) {
+              throw new Error(path + ' must return directly as HTTP 200');
+            }
+            if (!page.body.includes('<html lang="zh-CN"') ||
+                !/name=["']robots["'] content=["']noindex,\s*follow["']/i.test(page.body)) {
+              throw new Error(path + ' must be Simplified Chinese and noindex, follow');
+            }
+            const canonical = page.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
+            if (canonical !== origin + path) throw new Error(path + ' has unexpected canonical: ' + canonical);
+            const slug = path.split('/')[2];
+            if (!page.body.includes('href="/' + slug + '/" lang="en"')) {
+              throw new Error(path + ' is missing its direct English-language link');
+            }
+            const internalLegacyLinks = [...page.body.matchAll(/href=["']([^"']+)["']/g)]
+              .map((match) => match[1])
+              .filter((href) => {
+                try {
+                  const url = new URL(href, origin);
+                  return url.origin === origin && /\.html(?:[?#].*)?$/i.test(url.pathname + url.search);
+                } catch {
+                  return false;
+                }
+              });
+            if (internalLegacyLinks.length) {
+              throw new Error(path + ' contains internal .html links: ' + internalLegacyLinks.join(', '));
+            }
+            if (sitemap.body.includes(origin + path + '</loc>')) {
+              throw new Error(path + ' must remain outside sitemap.xml');
+            }
           }
 
           // Legacy .html URLs must resolve directly to the matching English canonical page.
