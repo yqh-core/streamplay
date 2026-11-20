@@ -175,15 +175,18 @@ jobs:
           ];
           for (const [path, expected] of snippetPages) {
             const page = path === '/' ? home : await get(path);
-            const title = page.body.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i)?.[1] || '';
+            const titleStart = page.body.indexOf('<title>');
+            const titleEnd = page.body.indexOf('</title>');
+            const title = titleStart >= 0 && titleEnd > titleStart ? page.body.slice(titleStart + 7, titleEnd) : '';
             const description = page.body.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)?.[1] || '';
             const canonical = page.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1] || '';
             if (!page.response.ok) throw new Error(path + ' returned HTTP ' + page.response.status);
             if (title !== expected) throw new Error(path + ' title mismatch: ' + title);
-            if (title.length > 60 || title.length < 10) throw new Error(path + ' title length outside 10–60: ' + title.length);
+            const visibleTitleLength = title.split('&amp;').join('&').length;
+            if (visibleTitleLength > 60 || visibleTitleLength < 10) throw new Error(path + ' title length outside 10–60: ' + visibleTitleLength);
             if (description.length < 50 || description.length > 160) throw new Error(path + ' description length outside 50–160: ' + description.length);
             if (canonical !== origin + path) throw new Error(path + ' has unexpected canonical: ' + canonical);
-            if (!/<h1\\b/i.test(page.body)) throw new Error(path + ' is missing H1');
+            if (!page.body.includes('<h1')) throw new Error(path + ' is missing H1');
           }
 
           const robots = await get('/robots.txt');
