@@ -23,7 +23,7 @@ jobs:
         env:
           SITE_ORIGIN: "https://play.digdevbox.com"
           LANDING_PATH: "/m3u8-player/"
-          EXPECTED_TITLE: "Online M3U8 &amp; HLS Player"
+          EXPECTED_TITLE: "M3U8 &amp; HLS Player"
           TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -163,6 +163,30 @@ jobs:
           if (landingCanonical !== origin + landingPath) throw new Error('Unexpected landing canonical: ' + landingCanonical);
           if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(landing.body)) {
             throw new Error('English landing page unexpectedly carries noindex');
+          }
+
+          // Keep the four main English search entry points within snippet-length
+          // budgets and verify exact metadata served to Googlebot after deployment.
+          const snippetPages = [
+            ['/', 'M3U8 &amp; HLS Player — Analyze, Play &amp; Embed | StreamPlay'],
+            ['/docs/', 'HLS &amp; M3U8 Documentation — Playlists, Tags &amp; CORS'],
+            ['/guides/', 'M3U8 &amp; HLS Player Guide — Play, Embed &amp; Troubleshoot'],
+            ['/m3u8-player/', 'M3U8 Player — Test HLS Streams &amp; Play MP4 | StreamPlay'],
+          ];
+          for (const [path, expected] of snippetPages) {
+            const page = path === '/' ? home : await get(path);
+            const titleStart = page.body.indexOf('<title>');
+            const titleEnd = page.body.indexOf('</title>');
+            const title = titleStart >= 0 && titleEnd > titleStart ? page.body.slice(titleStart + 7, titleEnd) : '';
+            const description = page.body.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)?.[1] || '';
+            const canonical = page.body.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1] || '';
+            if (!page.response.ok) throw new Error(path + ' returned HTTP ' + page.response.status);
+            if (title !== expected) throw new Error(path + ' title mismatch: ' + title);
+            const visibleTitleLength = title.split('&amp;').join('&').length;
+            if (visibleTitleLength > 60 || visibleTitleLength < 10) throw new Error(path + ' title length outside 10–60: ' + visibleTitleLength);
+            if (description.length < 50 || description.length > 160) throw new Error(path + ' description length outside 50–160: ' + description.length);
+            if (canonical !== origin + path) throw new Error(path + ' has unexpected canonical: ' + canonical);
+            if (!page.body.includes('<h1')) throw new Error(path + ' is missing H1');
           }
 
           const robots = await get('/robots.txt');
