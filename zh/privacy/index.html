@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head><script id="dd-theme-bootstrap">/* inject-dd-shell: 主题防闪烁 */
+(function(){try{var t=localStorage.getItem('dd-theme');var h=document.documentElement;
+if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto');}
+else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto');}
+else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
+}catch(e){}})();</script><style id="dd-theme-style">
+.dd-theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+  margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);
+  color:var(--dd-on-primary);border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  transition:background .15s,border-color .15s,transform .1s;flex:none;padding:0}
+.dd-theme-toggle:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.6)}
+.dd-theme-toggle:active{transform:scale(.94)}
+.dd-theme-toggle:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
+@media (max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}
+</style>
+
+    <title>隐私政策 - StreamPlay 流影</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StreamPlay 流影隐私政策：纯前端播放、无后端、不记录播放地址；同时说明第三方流媒体源站与广告的相关规定。">
+    <meta name="robots" content="noindex, follow">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="canonical" href="https://play.digdevbox.com/zh/privacy/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="隐私政策 - StreamPlay 流影">
+    <meta property="og:description" content="纯前端播放、无后端、不记录播放地址。">
+    <meta property="og:url" content="https://play.digdevbox.com/zh/privacy/">
+    <meta property="og:site_name" content="StreamPlay 流影">
+    <meta property="og:locale" content="zh_CN">
+
+    <link rel="icon" href="/images/logo.ico">
+    <link rel="apple-touch-icon" href="/images/logo.png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dd-tokens.css">
+    <link rel="stylesheet" href="/css/dd-shell.css">
+    <meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="StreamPlay 流影 - M3U8 / HLS 在线播放器">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
+
+<!-- adsense:start -->
+  <meta name="google-adsense-account" content="ca-pub-7944759654100814" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7944759654100814" crossorigin="anonymous"></script>
+  <!-- adsense:end -->
+  <script defer src="/analytics-consent.js"></script>
+</head>
+
+<body>
+<div class="dd-brandbar slim">
+    <div class="dd-shell-inner">
+        <a class="dd-brand" href="https://www.digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
+        <nav>
+                <a href="https://www.digdevbox.com/" data-i18n="nav.devtools">Dev 工具箱</a>
+                <a href="https://play.digdevbox.com/" aria-current="page" data-i18n="nav.player">流影播放器</a>
+                <a href="https://ip.digdevbox.com/" data-i18n="nav.ip">IP 查询</a>
+                
+                <a href="https://img.digdevbox.com/" data-i18n="nav.imgtools">图片压缩</a>
+        </nav>
+        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
+    </div>
+</div>
+    <header class="hd">
+        <div class="link-list">
+            <a class="brand" href="/">
+                <img src="./images/logo.png" alt="StreamPlay 流影">
+                <span>StreamPlay 流影</span>
+            </a>
+            <nav>
+                <a href="/" data-i18n="topnav.home">首页</a>
+                <a href="/zh/guides/" data-i18n="topnav.guides">使用教程</a>
+                <a href="/zh/docs/" data-i18n="topnav.docs">HLS 文档</a>
+                <a href="/zh/faq/" data-i18n="topnav.faq">常见问题</a>
+                <a href="/zh/about/" data-i18n="topnav.about">关于</a>
+            <a href="/privacy/" lang="en">English</a></nav>
+        </div>
+    </header>
+
+    <div class="main about">
+        <h1>隐私政策</h1>
+        <p class="subtitle">最后更新时间：2026 年 9 月</p>
+
+        <div class="card">
+            <p><strong>一句话说明：本站没有后端服务器。</strong>播放完全在你的浏览器里进行，你填写的播放地址不会被发送到本站，我们也没有地方可以存储它。</p>
+        </div>
+
+        <h2>一、我们收集哪些信息</h2>
+        <ul>
+            <li><strong>播放地址（不收集）：</strong>你粘贴的 m3u8 / mp4 地址只在你的浏览器里使用，用于请求对应的流媒体服务器。它不经过本站服务器，我们无法查看，也不会记录。</li>
+            <li><strong>访问日志：</strong>与访问任何网站一样，你的 IP 地址、浏览器标识、访问时间会出现在托管方（Cloudflare Pages）的访问日志中，用于保障可用性与安全。</li>
+            <li><strong>我们不要求注册</strong>，也不收集姓名、手机号等个人信息。</li>
+        </ul>
+
+        <h2>二、信息如何使用</h2>
+        <ul>
+            <li>保障网站正常运行与排查故障；</li>
+            <li>了解页面访问情况以改进内容（基于托管方提供的聚合统计，不关联到个人）；</li>
+            <li>防范滥用与自动化攻击。</li>
+        </ul>
+
+        <h2>三、Cookie 与本地存储</h2>
+        <p>本站可能使用浏览器本地存储保存界面偏好。这些数据只存在于你的设备上，不回传服务器，你可以通过浏览器设置随时清除。</p>
+
+        <h2>四、第三方服务</h2>
+        <p>使用本站时需要理解一点：<strong>你的播放请求是直接从你的浏览器发往你指定的流媒体服务器的</strong>，与本站无关。因此：</p>
+        <ul>
+            <li>该流媒体服务器会看到你的 IP 与请求记录，适用其自身的隐私政策；</li>
+            <li>本站无法控制也无法得知你访问了哪些地址；</li>
+            <li>播放器运行代码与 hls.js 依赖由本站自托管；Google AdSense 广告和可选的 Google Analytics 4（GA4）按下方说明从 Google 加载。</li>
+        </ul>
+        <p>本站托管于 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Pages</a>，其隐私政策适用于托管层面的数据处理。</p>
+
+        <h2>五、广告与访问统计</h2>
+        <p><strong>本站已接入 Google AdSense 广告。</strong>Google 及其广告合作伙伴可能使用 Cookie（包括 DoubleClick 等第三方 Cookie）投放广告、控制展示频次，并在适用情况下根据浏览行为个性化广告。你可以通过 <a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google 广告设置</a> 管理个性化广告，也可以在浏览器中阻止或清除第三方 Cookie。</p>
+        <p>本站另提供可选的 Google Analytics 4（GA4）页面浏览统计。只有你点击“Accept Google Analytics”后才会加载；如果拒绝，本站不会发出 GA4 请求。接受后，GA4 仅接收页面路径、页面标题和来源域名等页面浏览信息，不接收你粘贴的 M3U8 / MP4 地址、播放内容或 URL 查询参数。播放地址仍由浏览器直接请求你指定的流媒体服务器，不会发送给 DigDevBox。你可以随时通过“Privacy choices”更改 GA4 选择；分析 Cookie 仅在同意后启用。如果你也在其他 DigDevBox 子域同意 GA4，跨子域链接可能用于归并这些已同意的访问会话。</p>
+
+        <h2>六、数据保留</h2>
+        <ul>
+            <li>播放地址：不保存，页面关闭即消失；</li>
+            <li>本地存储：由你的浏览器管理，可自行清除；</li>
+            <li>访问日志：由托管方按其策略保留，本站不额外导出或长期留存。</li>
+        </ul>
+
+        <h2>七、你的权利</h2>
+        <ul>
+            <li>随时停止使用本站；</li>
+            <li>清除浏览器本地存储与 Cookie；</li>
+            <li>就数据处理方式向我们提出问询，见<a href="/zh/contact/">联系页面</a>。</li>
+        </ul>
+
+        <h2>八、政策更新</h2>
+        <p>本站可能不定期更新本政策，重大变更会在本页公布，继续使用即视为接受更新后的政策。</p>
+
+        <div class="footer">
+            <p class="links">
+                <a href="/">← 返回首页</a> |
+                <a href="/zh/contact/">联系</a> |
+                <a href="/zh/terms/">服务条款</a> | <a href="/zh/copyright/">版权与免责</a></p>
+            <p>&copy; 2026 StreamPlay 流影</p>
+        </div>
+    </div>
+
+
+
+<footer class="dd-brandfoot compact">
+    <div class="dd-shell-inner">
+        <p class="dd-brandfoot-title">DigDevBox · 免费在线开发者工具集</p>
+        <nav class="dd-brandfoot-nav">
+                <a href="https://www.digdevbox.com/">Dev 工具箱</a>
+                <a href="https://ip.digdevbox.com/">IP 查询</a>
+                
+                <a href="https://img.digdevbox.com/">图片压缩</a>
+        </nav>
+    </div>
+</footer>
+<script id="dd-theme-toggle-script">
+(function(){
+  var KEY='dd-theme';
+  function sysDark(){return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;}
+  function apply(t){var h=document.documentElement;
+    if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto');}
+    else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto');}
+    else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
+    try{localStorage.setItem(KEY,t);}catch(e){}
+    sync();}
+  function effective(){var h=document.documentElement;
+    if(h.getAttribute('data-theme')==='dark')return 'dark';
+    if(h.getAttribute('data-theme')==='light')return 'light';
+    return sysDark()?'dark':'light';}
+  // aria/title 交给 i18n 内核统一管理（按钮已带 data-i18n-attr="aria-label:aria.themeToggle"）。
+  // 原因：本脚本的 init 挂在 DOMContentLoaded 上，执行晚于 defer 的 dd-i18n.js，
+  // 若在这里硬编码中文 aria，会把内核刚写好的英文 aria 覆盖回中文（实测到的假通过点）。
+  // 未启用 i18n 的站点（无 window.DD_I18N）仍走原中文动态文案。
+  function sync(){var b=document.getElementById('dd-theme-toggle');if(!b)return;
+    var d=effective()==='dark';
+    b.textContent=d?'☀️':'🌙';
+    if(window.DD_I18N&&window.DD_I18N.t)return;
+    b.setAttribute('aria-label', d?'切换到浅色模式':'切换到深色模式');
+    b.setAttribute('title', d?'切换到浅色模式':'切换到深色模式');}
+  function toggle(){var c=effective();apply(c==='dark'?'light':'dark');}
+  function init(){var b=document.getElementById('dd-theme-toggle');if(b)b.addEventListener('click',toggle);sync();}
+  if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
+  if(window.matchMedia){matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){
+    try{if(localStorage.getItem(KEY))return;}catch(e){} sync();});}
+})();
+</script>
+</body>
+
+</html>
