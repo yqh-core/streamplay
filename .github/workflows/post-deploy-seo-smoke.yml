@@ -229,6 +229,19 @@ jobs:
               throw new Error(path + ' unexpectedly carries noindex');
             }
             if (!sitemap.body.includes(origin + path + '</loc>')) throw new Error(path + ' is missing from sitemap.xml');
+            const internalLegacyLinks = [...page.body.matchAll(/href=["']([^"']+)["']/g)]
+              .map((match) => match[1])
+              .filter((href) => {
+                try {
+                  const url = new URL(href, origin);
+                  return url.origin === origin && /\.html(?:[?#].*)?$/i.test(url.pathname + url.search);
+                } catch {
+                  return false;
+                }
+              });
+            if (internalLegacyLinks.length) {
+              throw new Error(path + ' contains internal .html redirect links: ' + internalLegacyLinks.join(', '));
+            }
             if (!/<h1\b/i.test(page.body)) throw new Error(path + ' is missing its primary heading');
           }
 
