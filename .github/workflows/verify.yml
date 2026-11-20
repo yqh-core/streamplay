@@ -53,3 +53,30 @@ jobs:
           grep -Fq '"inLanguage": "en"' index.html
           grep -Fq '"priceCurrency": "USD"' index.html
           echo "English-first StreamPlay homepage metadata and structured data verified"
+
+
+      - name: Support-page canonical and internal-link gate
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const origin = 'https://play.digdevbox.com';
+          const routes = ['about', 'contact', 'copyright', 'docs', 'faq', 'guides', 'privacy', 'terms'];
+          const files = ['index.html', ...routes.map((route) => route + '.html')];
+          for (const file of files) {
+            const html = readFileSync(file, 'utf8');
+            const expected = file === 'index.html' ? origin + '/' : origin + '/' + file.replace(/\.html$/, '') + '/';
+            const canonical = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
+            if (canonical !== expected) throw new Error(file + ' canonical mismatch: ' + canonical + ' (expected ' + expected + ')');
+            const hrefs = [...html.matchAll(/href=["']([^"']+)["']/g)].map((match) => match[1]);
+            const legacyInternal = hrefs.filter((href) => {
+              try {
+                const url = new URL(href, origin);
+                return url.origin === origin && /\.html(?:[?#].*)?$/i.test(url.pathname + url.search);
+              } catch {
+                return false;
+              }
+            });
+            if (legacyInternal.length) throw new Error(file + ' contains internal legacy .html links: ' + legacyInternal.join(', '));
+          }
+          console.log('PASS: homepage and eight support pages use final canonical URLs and contain no internal .html links');
+          NODE
