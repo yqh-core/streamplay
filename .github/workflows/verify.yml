@@ -64,14 +64,14 @@ jobs:
           const files = ['index.html', ...routes.map((route) => route + '.html')];
           for (const file of files) {
             const html = readFileSync(file, 'utf8');
-            const expected = file === 'index.html' ? origin + '/' : origin + '/' + file.replace(/\\.html$/, '') + '/';
+            const expected = file === 'index.html' ? origin + '/' : origin + '/' + file.replace(/\.html$/, '') + '/';
             const canonical = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
             if (canonical !== expected) throw new Error(file + ' canonical mismatch: ' + canonical + ' (expected ' + expected + ')');
             const hrefs = [...html.matchAll(/href=["']([^"']+)["']/g)].map((match) => match[1]);
             const legacyInternal = hrefs.filter((href) => {
               try {
                 const url = new URL(href, origin);
-                return url.origin === origin && /\\.html(?:[?#].*)?$/i.test(url.pathname + url.search);
+                return url.origin === origin && /\.html(?:[?#].*)?$/i.test(url.pathname + url.search);
               } catch {
                 return false;
               }
