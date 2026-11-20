@@ -55,18 +55,26 @@ jobs:
           echo "English-first StreamPlay homepage metadata and structured data verified"
 
 
-      - name: Support-page canonical and internal-link gate
+      - name: English and Chinese support-page canonical/link gate
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const origin = 'https://play.digdevbox.com';
           const routes = ['about', 'contact', 'copyright', 'docs', 'faq', 'guides', 'privacy', 'terms'];
-          const files = ['index.html', ...routes.map((route) => route + '.html')];
-          for (const file of files) {
-            const html = readFileSync(file, 'utf8');
-            const expected = file === 'index.html' ? origin + '/' : origin + '/' + file.replace(/\.html$/, '') + '/';
+          const files = [
+            { file: 'index.html', canonical: origin + '/', lang: 'en', noindex: false },
+            ...routes.map((route) => ({ file: route + '/index.html', canonical: origin + '/' + route + '/', lang: 'en', noindex: false })),
+            { file: 'zh/index.html', canonical: origin + '/zh/', lang: 'zh-CN', noindex: true },
+            ...routes.map((route) => ({ file: 'zh/' + route + '/index.html', canonical: origin + '/zh/' + route + '/', lang: 'zh-CN', noindex: true })),
+          ];
+          for (const entry of files) {
+            const html = readFileSync(entry.file, 'utf8');
             const canonical = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i)?.[1];
-            if (canonical !== expected) throw new Error(file + ' canonical mismatch: ' + canonical + ' (expected ' + expected + ')');
+            if (canonical !== entry.canonical) throw new Error(entry.file + ' canonical mismatch: ' + canonical + ' (expected ' + entry.canonical + ')');
+            if (!html.includes('<html lang="' + entry.lang + '"')) throw new Error(entry.file + ' has incorrect document language');
+            if (entry.noindex && !/name=["']robots["'] content=["']noindex,\s*follow["']/i.test(html)) {
+              throw new Error(entry.file + ' must remain noindex, follow');
+            }
             const hrefs = [...html.matchAll(/href=["']([^"']+)["']/g)].map((match) => match[1]);
             const legacyInternal = hrefs.filter((href) => {
               try {
@@ -76,7 +84,13 @@ jobs:
                 return false;
               }
             });
-            if (legacyInternal.length) throw new Error(file + ' contains internal legacy .html links: ' + legacyInternal.join(', '));
+            if (legacyInternal.length) throw new Error(entry.file + ' contains internal legacy .html links: ' + legacyInternal.join(', '));
           }
-          console.log('PASS: homepage and eight support pages use final canonical URLs and contain no internal .html links');
+          for (const route of routes) {
+            const english = readFileSync(route + '/index.html', 'utf8');
+            if (!english.includes('href="/zh/' + route + '/"')) throw new Error(route + ': English page is missing its direct Chinese-language link');
+            const chinese = readFileSync('zh/' + route + '/index.html', 'utf8');
+            if (!chinese.includes('href="/' + route + '/" lang="en"')) throw new Error(route + ': Chinese page is missing its direct English-language link');
+          }
+          console.log('PASS: English canonicals, noindex Chinese routes, direct language links and zero internal .html links');
           NODE
