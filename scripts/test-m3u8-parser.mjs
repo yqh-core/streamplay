@@ -6,7 +6,7 @@ const source=fs.readFileSync(new URL('../js/player.js',import.meta.url),'utf8');
 const start=source.indexOf('    function resolveUrl(uri, base) {');
 const end=source.indexOf('    function fmtDuration(sec) {',start);
 assert.ok(start>=0&&end>start,'production parser anchors must exist');
-const sandbox={};
+const sandbox={URL};
 vm.runInNewContext(source.slice(start,end)+'\nthis.__parseManifest=parseManifest;',sandbox);
 const parse=sandbox.__parseManifest;
 assert.equal(typeof parse,'function');
