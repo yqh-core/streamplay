@@ -1,14 +1,40 @@
-$ [exit=0] scripts/check-locales.mjs
+StreamPlay PR #25 fix - gate re-run (with location-robust guard test)  2026-11-21 22:02:57
+baseline head 0cfa152 + parser-load guard; player.js sha8=29656d3f
+----------------------------------------------------------------
+
+$ [exit=0]  node scripts/check-locales.mjs
+      [locales] en: 19 keys
+      [locales] zh: 19 keys
       [locales] PASS 鍚勮瑷€ key 闆嗗悎/绌哄€?澶氫綑閿?鍗犱綅绗︿竴鑷?
-$ [exit=0] scripts/check-asset-versioning.mjs
+
+$ [exit=0]  node scripts/check-asset-versioning.mjs
       G-ASSET-VER PASS锛? 涓暱缂撳瓨璺緞寮曠敤鐨??v= 鍏ㄩ儴绛変簬褰撳墠鍐呭鍝堝笇锛堟壂 10 涓?HTML锛?
-$ [exit=0] scripts/check-asset-versioning.mjs --falsify
+
+$ [exit=0]  node scripts/check-asset-versioning.mjs --falsify
+      === G-ASSET-VER 璇佷吉鑷锛堝唴瀛樺す鍏凤紝涓嶅啓鐩橈級===
+        鉁?缂虹増鏈覆 鈫?鏈熸湜 鍒ょ孩锛屽疄闄?鍒ょ孩锛坕ndex.html: js/player.js 缂??v= 鐗堟湰涓诧紝鍗磋惤鍦ㄩ暱缂撳瓨璺緞涓嬶級
+        鉁?鐗堟湰涓茶繃鏈?鈫?鏈熸湜 鍒ょ孩锛屽疄闄?鍒ょ孩锛坕ndex.html: js/player.js 鐗堟湰涓?deadbeef 鈮?褰撳墠鍐呭鍝堝笇 29656d3f锛堟敼浜嗘枃浠跺繕 锛?  鉁?璧勬簮鏂囦欢涓嶅瓨鍦?鈫?鏈熸湜 鍒ょ孩锛屽疄闄?鍒ょ孩锛坕ndex.html: 寮曠敤 ./js/js/__no_such__.js 浣嗚祫婧愭枃浠朵笉瀛樺湪锛?  鉁?鍚堣瀵圭収缁勶紙鍘熸牱锛?鈫?鏈熸湜 鍒ょ豢锛屽疄闄?鍒ょ豢
+      
       G-ASSET-VER 鑷锛氭鍙嶄緥鍧囩鍚堥鏈?
-$ [exit=0] scripts/test-m3u8-parser.mjs
+
+$ [exit=0]  node scripts/test-m3u8-parser.mjs
       PASS: production M3U8 parser 鈥?master/media, offsets, CRLF, VOD/LIVE/EVENT, empty/missing/invalid input, encryption marker
-$ [exit=0] scripts/check-ga4-consent.mjs
+
+$ [exit=0]  node scripts/check-ga4-consent.mjs
       [GA4 consent] PASS: all eighteen public HTML pages, correct ID, opt-in gate, safe URL and privacy disclosure
-$ [exit=0] scripts/test-ga4-consent-runtime.mjs
+
+$ [exit=0]  node scripts/test-ga4-consent-runtime.mjs
       [GA4 runtime] PASS: no pre-consent load; accept sends safe path-only page_view; reject blocks; noindex suppresses; withdrawal clears cookies
-$ [exit=0] scripts/test-player-parser-guard.mjs
+
+$ [exit=0]  node scripts/test-player-parser-guard.mjs
+      player.js under test resolved from: ../js/player.js
+      FIXED player.js (with guard):
+        ok    A parser present  -> loads clean  -> threw=false  (clean load)
+        ok    B parser missing  -> loads clean (no IIFE abort)  -> threw=false  (clean load)
+        ok    C parser obj, no method -> loads clean  -> threw=false  (clean load)
+        ok    D parser obj, method not a function -> loads clean  -> threw=false  (clean load)
+      UNGUARDED player.js (pre-fix, for contrast):
+        ok    B' parser missing  -> IIFE ABORTS (the bug the guard fixes)  -> threw=true  (TypeError: Cannot read properties of undefined (reading 'parseManifest')
       PASS: player.js survives missing/malformed parser module; guard is load-bearing
+
+==== ALL 7 GATES exit 0: True ====

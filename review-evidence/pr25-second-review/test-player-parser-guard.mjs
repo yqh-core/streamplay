@@ -2,13 +2,28 @@
 /* Failure-simulation test for PR #25 parser-load resilience.
    Proves player.js does NOT abort its IIFE when the shared M3U8 parser
    module is missing or malformed, while normal playback wiring is untouched.
-   Run: node scripts/test-player-parser-guard.mjs   (exit 0 = pass, 1 = fail) */
+   Location-robust: runnable from scripts/ (reads ../js/player.js) OR from the
+   review-evidence dir (reads the sibling player.fixed.js). Exit 0 = pass, 1 = fail. */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const GUARDED = 'var m3u8ParserReady = !!(window.StreamPlayM3U8Parser';
-const src = readFileSync(new URL('../js/player.js', import.meta.url), 'utf8');
+
+/* Resolve the player.js under test regardless of where this file is placed. */
+function resolvePlayerSource() {
+  const candidates = ['../js/player.js', './player.fixed.js', './player.js'];
+  const tried = [];
+  for (const c of candidates) {
+    const url = new URL(c, import.meta.url);
+    try { return { src: readFileSync(url, 'utf8'), from: c }; }
+    catch { tried.push(c); }
+  }
+  throw new Error('player.js not found near test; tried: ' + tried.join(', '));
+}
+const { src: playerSrc, from: playerFrom } = resolvePlayerSource();
+// Alias kept for the rest of the file.
+const src = playerSrc;
 assert.ok(src.includes(GUARDED), 'player.js must contain the guarded parser init');
 
 /* Universal permissive stub: any property get returns a callable stub,
@@ -81,10 +96,12 @@ function check(name, err, expectThrow) {
 
 const WORKING_PARSER = { parseManifest: () => ({ isMaster: false, segments: [], variants: [], media: [] }) };
 
+console.log('player.js under test resolved from: ' + playerFrom);
 console.log('FIXED player.js (with guard):');
 check('A parser present  -> loads clean', loadPlayer(src, WORKING_PARSER), false);
 check('B parser missing  -> loads clean (no IIFE abort)', loadPlayer(src, undefined), false);
 check('C parser obj, no method -> loads clean', loadPlayer(src, {}), false);
+check('D parser obj, method not a function -> loads clean', loadPlayer(src, { parseManifest: 'oops' }), false);
 
 /* Regression proof: the ORIGINAL unguarded init must abort the IIFE when the
    module is missing. Reconstruct that variant by reverting the guard block to
