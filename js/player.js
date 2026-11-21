@@ -1223,72 +1223,14 @@
         try { return new URL(uri, base).href; } catch (e) { return uri; }
     }
 
-    /* 属性列表解析：KEY=VALUE,KEY2="带,逗号",RESOLUTION=1280x720 */
-    function parseAttrs(s) {
-        var out = {};
-        var re = /([A-Z0-9-]+)=("[^"]*"|[^,]*)/g;
-        var m;
-        while ((m = re.exec(s)) !== null) {
-            out[m[1]] = m[2].replace(/^"|"$/g, '');
-        }
-        return out;
-    }
-
-    function parseManifest(text, baseUrl) {
-        var lines = text.split(/\r?\n/);
-        var info = {
-            isMaster: false, version: '', targetDuration: 0, mediaSequence: 0,
-            playlistType: '', endList: false, variants: [], media: [],
-            segments: [], totalDuration: 0, encrypted: false, keyMethod: '',
-            initSegment: '', discontinuities: 0
-        };
-        var pendingVariant = null;
-        var pendingExtinf = 0;
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].trim();
-            if (!line) continue;
-            if (line.indexOf('#EXT-X-STREAM-INF:') === 0) {
-                info.isMaster = true;
-                pendingVariant = parseAttrs(line.slice(18));
-            } else if (line.indexOf('#EXT-X-MEDIA:') === 0) {
-                info.media.push(parseAttrs(line.slice(13)));
-            } else if (line.indexOf('#EXT-X-VERSION:') === 0) {
-                info.version = line.slice(15);
-            } else if (line.indexOf('#EXT-X-TARGETDURATION:') === 0) {
-                info.targetDuration = parseFloat(line.slice(20)) || 0;
-            } else if (line.indexOf('#EXT-X-MEDIA-SEQUENCE:') === 0) {
-                info.mediaSequence = parseInt(line.slice(20), 10) || 0;
-            } else if (line.indexOf('#EXT-X-PLAYLIST-TYPE:') === 0) {
-                info.playlistType = line.slice(19);
-            } else if (line.indexOf('#EXT-X-ENDLIST') === 0) {
-                info.endList = true;
-            } else if (line.indexOf('#EXT-X-KEY:') === 0) {
-                var keyAttrs = parseAttrs(line.slice(11));
-                if (keyAttrs.METHOD && keyAttrs.METHOD !== 'NONE') {
-                    info.encrypted = true;
-                    info.keyMethod = keyAttrs.METHOD;
-                }
-            } else if (line.indexOf('#EXT-X-MAP:') === 0) {
-                var mapAttrs = parseAttrs(line.slice(11));
-                if (mapAttrs.URI) info.initSegment = resolveUrl(mapAttrs.URI, baseUrl);
-            } else if (line.indexOf('#EXT-X-DISCONTINUITY') === 0) {
-                info.discontinuities++;
-            } else if (line.indexOf('#EXTINF:') === 0) {
-                pendingExtinf = parseFloat(line.slice(8)) || 0;
-            } else if (line[0] !== '#') {
-                if (pendingVariant) {
-                    pendingVariant.uri = resolveUrl(line, baseUrl);
-                    info.variants.push(pendingVariant);
-                    pendingVariant = null;
-                } else if (!info.isMaster) {
-                    info.segments.push({ duration: pendingExtinf, uri: resolveUrl(line, baseUrl) });
-                    info.totalDuration += pendingExtinf;
-                    pendingExtinf = 0;
-                }
-            }
-        }
-        return info;
-    }
+    /* Parser is a separately tested production module loaded before this file.
+       容错：解析模块可能因网络/部分部署/immutable 长缓存命中坏文件而未加载成功。
+       这里只做安全探测，绝不在顶层无保护解引用 window.StreamPlayM3U8Parser——
+       否则模块缺失会让整个播放器 IIFE 中止（把分析功能故障扩大成整播放器崩溃）。
+       模块缺失时不返回“看似正常的空解析”，只在 analyzeManifest 入口明确降级。 */
+    var m3u8ParserReady = !!(window.StreamPlayM3U8Parser
+        && typeof window.StreamPlayM3U8Parser.parseManifest === 'function');
+    var parseManifest = m3u8ParserReady ? window.StreamPlayM3U8Parser.parseManifest : null;
 
     function fmtDuration(sec) {
         if (!isFinite(sec) || sec <= 0) return '—';
@@ -1475,6 +1417,10 @@
 
     function analyzeManifest() {
         if (!maUrl || !maResult) return;
+        if (!m3u8ParserReady) {
+            maSetStatus('M3U8 清单分析暂不可用：解析模块未能加载；播放与其他功能不受影响，请刷新页面重试。', 'error');
+            return;
+        }
         var url = maUrl.value.trim();
         if (!url) { maSetStatus('请先输入 m3u8 地址', 'warn'); return; }
         if (!/^https?:\/\//i.test(url)) { maSetStatus('地址必须以 http:// 或 https:// 开头', 'warn'); return; }
