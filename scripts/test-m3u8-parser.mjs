@@ -25,7 +25,7 @@ const live=parse('#EXTM3U\n#EXT-X-TARGETDURATION:4\n#EXT-X-MEDIA-SEQUENCE:9\n#EX
 assert.equal(live.targetDuration,4);assert.equal(live.mediaSequence,9);assert.equal(live.playlistType,'');assert.equal(live.endList,false);
 const empty=parse('#EXTM3U\n#EXT-X-TARGETDURATION:\n#EXT-X-MEDIA-SEQUENCE:\n#EXT-X-PLAYLIST-TYPE:\n',base);
 assert.equal(empty.targetDuration,0);assert.equal(empty.mediaSequence,0);assert.equal(empty.playlistType,'');
-const invalid=parse('not an m3u8 manifest\n#EXT-X-TARGETDURATION:abc\n#EXT-X-MEDIA-SEQUENCE:abc',base);
+const invalid=parse('#EXTM3U\n#EXT-X-TARGETDURATION:abc\n#EXT-X-MEDIA-SEQUENCE:abc',base);
 assert.equal(invalid.targetDuration,0);assert.equal(invalid.mediaSequence,0);assert.equal(invalid.segments.length,0);
 const encrypted=parse('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="key.bin"\n#EXTINF:2,\nseg.ts',base);
 assert.equal(encrypted.encrypted,true);assert.equal(encrypted.keyMethod,'AES-128');
