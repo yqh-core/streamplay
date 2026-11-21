@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-i18n-page="home">
+
+<head><script id="dd-theme-bootstrap">/* inject-dd-shell: 主题防闪烁 */
+(function(){try{var t=localStorage.getItem('dd-theme');var h=document.documentElement;
+if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto');}
+else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto');}
+else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
+}catch(e){}})();</script><style id="dd-theme-style">
+.dd-theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+  margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);
+  color:var(--dd-on-primary);border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  transition:background .15s,border-color .15s,transform .1s;flex:none;padding:0}
+.dd-theme-toggle:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.6)}
+.dd-theme-toggle:active{transform:scale(.94)}
+.dd-theme-toggle:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
+@media (max-width:640px){.dd-theme-toggle{width:30px;height:30px;font-size:14px}}
+</style>
+
+    <title>M3U8 &amp; HLS Player — Analyze, Play &amp; Embed | StreamPlay</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Play M3U8/HLS streams or MP4 URLs in your browser. Inspect playlists, diagnose CORS and codec issues, and create iframe embeds—no plugin required.">
+    <meta name="keywords" content="online M3U8 player, HLS player, HLS stream tester, M3U8 playlist analyzer, MP4 player, CORS diagnostics, iframe embed generator">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="canonical" href="https://play.digdevbox.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="M3U8 &amp; HLS Player — Analyze, Play &amp; Embed | StreamPlay">
+    <meta property="og:description" content="Play M3U8/HLS streams or MP4 URLs in your browser. Inspect playlists, diagnose CORS and codec issues, and create iframe embeds—no plugin required.">
+    <meta property="og:url" content="https://play.digdevbox.com/">
+    <meta property="og:site_name" content="StreamPlay">
+    <meta property="og:locale" content="en_US">
+
+    <link rel="icon" href="./images/logo.ico">
+    <link rel="apple-touch-icon" href="./images/logo.png">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="css/dd-tokens.css">
+    <link rel="stylesheet" href="css/dd-shell.css">
+    <meta property="og:image" content="https://play.digdevbox.com/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="StreamPlay online M3U8 and HLS video player">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://play.digdevbox.com/images/og-image.jpg">
+
+<!-- adsense:start -->
+  <meta name="google-adsense-account" content="ca-pub-7944759654100814" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7944759654100814" crossorigin="anonymous"></script>
+  <!-- adsense:end -->
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "StreamPlay Online M3U8 and HLS Player",
+    "url": "https://play.digdevbox.com/",
+    "description": "A browser-based player for compatible M3U8 and HLS live or on-demand streams, plus supported MP4 URLs, with playlist analysis and playback diagnostics.",
+    "applicationCategory": "MultimediaApplication",
+    "applicationSubCategory": "VideoPlayer",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript",
+    "inLanguage": "en",
+    "featureList": [
+      "M3U8 and HLS live and on-demand playback",
+      "Native MP4 and WebM playback",
+      "Playback speed controls from 0.5× to 2×",
+      "HLS rendition selection and adaptive quality switching",
+      "Audio track selection",
+      "A-B loop playback",
+      "VTT and SRT subtitle loading",
+      "Current-frame screenshots",
+      "Picture-in-picture and fullscreen",
+      "Recent playback list stored locally",
+      "Resume playback from locally remembered progress",
+      "Share links with playback timestamps",
+      "Theater widescreen mode",
+      "Subtitle style customization",
+      "Playback statistics for resolution, codec, bandwidth and dropped frames",
+      "Playback diagnostics for MSE, decoding and URL reachability",
+      "Keyboard shortcut help panel",
+      "Floating mini-player while scrolling",
+      "Playback queue with autoplay, next/previous and repeat",
+      "M3U8 playlist analysis for variants, audio, subtitles, segments, live state and encryption markers",
+      "Iframe embed builder with configuration, live preview and copy"
+    ],
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "DigDevBox", "item": "https://www.digdevbox.com/" },
+      { "@type": "ListItem", "position": 2, "name": "StreamPlay", "item": "https://play.digdevbox.com/" }
+    ]
+  }
+  </script>
+  <script defer src="/analytics-consent.js"></script>
+</head>
+
+<body>
+<div class="dd-brandbar slim">
+    <div class="dd-shell-inner">
+        <a class="dd-brand" href="https://www.digdevbox.com/"><span class="dd-brand-mark">DB</span>DigDevBox</a>
+        <nav>
+                <a href="https://www.digdevbox.com/" data-i18n="nav.devtools">Dev Toolbox</a>
+                <a href="https://play.digdevbox.com/" aria-current="page" data-i18n="nav.player">StreamPlay</a>
+                <a href="https://ip.digdevbox.com/" data-i18n="nav.ip">IP Lookup</a>
+                
+                <a href="https://img.digdevbox.com/" data-i18n="nav.imgtools">Image Compressor</a>
+        </nav>
+        <button id="dd-theme-toggle" class="dd-theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" data-i18n-attr="aria-label:aria.themeToggle,title:aria.themeToggle">🌙</button>
+    </div>
+</div>
+    <header class="hd">
+        <div class="link-list">
+            <a class="brand" href="/">
+                <img src="./images/logo.png" alt="StreamPlay">
+                <span>StreamPlay</span>
+            </a>
+            <nav>
+                <a href="/" aria-current="page" data-i18n="topnav.home">Home</a>
+                <a href="/guides/" data-i18n="topnav.guides">Guides</a>
+                <a href="/docs/" data-i18n="topnav.docs">HLS Docs</a>
+                <a href="/faq/" data-i18n="topnav.faq">FAQ</a>
+                <a href="/about/" data-i18n="topnav.about">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <h1 data-i18n="h1.title">StreamPlay</h1>
+        <p class="subtitle" data-i18n="hero.subtitle">Paste an m3u8 / HLS or mp4 URL and hit play</p>
+
+        <!-- ① 地址输入：已预填一个可用的测试流，打开页面就能直接Select Play -->
+        <div class="form">
+            <input type="text" id="url" aria-label="Stream URL" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+                placeholder="Paste an M3U8 / HLS / MP4 stream URL" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:placeholder.urlInput">
+            <button type="button" id="play-btn" title="Play">
+                <img src="./images/ic-play.png" alt="">
+                <span data-i18n="btn.play">Play</span>
+            </button>
+        </div>
+
+        <p class="hint">
+            A sample stream is prefilled. <strong>Select the Play button</strong> (or press Enter) to start playback. To play your own video, replace the URL with your M3U8 link and select Play.
+        </p>
+
+        <!-- ② 示例流快捷按钮：没有地址时一键体验 -->
+        <div class="demo-bar">
+            <span class="demo-label">No stream URL? Try one of these:</span>
+            <button type="button" class="demo-btn" data-url="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">Sample 1 · Multi-bitrate (10 min)</button>
+            <!-- 注意：示例流必须允许跨域（响应带 Access-Control-Allow-Origin），否则浏览器会拦截、
+                 播放器只能报「地址不可达」。Apple 的 devstreaming-cdn 就不带该头，实测播不了，已换掉。 -->
+            <button type="button" class="demo-btn" data-url="https://test-streams.mux.dev/tos_ismc/main.m3u8">Sample 2 · Multi-bitrate (Tears of Steel)</button>
+            <button type="button" class="demo-btn" data-url="https://stream.mux.com/v69RSHhFelSm4701snP22dYz2jICy4E4FUyk02rW4gxRM.m3u8">Sample 3 · Short clip</button>
+        </div>
+
+        <!-- ②-b 差异能力入口：纯 HTML 锚点直达（零 JS 零测量），复用 demo-btn 既有样式 -->
+        <div class="demo-bar">
+            <span class="demo-label">More than playback:</span>
+            <a class="demo-btn" href="#analyzer" style="text-decoration:none">🧾 Analyze an M3U8 playlist</a>
+            <a class="demo-btn" href="#embed" style="text-decoration:none">🧩 Generate an embed</a>
+            <a class="demo-btn" href="/guides/" style="text-decoration:none">🩺 Troubleshoot playback</a>
+        </div>
+
+        <div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+        <!-- ③ 播放器 + 自定义控制条（对标 video.js / hls.js：Speed、Quality、Picture-in-picture、快捷键） -->
+        <div class="now-playing" id="now-playing" hidden>
+            <span class="np-eq" id="np-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="np-label">Now playing</span>
+            <span class="np-url" id="np-url"></span>
+        </div>
+        <div class="player-glow" aria-hidden="true"></div>
+        <div class="mini-spacer" id="mini-spacer" hidden></div>
+        <div class="player-shell">
+            <div class="player-wrap">
+                <video id="player" preload="auto" playsinline webkit-playsinline></video>
+                <button type="button" class="big-play" id="big-play" aria-label="Play">▶</button>
+                <div class="buffer-spin" id="buffer-spin" hidden aria-hidden="true"><span></span></div>
+                <button type="button" class="retry-overlay" id="retry-overlay" hidden>⟳ Playback failed. Click to retry</button>
+                <div class="resume-bar" id="resume-bar" hidden>
+                    <span class="resume-text" id="resume-text"></span>
+                    <button type="button" id="resume-go" class="mini-btn">Resume</button>
+                    <button type="button" id="resume-dismiss" class="mini-btn ghost">Start over</button>
+                </div>
+                <div class="stats-panel" id="stats-panel" hidden aria-label="Playback statistics">
+                    <div class="sp-head"><span>Playback statistics</span><button type="button" id="stats-close" class="sp-x" aria-label="Close statistics">✕</button></div>
+                    <dl class="sp-grid" id="stats-grid"></dl>
+                </div>
+            </div>
+            <div class="controls" id="controls">
+                <div class="seek-row" id="seek-row">
+                    <div class="buffer-track" id="buffer-track" aria-hidden="true"></div>
+                    <input type="range" id="seek" min="0" max="100" value="0" step="0.1" aria-label="Playback progress">
+                    <div class="seek-tip" id="seek-tip" hidden></div>
+                </div>
+                <div class="ctrl-row">
+                    <button type="button" id="c-play" class="cbtn" aria-label="Play / pause" title="Play / pause（Space）">▶</button>
+                    <span class="time"><span id="cur">0:00</span> / <span id="dur">0:00</span></span>
+                    <button type="button" id="c-mute" class="cbtn" aria-label="Muted" title="Muted（M）">🔊</button>
+                    <input type="range" id="vol" class="vol" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+                    <label class="sel-wrap">Speed
+                        <select id="rate" aria-label="Playback speed">
+                            <option value="0.5">0.5×</option>
+                            <option value="0.75">0.75×</option>
+                            <option value="1" selected>1×</option>
+                            <option value="1.25">1.25×</option>
+                            <option value="1.5">1.5×</option>
+                            <option value="2">2×</option>
+                        </select>
+                    </label>
+                    <label class="sel-wrap">Quality
+                        <select id="quality" aria-label="Quality">
+                            <option value="-1">Auto</option>
+                        </select>
+                    </label>
+                    <label class="sel-wrap">Audio track
+                        <select id="audio" aria-label="Audio track" disabled>
+                            <option value="-1">Default</option>
+                        </select>
+                    </label>
+                    <span class="ctrl-sep" aria-hidden="true"></span>
+                    <button type="button" id="c-pip" class="cbtn" aria-label="Picture-in-picture" title="Picture-in-picture">📺</button>
+                    <button type="button" id="c-snap" class="cbtn" aria-label="Capture current frame" title="Capture current frame">📷</button>
+                    <button type="button" id="c-loop-a" class="cbtn loop-btn" aria-label="Set A-B loop start" title="A-B loop: set point A">A</button>
+                    <button type="button" id="c-loop-b" class="cbtn loop-btn" aria-label="Set A-B loop end" title="A-B loop: set point B">B</button>
+                    <button type="button" id="c-share" class="cbtn" aria-label="Copy share link with timestamp" title="Copy share link at current time">🔗</button>
+                    <button type="button" id="c-theater" class="cbtn" aria-label="Theater mode" title="Theater mode">🎬</button>
+                    <button type="button" id="c-stats" class="cbtn" aria-label="Playback statistics panel" title="Playback statistics (resolution, codec, bandwidth, dropped frames)">📊</button>
+                    <button type="button" id="c-diag" class="cbtn" aria-label="Playback diagnostics" title="Playback diagnostics (MSE, decoding and URL reachability)">🩺</button>
+                    <button type="button" id="c-help" class="cbtn" aria-label="Keyboard shortcuts" title="Keyboard shortcuts（?）">⌨</button>
+                    <button type="button" id="c-mini" class="cbtn" aria-label="Mini player" title="Mini player (floats when scrolled out of view)">🪟</button>
+                    <button type="button" id="c-full" class="cbtn" aria-label="Fullscreen" title="Fullscreen（F）">⛶</button>
+                </div>
+                <div class="stats" id="stats" aria-live="off"></div>
+            </div>
+            <div class="mini-bar" id="mini-bar">
+                <button type="button" id="mini-play" class="cbtn" aria-label="Play / pause">⏸</button>
+                <span class="mini-title" id="mini-title">Now playing</span>
+                <button type="button" id="mini-expand" class="cbtn" aria-label="Restore player" title="Restore player">⤢</button>
+                <button type="button" id="mini-close" class="cbtn" aria-label="CloseMini player" title="CloseMini player">✕</button>
+            </div>
+        </div>
+        <p class="kbd-hint">Shortcuts:<kbd>Space</kbd> Play / pause · <kbd>←</kbd>/<kbd>→</kbd> Seek 5s · <kbd>J</kbd>/<kbd>L</kbd> 10s · <kbd>↑</kbd>/<kbd>↓</kbd> Volume · <kbd>M</kbd> Muted · <kbd>F</kbd> Fullscreen · <kbd>?</kbd> Help</p>
+
+        <!-- ③-c Keyboard shortcuts + Playback diagnostics（对标商业播放器的辅助/排障能力） -->
+        <div class="sp-modal" id="help-modal" hidden role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+            <div class="sp-modal-card">
+                <div class="sp-modal-head"><strong>Keyboard shortcuts</strong><button type="button" class="sp-x" id="help-close" aria-label="Close">✕</button></div>
+                <ul class="shortcut-list">
+                    <li><kbd>Space</kbd> / <kbd>K</kbd><span>Play / pause</span></li>
+                    <li><kbd>←</kbd> / <kbd>→</kbd><span>Seek backward / forward 5 seconds</span></li>
+                    <li><kbd>J</kbd> / <kbd>L</kbd><span>Seek backward / forward 10 seconds</span></li>
+                    <li><kbd>↑</kbd> / <kbd>↓</kbd><span>Increase / decrease volume</span></li>
+                    <li><kbd>M</kbd><span>Toggle mute</span></li>
+                    <li><kbd>F</kbd><span>Toggle fullscreen</span></li>
+                    <li><kbd>?</kbd><span>Open this help</span></li>
+                    <li><kbd>Esc</kbd><span>Close dialog</span></li>
+                </ul>
+                <p class="note">The control bar also includes share, theater mode, statistics, diagnostics, screenshots and A-B loop controls.</p>
+            </div>
+        </div>
+        <div class="sp-modal" id="diag-modal" hidden role="dialog" aria-modal="true" aria-label="Playback diagnostics">
+            <div class="sp-modal-card">
+                <div class="sp-modal-head"><strong>Playback diagnostics</strong><button type="button" class="sp-x" id="diag-close" aria-label="Close">✕</button></div>
+                <div class="diag-body" id="diag-body"></div>
+                <button type="button" id="diag-run" class="mini-btn">Run checks again</button>
+            </div>
+        </div>
+
+        <!-- ③-b 播放工具：Subtitles + Recent streams（对标 video.js 插件生态的常用能力） -->
+        <div class="tool-grid">
+            <div class="card tool-card">
+                <p><strong>Subtitles <span class="tag">.vtt / .srt</span></strong></p>
+                <div class="sub-row">
+                    <input type="text" id="sub-url" aria-label="Subtitle URL" placeholder="Paste a subtitle URL (.vtt / .srt) and press Enter to load" autocomplete="off" spellcheck="false">
+                    <button type="button" id="sub-load" class="mini-btn">Load subtitles</button>
+                    <button type="button" id="sub-off" class="mini-btn ghost">Close</button>
+                </div>
+                <div class="cue-row">
+                    <label>Text size<select id="cue-size" aria-label="SubtitlesText size">
+                        <option value="80">Small</option>
+                        <option value="100" selected>Normal</option>
+                        <option value="130">Large</option>
+                        <option value="160">Extra large</option>
+                    </select></label>
+                    <label>Color<select id="cue-color" aria-label="SubtitlesColor">
+                        <option value="#ffffff" selected>White</option>
+                        <option value="#ffe14d">Yellow</option>
+                        <option value="#5df2e0">Cyan</option>
+                        <option value="#9dff5d">Green</option>
+                    </select></label>
+                    <label>Background<select id="cue-bg" aria-label="SubtitlesBackground">
+                        <option value="rgba(0,0,0,0.6)" selected>Translucent black</option>
+                        <option value="rgba(0,0,0,0.9)">Solid black</option>
+                        <option value="transparent">None</option>
+                    </select></label>
+                </div>
+                <p class="note" id="sub-note">After loading, select the subtitle track in the player menu. Cross-origin subtitles require CORS permission from the source.</p>
+            </div>
+            <div class="card tool-card">
+                <p><strong>Recent streams <span class="tag" id="recent-count">0</span></strong>
+                    <button type="button" id="recent-clear" class="mini-btn ghost clear-btn">Clear</button>
+                </p>
+                <ul class="recent-list" id="recent-list" aria-label="Recent stream URLs"></ul>
+                <p class="note" id="recent-empty">Played URLs are saved only in this browser. Select one to play it again.</p>
+            </div>
+        </div>
+
+        <!-- ③-d Playlist queue：Autoplay next / 上下首 / Repeat current stream（对标商业播放器的播放列表能力） -->
+        <div class="card queue-card">
+            <p><strong>Playlist queue <span class="tag" id="queue-count">0</span></strong>
+                <label class="queue-toggle"><input type="checkbox" id="queue-auto"> Autoplay next</label>
+                <label class="queue-toggle"><input type="checkbox" id="queue-repeat"> Repeat current stream</label>
+                <button type="button" id="queue-clear" class="mini-btn ghost clear-btn">Clear</button>
+            </p>
+            <div class="sub-row">
+                <input type="text" id="queue-url" aria-label="Queue stream URL" placeholder="Paste a URL and press Enter to add it to the queue" autocomplete="off" spellcheck="false">
+                <button type="button" id="queue-add" class="mini-btn">Add</button>
+                <button type="button" id="queue-prev" class="mini-btn ghost">⏮ Previous</button>
+                <button type="button" id="queue-next" class="mini-btn ghost">Next ⏭</button>
+            </div>
+            <ol class="queue-list" id="queue-list" aria-label="Playlist queue"></ol>
+            <p class="note" id="queue-empty">Add multiple URLs to build a queue. Enable Autoplay next to advance automatically, or Repeat current stream to loop the current item. The queue is stored only in this browser.</p>
+        </div>
+
+        <!-- ③-e M3U8 playlist analyzer器（对标 LivePlayer Analyzer：变体/Audio track/Subtitles/分片/直播态/加密） -->
+        <div class="card analyzer-card" id="analyzer">
+            <p><strong>M3U8 playlist analyzer <span class="tag">Developer</span></strong></p>
+            <div class="sub-row">
+                <input type="text" id="ma-url" aria-label="M3U8 playlist URL" placeholder="Paste an M3U8 URL and press Enter to analyze" autocomplete="off" spellcheck="false">
+                <button type="button" id="ma-run" class="mini-btn">Analyze</button>
+                <button type="button" id="ma-use-current" class="mini-btn ghost">Use current stream URL</button>
+            </div>
+            <p class="ma-status" id="ma-status" role="status" aria-live="polite"></p>
+            <div class="ma-result" id="ma-result"></div>
+            <p class="note">Analysis runs locally in your browser. The source must allow CORS. For a master playlist, the analyzer also attempts to read the first media variant. Encrypted streams can be inspected structurally; DRM playback is not bypassed.</p>
+        </div>
+
+                <!-- ④ How-to -->
+        <div class="card" lang="en">
+            <p><strong>How to play an HLS stream in three steps</strong></p>
+            <ol class="steps">
+                <li><strong>Get a stream URL</strong> — Paste an M3U8 / HLS playback URL into the input field, or select one of the sample streams above.</li>
+                <li><strong>Select Play</strong> — Select the Play button or press Enter.</li>
+                <li><strong>Watch and control playback</strong> — Move the pointer over the player to pause, adjust volume, seek or enter fullscreen. On phones, landscape orientation may provide a better viewing experience.</li>
+            </ol>
+            <p class="note">If the player stays on Loading or reports an error, the URL may be unavailable or the media host may block cross-origin requests. Try opening the stream URL in a new browser tab first. A reachable URL is a useful first check, but playback can still depend on CORS, codecs and browser support.</p>
+        </div>
+
+                <!-- ⑤ Developer tool: iframe embed builder -->
+        <div class="card dev-card" id="embed" lang="en">
+            <p><strong>Embed StreamPlay on your website <span class="tag">Builder</span></strong></p>
+            <div class="emb-grid">
+                <div class="emb-form">
+                    <label class="emb-field emb-url-field">Stream URL
+                        <input type="text" id="emb-url" placeholder="M3U8 / HLS / MP4 URL" autocomplete="off" spellcheck="false">
+                    </label>
+                    <div class="emb-row">
+                        <label class="emb-field">Width<input type="text" id="emb-width" value="100%" autocomplete="off"></label>
+                        <label class="emb-field">Height<input type="number" id="emb-height" value="480" min="120" step="10"></label>
+                        <label class="emb-field">Start time (seconds)<input type="number" id="emb-t" value="0" min="0" step="1"></label>
+                    </div>
+                    <div class="emb-row">
+                        <label class="emb-check"><input type="checkbox" id="emb-autoplay"> Autoplay</label>
+                        <label class="emb-check"><input type="checkbox" id="emb-muted" checked> Muted</label>
+                        <button type="button" id="emb-use-current" class="mini-btn ghost">Use current stream URL</button>
+                    </div>
+                    <p class="note" id="emb-note">The preview uses this site. Copied embed code points to the production domain play.digdevbox.com.</p>
+                    <pre class="emb-code" id="emb-code"></pre>
+                    <button type="button" id="emb-copy" class="mini-btn">Copy embed code</button>
+                </div>
+                <div class="emb-preview-wrap">
+                    <iframe id="emb-preview" title="StreamPlay embed preview" loading="lazy" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                </div>
+            </div>
+            <p class="note">The embed URL uses <code>?url=</code> to load a stream and <code>&amp;t=seconds</code> to set the starting position. <code>&amp;autoplay=1&amp;muted=1</code> requests muted autoplay; browser policies vary and may still block it. Use the share control to copy a link with the current playback timestamp.</p>
+        </div>
+
+                <!-- ⑥ HLS and M3U8 background -->
+        <div class="card" lang="en">
+            <p>StreamPlay is a browser-based player built with the HTML5 <code>&lt;video&gt;</code> element and the open-source <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a> library. It plays compatible HTTP Live Streaming (HLS) sources, commonly referenced by an <code>.m3u8</code> playlist, as well as browser-supported MP4 and other media formats. Your browser retrieves media from the source host; StreamPlay does not host video files.</p>
+            <h2>What is an M3U8 file?</h2>
+            <p>An M3U8 file is a UTF-8 text playlist that describes media resources and how a player should request them. It may reference individual media segments or a master playlist that points to multiple stream variants.</p>
+            <p>A master playlist can describe several resolutions and bitrates so a compatible player can select a rendition based on device and network conditions. A media playlist lists the segments for one rendition and may describe timing, live-window behavior and encryption metadata.</p>
+            <p>Playlist entries can use absolute URLs, relative paths or full URLs to reference media segments. The playlist may also include comments and metadata that help describe the stream.</p>
+            <p>M3U8 is widely used with HLS for live and on-demand video. A valid playlist does not guarantee playback: the browser, codecs, source availability, authorization and CORS policy must also permit the request.</p>
+        </div>
+
+                <!-- ⑦ Frequently asked questions: visible copy and FAQPage structured data use the same English answers -->
+        <div class="card faq-card" id="faq" lang="en">
+            <h2>Frequently asked questions</h2>
+            <details><summary>Which media formats does StreamPlay support?</summary><p>StreamPlay supports compatible M3U8 / HLS live and on-demand streams, plus browser-supported MP4, WebM and Ogg media. HLS playback uses hls.js where required; native formats use the browser's media support.</p></details>
+            <details><summary>Why does a stream fail to load or keep buffering?</summary><p>The URL may be unavailable, expired or protected, or the media host may block cross-origin requests (CORS). Codec support and browser capabilities also vary. Check the URL, CORS response headers and the playback diagnostics.</p></details>
+            <details><summary>Are my stream URLs uploaded or stored?</summary><p>Playback requests go from your browser to the media source; StreamPlay does not host the video files. Recent URLs and playback progress are stored locally in this browser and are not uploaded to this site. You can clear the local history at any time.</p></details>
+            <details><summary>Can I change playback speed and video quality?</summary><p>Yes. The player offers speed settings from 0.5× to 2×. For multi-bitrate HLS streams, the quality menu can show available renditions for manual selection or adaptive switching.</p></details>
+            <details><summary>How do I load subtitles?</summary><p>Enter a VTT or SRT subtitle URL in the Subtitles tool and load it, then select the track in the player's subtitle menu. The subtitle host must allow cross-origin requests when the browser requires them.</p></details>
+            <details><summary>Can StreamPlay remember playback progress or share a timestamp?</summary><p>Playback progress is stored locally in this browser. When you reopen the same URL, the player can offer to resume. Use the share control to copy a link with a timestamp so another person can open the stream at that position, subject to the source URL's access rules.</p></details>
+            <details><summary>How can I diagnose playback problems or inspect playback statistics?</summary><p>Open Playback diagnostics to check MSE / hls.js support, H.264 and WebM decoding capability, network state and URL reachability, including CORS-related checks. The statistics panel can show resolution, codec, estimated bandwidth, buffer health and dropped frames when the browser exposes those values.</p></details>
+            <details><summary>Can I play multiple streams in sequence or keep the player visible while scrolling?</summary><p>Yes. Add URLs to the Playback queue and enable Autoplay next to advance automatically. You can also move to the previous or next item, repeat the current stream, or use the floating mini-player while scrolling.</p></details>
+            <details><summary>How do I inspect available renditions and audio tracks in an M3U8 playlist?</summary><p>Yes. Paste a URL into the M3U8 playlist analyzer. A master playlist can expose variants, resolution, bandwidth, codecs, audio and subtitle groups. A media playlist can expose segment counts, durations, live or on-demand state and encryption markers. Analysis runs locally and requires the source host to allow CORS. It does not bypass DRM or access controls. See the <a href="/guides/#analyzer">playlist analyzer guide</a>.</p></details>
+            <details><summary>How do I embed the player on my own website?</summary><p>Use the iframe embed builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code. The embed points to play.digdevbox.com and uses a URL parameter to load your stream. Most browsers restrict autoplay unless the video is muted, and behavior varies by browser.</p></details>
+        </div>
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            { "@type": "Question", "name": "Which media formats does StreamPlay support?", "acceptedAnswer": { "@type": "Answer", "text": "StreamPlay supports compatible M3U8 / HLS live and on-demand streams, plus browser-supported MP4, WebM and Ogg media. HLS playback uses hls.js where required; native formats use the browser's media support." } },
+            { "@type": "Question", "name": "Why does a stream fail to load or keep buffering?", "acceptedAnswer": { "@type": "Answer", "text": "The URL may be unavailable, expired or protected, or the media host may block cross-origin requests (CORS). Codec support and browser capabilities also vary. Check the URL, CORS response headers and the playback diagnostics." } },
+            { "@type": "Question", "name": "Are my stream URLs uploaded or stored?", "acceptedAnswer": { "@type": "Answer", "text": "Playback requests go from your browser to the media source; StreamPlay does not host the video files. Recent URLs and playback progress are stored locally in this browser and are not uploaded to this site. You can clear the local history at any time." } },
+            { "@type": "Question", "name": "Can I change playback speed and video quality?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The player offers speed settings from 0.5× to 2×. For multi-bitrate HLS streams, the quality menu can show available renditions for manual selection or adaptive switching." } },
+            { "@type": "Question", "name": "How do I load subtitles?", "acceptedAnswer": { "@type": "Answer", "text": "Enter a VTT or SRT subtitle URL in the Subtitles tool and load it, then select the track in the player's subtitle menu. The subtitle host must allow cross-origin requests when the browser requires them." } },
+            { "@type": "Question", "name": "Can StreamPlay remember playback progress or share a timestamp?", "acceptedAnswer": { "@type": "Answer", "text": "Playback progress is stored locally in this browser. When you reopen the same URL, the player can offer to resume. Use the share control to copy a link with a timestamp so another person can open the stream at that position, subject to the source URL's access rules." } },
+            { "@type": "Question", "name": "How can I diagnose playback problems or inspect playback statistics?", "acceptedAnswer": { "@type": "Answer", "text": "Open Playback diagnostics to check MSE / hls.js support, H.264 and WebM decoding capability, network state and URL reachability, including CORS-related checks. The statistics panel can show resolution, codec, estimated bandwidth, buffer health and dropped frames when the browser exposes those values." } },
+            { "@type": "Question", "name": "Can I play multiple streams in sequence or keep the player visible while scrolling?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Add URLs to the Playback queue and enable Autoplay next to advance automatically. You can also move to the previous or next item, repeat the current stream, or use the floating mini-player while scrolling." } },
+            { "@type": "Question", "name": "How do I inspect available renditions and audio tracks in an M3U8 playlist?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Paste a URL into the M3U8 playlist analyzer. A master playlist can expose variants, resolution, bandwidth, codecs, audio and subtitle groups. A media playlist can expose segment counts, durations, live or on-demand state and encryption markers. Analysis runs locally and requires the source host to allow CORS. It does not bypass DRM or access controls." } },
+            { "@type": "Question", "name": "How do I embed the player on my own website?", "acceptedAnswer": { "@type": "Answer", "text": "Use the iframe embed builder to enter a stream URL, dimensions, start time and autoplay options. Preview the result and copy the iframe code. The embed points to play.digdevbox.com and uses a URL parameter to load your stream. Most browsers restrict autoplay unless the video is muted, and behavior varies by browser." } }
+          ]
+        }
+        </script>
+
+        <div class="footer">
+            <p>This site provides playback technology only. It does not store, create or distribute audio or video content. Media resources are supplied by third parties; contact us about copyright concerns.</p>
+                        <p class="links">
+                <a href="/" data-i18n="topnav.home">Home</a> |
+                <a href="/guides/" data-i18n="topnav.guides">Guides</a> |
+                <a href="/docs/" data-i18n="topnav.docs">HLS Docs</a> |
+                <a href="/faq/" data-i18n="topnav.faq">FAQ</a> |
+                <a href="/about/" data-i18n="topnav.about">About</a> |
+                <a href="/contact/">Contact</a> |
+                <a href="/privacy/">Privacy</a> |
+                <a href="/terms/">Terms</a> | <a href="/copyright/">Copyright & Disclaimer</a></p>
+            <p>&copy; 2026 StreamPlay</p>
+        </div>
+    </main>
+
+    <!-- 本地依赖，不请求任何外网 CDN，保证离线可用 -->
+    <script src="./libs/hls.min.js?v=a12e7ee1"></script>
+    <script src="./js/m3u8-parser.js?v=aefd3495"></script>
+    <script src="./js/player.js?v=29656d3f"></script>
+
+
+
+<footer class="dd-brandfoot compact">
+    <div class="dd-shell-inner">
+        <p class="dd-brandfoot-title">DigDevBox · Free online developer tools</p>
+        <nav class="dd-brandfoot-nav">
+                <a href="https://www.digdevbox.com/">Developer Tools</a>
+                <a href="https://ip.digdevbox.com/">IP Lookup</a>
+                
+                <a href="https://img.digdevbox.com/">Image Compressor</a>
+                <a href="https://draw.digdevbox.com/">ImageForge</a>
+                <a href="https://ttsreader.digdevbox.com/">Text to Speech</a>
+                <a href="https://notes.digdevbox.com/">Forge Notes</a>
+        </nav>
+    </div>
+</footer>
+<script id="dd-theme-toggle-script">
+(function(){
+  var KEY='dd-theme';
+  function sysDark(){return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;}
+  function apply(t){var h=document.documentElement;
+    if(t==='dark'){h.setAttribute('data-theme','dark');h.removeAttribute('data-dd-auto');}
+    else if(t==='light'){h.setAttribute('data-theme','light');h.removeAttribute('data-dd-auto');}
+    else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
+    try{localStorage.setItem(KEY,t);}catch(e){}
+    sync();}
+  function effective(){var h=document.documentElement;
+    if(h.getAttribute('data-theme')==='dark')return 'dark';
+    if(h.getAttribute('data-theme')==='light')return 'light';
+    return sysDark()?'dark':'light';}
+  // aria/title 交给 i18n 内核统一管理（按钮已带 data-i18n-attr="aria-label:aria.themeToggle"）。
+  // 原因：本脚本的 init 挂在 DOMContentLoaded 上，执行晚于 defer 的 dd-i18n.js，
+  // 若在这里硬编码中文 aria，会把内核刚写好的英文 aria 覆盖回中文（实测到的假通过点）。
+  // 未启用 i18n 的站点（None window.DD_I18N）仍走原中文动态文案。
+  function sync(){var b=document.getElementById('dd-theme-toggle');if(!b)return;
+    var d=effective()==='dark';
+    b.textContent=d?'☀️':'🌙';
+    if(window.DD_I18N&&window.DD_I18N.t)return;
+    b.setAttribute('aria-label', d?'切换到浅色模式':'切换到深色模式');
+    b.setAttribute('title', d?'切换到浅色模式':'切换到深色模式');}
+  function toggle(){var c=effective();apply(c==='dark'?'light':'dark');}
+  function init(){var b=document.getElementById('dd-theme-toggle');if(b)b.addEventListener('click',toggle);sync();}
+  if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
+  if(window.matchMedia){matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){
+    try{if(localStorage.getItem(KEY))return;}catch(e){} sync();});}
+})();
+</script>
+<section class="seo-landing-link" style="max-width:900px;margin:2rem auto;padding:1rem"><h2>Online M3U8 / HLS Player — English Guide</h2><p>Learn how to play HLS streams, inspect M3U8 playlists, diagnose common playback issues and generate iframe embeds.</p><p><a href="/m3u8-player/">Open the M3U8 and HLS player guide</a></p></section>
+</body>
+
+</html>

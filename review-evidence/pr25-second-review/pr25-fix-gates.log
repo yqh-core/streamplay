@@ -1,0 +1,14 @@
+$ [exit=0] scripts/check-locales.mjs
+      [locales] PASS 鍚勮瑷€ key 闆嗗悎/绌哄€?澶氫綑閿?鍗犱綅绗︿竴鑷?
+$ [exit=0] scripts/check-asset-versioning.mjs
+      G-ASSET-VER PASS锛? 涓暱缂撳瓨璺緞寮曠敤鐨??v= 鍏ㄩ儴绛変簬褰撳墠鍐呭鍝堝笇锛堟壂 10 涓?HTML锛?
+$ [exit=0] scripts/check-asset-versioning.mjs --falsify
+      G-ASSET-VER 鑷锛氭鍙嶄緥鍧囩鍚堥鏈?
+$ [exit=0] scripts/test-m3u8-parser.mjs
+      PASS: production M3U8 parser 鈥?master/media, offsets, CRLF, VOD/LIVE/EVENT, empty/missing/invalid input, encryption marker
+$ [exit=0] scripts/check-ga4-consent.mjs
+      [GA4 consent] PASS: all eighteen public HTML pages, correct ID, opt-in gate, safe URL and privacy disclosure
+$ [exit=0] scripts/test-ga4-consent-runtime.mjs
+      [GA4 runtime] PASS: no pre-consent load; accept sends safe path-only page_view; reject blocks; noindex suppresses; withdrawal clears cookies
+$ [exit=0] scripts/test-player-parser-guard.mjs
+      PASS: player.js survives missing/malformed parser module; guard is load-bearing
