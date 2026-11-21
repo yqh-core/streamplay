@@ -2,6 +2,10 @@
 (function (root) {
   'use strict';
 
+  function resolveUrl(uri, base) {
+    try { return new URL(uri, base).href; } catch (e) { return uri; }
+  }
+
   /* 属性列表解析：KEY=VALUE,KEY2="带,逗号",RESOLUTION=1280x720 */
   function parseAttrs(s) {
       var out = {};
