@@ -1255,11 +1255,11 @@
             } else if (line.indexOf('#EXT-X-VERSION:') === 0) {
                 info.version = line.slice(15);
             } else if (line.indexOf('#EXT-X-TARGETDURATION:') === 0) {
-                info.targetDuration = parseFloat(line.slice(20)) || 0;
+                info.targetDuration = parseFloat(line.slice('#EXT-X-TARGETDURATION:'.length)) || 0;
             } else if (line.indexOf('#EXT-X-MEDIA-SEQUENCE:') === 0) {
-                info.mediaSequence = parseInt(line.slice(20), 10) || 0;
+                info.mediaSequence = parseInt(line.slice('#EXT-X-MEDIA-SEQUENCE:'.length), 10) || 0;
             } else if (line.indexOf('#EXT-X-PLAYLIST-TYPE:') === 0) {
-                info.playlistType = line.slice(19);
+                info.playlistType = line.slice('#EXT-X-PLAYLIST-TYPE:'.length);
             } else if (line.indexOf('#EXT-X-ENDLIST') === 0) {
                 info.endList = true;
             } else if (line.indexOf('#EXT-X-KEY:') === 0) {

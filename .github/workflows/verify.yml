@@ -35,6 +35,9 @@ jobs:
       - name: 静态资源版本串门禁自证（G-ASSET-VER --falsify）
         run: node scripts/check-asset-versioning.mjs --falsify
 
+      - name: M3U8 parser regression (production parser source)
+        run: node scripts/test-m3u8-parser.mjs
+
       - name: GA4 consent 静态门禁（ID / 页面覆盖 / 隐私边界）
         run: node scripts/check-ga4-consent.mjs
 
