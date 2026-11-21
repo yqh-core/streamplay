@@ -1223,8 +1223,14 @@
         try { return new URL(uri, base).href; } catch (e) { return uri; }
     }
 
-    /* Parser is a separately tested production module loaded before this file. */
-    var parseManifest = window.StreamPlayM3U8Parser.parseManifest;
+    /* Parser is a separately tested production module loaded before this file.
+       容错：解析模块可能因网络/部分部署/immutable 长缓存命中坏文件而未加载成功。
+       这里只做安全探测，绝不在顶层无保护解引用 window.StreamPlayM3U8Parser——
+       否则模块缺失会让整个播放器 IIFE 中止（把分析功能故障扩大成整播放器崩溃）。
+       模块缺失时不返回“看似正常的空解析”，只在 analyzeManifest 入口明确降级。 */
+    var m3u8ParserReady = !!(window.StreamPlayM3U8Parser
+        && typeof window.StreamPlayM3U8Parser.parseManifest === 'function');
+    var parseManifest = m3u8ParserReady ? window.StreamPlayM3U8Parser.parseManifest : null;
 
     function fmtDuration(sec) {
         if (!isFinite(sec) || sec <= 0) return '—';
@@ -1411,6 +1417,10 @@
 
     function analyzeManifest() {
         if (!maUrl || !maResult) return;
+        if (!m3u8ParserReady) {
+            maSetStatus('M3U8 清单分析暂不可用：解析模块未能加载；播放与其他功能不受影响，请刷新页面重试。', 'error');
+            return;
+        }
         var url = maUrl.value.trim();
         if (!url) { maSetStatus('请先输入 m3u8 地址', 'warn'); return; }
         if (!/^https?:\/\//i.test(url)) { maSetStatus('地址必须以 http:// 或 https:// 开头', 'warn'); return; }

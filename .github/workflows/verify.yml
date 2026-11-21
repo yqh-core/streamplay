@@ -32,6 +32,9 @@ jobs:
       - name: M3U8 production parser regression
         run: node scripts/test-m3u8-parser.mjs
 
+      - name: Player parser load guard regression
+        run: node scripts/test-player-parser-guard.mjs
+
       - name: 静态资源版本串门禁（G-ASSET-VER）
         run: node scripts/check-asset-versioning.mjs
 
