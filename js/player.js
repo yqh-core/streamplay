@@ -1213,6 +1213,13 @@
     var maResult = document.getElementById('ma-result');
     var maSeq = 0;
 
+    function maT(key, fallback, values) {
+        var value = window.DD_I18N && typeof window.DD_I18N.t === 'function' ? window.DD_I18N.t(key) : fallback;
+        return String(value).replace(/\\{([a-zA-Z0-9_]+)\\}/g, function (_, name) {
+            return values && values[name] !== undefined ? String(values[name]) : '{' + name + '}';
+        });
+    }
+
     function maSetStatus(msg, kind) {
         if (!maStatus) return;
         maStatus.textContent = msg;
@@ -1289,24 +1296,24 @@
     function renderMediaInfo(info, container, labelPrefix) {
         var chips = document.createElement('div');
         chips.className = 'ma-chips';
-        chips.appendChild(maChip('类型', info.endList ? 'VOD 点播' : 'LIVE 直播'));
-        if (info.version) chips.appendChild(maChip('HLS 版本', info.version));
-        if (info.targetDuration) chips.appendChild(maChip('目标分片时长', info.targetDuration + 's'));
-        chips.appendChild(maChip('分片数', String(info.segments.length)));
-        if (info.totalDuration > 0) chips.appendChild(maChip('总时长', fmtDuration(info.totalDuration)));
-        chips.appendChild(maChip('加密', info.encrypted ? info.keyMethod : '无'));
-        if (info.discontinuities) chips.appendChild(maChip('不连续点', String(info.discontinuities)));
+        chips.appendChild(maChip(maT('ma.type', 'Type'), info.endList ? maT('ma.vod', 'VOD') : maT('ma.live', 'LIVE')));
+        if (info.version) chips.appendChild(maChip(maT('ma.hlsVersion', 'HLS version'), info.version));
+        if (info.targetDuration) chips.appendChild(maChip(maT('ma.targetDuration', 'Target segment duration'), info.targetDuration + 's'));
+        chips.appendChild(maChip(maT('ma.segmentCount', 'Segments'), String(info.segments.length)));
+        if (info.totalDuration > 0) chips.appendChild(maChip(maT('ma.totalDuration', 'Total duration'), fmtDuration(info.totalDuration)));
+        chips.appendChild(maChip(maT('ma.encryption', 'Encryption'), info.encrypted ? info.keyMethod : maT('ma.none', 'None')));
+        if (info.discontinuities) chips.appendChild(maChip(maT('ma.discontinuities', 'Discontinuities'), String(info.discontinuities)));
         container.appendChild(chips);
         if (info.segments.length) {
             var durs = info.segments.map(function (s) { return s.duration; }).filter(function (d) { return d > 0; });
             if (durs.length) {
                 var sum = durs.reduce(function (a, b) { return a + b; }, 0);
-                container.appendChild(maSection((labelPrefix || '') + '分片时长：最短 ' + Math.min.apply(null, durs).toFixed(2) + 's · 最长 ' + Math.max.apply(null, durs).toFixed(2) + 's · 平均 ' + (sum / durs.length).toFixed(2) + 's'));
+                container.appendChild(maSection(maT('ma.segmentDurationStats', '{prefix}Segment duration: min {min}s · max {max}s · avg {avg}s', { prefix: labelPrefix || '', min: Math.min.apply(null, durs).toFixed(2), max: Math.max.apply(null, durs).toFixed(2), avg: (sum / durs.length).toFixed(2) })));
             }
             var details = document.createElement('details');
             details.className = 'ma-raw';
             var summary = document.createElement('summary');
-            summary.textContent = '分片列表（' + info.segments.length + ' 条，点击展开）';
+            summary.textContent = maT('ma.segmentList', 'Segments ({count}; select to expand)', { count: info.segments.length });
             details.appendChild(summary);
             var ol = document.createElement('ol');
             ol.className = 'ma-seglist';
@@ -1317,26 +1324,26 @@
             });
             if (info.segments.length > 200) {
                 var more = document.createElement('li');
-                more.textContent = '… 其余 ' + (info.segments.length - 200) + ' 条省略';
+                more.textContent = maT('ma.omittedSegments', '… {count} more omitted', { count: info.segments.length - 200 });
                 ol.appendChild(more);
             }
             details.appendChild(ol);
             container.appendChild(details);
         }
         if (info.initSegment) {
-            container.appendChild(maSection('初始化分片：' + info.initSegment));
+            container.appendChild(maSection(maT('ma.initSegment', 'Initialization segment: {uri}', { uri: info.initSegment })));
         }
     }
 
     function renderManifest(info, text, baseUrl, container) {
         var headChips = document.createElement('div');
         headChips.className = 'ma-chips';
-        headChips.appendChild(maChip(info.isMaster ? 'Master 主清单' : 'Media 媒体清单', info.isMaster ? '多码率' : '单码率'));
+        headChips.appendChild(maChip(info.isMaster ? maT('ma.masterPlaylist', 'Master playlist') : maT('ma.mediaPlaylist', 'Media playlist'), info.isMaster ? maT('ma.multiBitrate', 'Multiple bitrates') : maT('ma.singleBitrate', 'Single bitrate')));
         container.appendChild(headChips);
         if (info.isMaster) {
-            container.appendChild(maSection('变体流（' + info.variants.length + ' 条）'));
+            container.appendChild(maSection(maT('ma.variants', 'Variants ({count})', { count: info.variants.length })));
             container.appendChild(maTable(
-                ['#', '分辨率', '带宽', '帧率', '编码', '音轨组', '字幕组', 'URI'],
+                ['#', maT('ma.resolution', 'Resolution'), maT('ma.bandwidth', 'Bandwidth'), maT('ma.frameRate', 'Frame rate'), maT('ma.codec', 'Codecs'), maT('ma.audioGroup', 'Audio group'), maT('ma.subtitleGroup', 'Subtitle group'), maT('ma.uri', 'URI')],
                 info.variants.map(function (v, i) {
                     var bw = parseInt(v.BANDWIDTH || '0', 10);
                     return [String(i + 1), v.RESOLUTION || '—',
@@ -1346,12 +1353,12 @@
                 })
             ));
             if (info.media.length) {
-                container.appendChild(maSection('音轨 / 字幕组（' + info.media.length + ' 条）'));
+                container.appendChild(maSection(maT('ma.mediaGroups', 'Audio / subtitle groups ({count})', { count: info.media.length })));
                 container.appendChild(maTable(
-                    ['类型', '组 ID', '名称', '语言', '默认', 'URI'],
+                    [maT('ma.type', 'Type'), maT('ma.groupId', 'Group ID'), maT('ma.name', 'Name'), maT('ma.language', 'Language'), maT('ma.default', 'Default'), maT('ma.uri', 'URI')],
                     info.media.map(function (m) {
                         return [m.TYPE || '—', m['GROUP-ID'] || '—', m.NAME || '—',
-                            m.LANGUAGE || '—', m.DEFAULT || '—', m.URI || '（内嵌）'];
+                            m.LANGUAGE || '—', m.DEFAULT || '—', m.URI || maT('ma.embedded', '(embedded)')];
                     })
                 ));
             }
@@ -1361,16 +1368,16 @@
                 var sub = document.createElement('div');
                 sub.className = 'ma-sub';
                 container.appendChild(sub);
-                maSetStatus('正在分析首个变体的媒体清单…', 'info');
+                maSetStatus(maT('ma.analyzingFirstVariant', "Analyzing the first variant's media playlist…"), 'info');
                 fetchText(firstUri, 15000).then(function (r) {
                     var child = parseManifest(r.text, firstUri);
-                    var title = maSection('首个变体的媒体清单');
+                    var title = maSection(maT('ma.firstVariantMedia', 'First variant media playlist'));
                     sub.appendChild(title);
                     renderMediaInfo(child, sub, '');
-                    maSetStatus('分析完成：master + 首个变体媒体清单', 'ok');
+                    maSetStatus(maT('ma.analysisCompleteMaster', 'Analysis complete: master + first variant media playlist'), 'ok');
                 }).catch(function (e) {
-                    sub.appendChild(maSection('首个变体媒体清单获取失败：' + e.message + '（变体表仍可用）'));
-                    maSetStatus('分析完成：master 变体表可用；首个变体媒体清单不可读', 'warn');
+                    sub.appendChild(maSection(maT('ma.firstVariantFetchFailed', 'Could not fetch first variant media playlist: {error} (variant table is still available)', { error: e.message })));
+                    maSetStatus(maT('ma.analysisPartial', 'Analysis complete: master variants are available; first variant media playlist is unavailable'), 'warn');
                 });
             }
         } else {
@@ -1380,7 +1387,7 @@
         var raw = document.createElement('details');
         raw.className = 'ma-raw';
         var rawSum = document.createElement('summary');
-        rawSum.textContent = '清单原文（' + text.length + ' 字符，点击展开）';
+        rawSum.textContent = maT('ma.rawPlaylist', 'Raw playlist ({count} characters)', { count: text.length }) + ' — ' + maT('ma.expandToView', 'select to expand');
         raw.appendChild(rawSum);
         var pre = document.createElement('pre');
         pre.className = 'ma-pre';
@@ -1389,11 +1396,11 @@
         var copyBtn = document.createElement('button');
         copyBtn.type = 'button';
         copyBtn.className = 'mini-btn';
-        copyBtn.textContent = '复制原文';
+        copyBtn.textContent = maT('ma.copyRaw', 'Copy raw text');
         copyBtn.addEventListener('click', function () {
             copyText(text).then(function (ok) {
-                copyBtn.textContent = ok ? '已复制 ✓' : '复制失败';
-                setTimeout(function () { copyBtn.textContent = '复制原文'; }, 2000);
+                copyBtn.textContent = ok ? maT('ma.copied', 'Copied ✓') : maT('ma.copyFailed', 'Copy failed');
+                setTimeout(function () { copyBtn.textContent = maT('ma.copyRaw', 'Copy raw text'); }, 2000);
             });
         });
         raw.appendChild(copyBtn);
@@ -1405,12 +1412,12 @@
         var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs) : null;
         return fetch(url, ctrl ? { signal: ctrl.signal } : {}).then(function (resp) {
             if (timer) clearTimeout(timer);
-            if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+            if (!resp.ok) throw new Error(maT('ma.httpError', 'HTTP {status} {statusText}', { status: resp.status, statusText: resp.statusText }));
             return resp.text().then(function (text) { return { text: text, resp: resp }; });
         }).catch(function (e) {
             if (timer) clearTimeout(timer);
-            if (e && e.name === 'AbortError') throw new Error('请求超时（' + (timeoutMs / 1000) + 's）');
-            if (e instanceof TypeError) throw new Error('网络请求失败：地址不可达或对方不允许跨域（CORS）');
+            if (e && e.name === 'AbortError') throw new Error(maT('ma.timeout', 'Request timed out ({seconds}s)', { seconds: timeoutMs / 1000 }));
+            if (e instanceof TypeError) throw new Error(maT('ma.corsError', 'Network request failed: URL is unreachable or the host does not allow cross-origin access (CORS)'));
             throw e;
         });
     }
@@ -1418,29 +1425,29 @@
     function analyzeManifest() {
         if (!maUrl || !maResult) return;
         if (!m3u8ParserReady) {
-            maSetStatus('M3U8 清单分析暂不可用：解析模块未能加载；播放与其他功能不受影响，请刷新页面重试。', 'error');
+            maSetStatus(maT('ma.parserUnavailable', 'M3U8 analysis is temporarily unavailable: the parser module did not load. Playback and other features are unaffected. Refresh and try again.'), 'error');
             return;
         }
         var url = maUrl.value.trim();
-        if (!url) { maSetStatus('请先输入 m3u8 地址', 'warn'); return; }
-        if (!/^https?:\/\//i.test(url)) { maSetStatus('地址必须以 http:// 或 https:// 开头', 'warn'); return; }
+        if (!url) { maSetStatus(maT('ma.enterUrl', 'Enter an M3U8 URL first'), 'warn'); return; }
+        if (!/^https?:\/\//i.test(url)) { maSetStatus(maT('ma.httpUrlRequired', 'URL must start with http:// or https://'), 'warn'); return; }
         var seq = ++maSeq;
         maResult.innerHTML = '';
-        maSetStatus('正在获取清单…', 'info');
+        maSetStatus(maT('ma.fetching', 'Fetching playlist…'), 'info');
         if (maRun) maRun.disabled = true;
         fetchText(url, 15000).then(function (r) {
             if (seq !== maSeq) return;
             var text = r.text;
             if (text.trim().indexOf('#EXTM3U') !== 0) {
-                maSetStatus('内容不是 M3U8 清单（缺少 #EXTM3U 头）——可能是 HTML 错误页或媒体文件', 'error');
+                maSetStatus(maT('ma.notM3u8', 'This is not an M3U8 playlist (missing #EXTM3U header). It may be an HTML error page or a media file.'), 'error');
                 return;
             }
             var info = parseManifest(text, url);
             renderManifest(info, text, url, maResult);
-            if (!info.isMaster) maSetStatus('分析完成', 'ok');
+            if (!info.isMaster) maSetStatus(maT('ma.analysisComplete', 'Analysis complete'), 'ok');
         }).catch(function (e) {
             if (seq !== maSeq) return;
-            maSetStatus('分析失败：' + e.message, 'error');
+            maSetStatus(maT('ma.analysisFailed', 'Analysis failed: {error}', { error: e.message }), 'error');
         }).finally(function () {
             if (seq === maSeq && maRun) maRun.disabled = false;
         });
