@@ -8,7 +8,7 @@ const runtime = readFileSync('js/dd-i18n.js', 'utf8');
 const en = JSON.parse(readFileSync('locales/en.json', 'utf8'));
 const zh = JSON.parse(readFileSync('locales/zh.json', 'utf8'));
 
-const dataMatch = index.match(/<script id="dd-i18n-data">window\\.DD_I18N_DATA = ([\\s\\S]*?);<\\/script>/);
+const dataMatch = index.match(/<script id="dd-i18n-data">window\.DD_I18N_DATA = ([\s\S]*?);<\/script>/);
 assert.ok(dataMatch, 'index.html must embed locale data before runtime execution');
 const embedded = JSON.parse(dataMatch[1]);
 assert.deepEqual(embedded.en, en, 'embedded English locale must exactly match locales/en.json');
@@ -17,10 +17,10 @@ assert.deepEqual(embedded.zh, zh, 'embedded Chinese locale must exactly match lo
 const dataAt = index.indexOf('id="dd-i18n-data"');
 const runtimeAt = index.indexOf('js/dd-i18n.js');
 assert.ok(dataAt >= 0 && runtimeAt > dataAt, 'locale payload must precede the shared runtime');
-assert.match(index, /<script defer src="\\.\\/js\\/dd-i18n\\.js\\?v=[a-f0-9]{8}"><\\/script>/);
+assert.match(index, /<script defer src="\.\/js\/dd-i18n\.js\?v=[a-f0-9]{8}"><\/script>/);
 assert.match(index, /id="dd-lang-toggle"/, 'language toggle must exist for the shared runtime');
 
-const keys = [...player.matchAll(/maT\\(\\s*['"](ma\\.[^'"]+)['"]/g)].map((match) => match[1]);
+const keys = [...player.matchAll(/maT\(\s*['"](ma\.[^'"]+)['"]/g)].map((match) => match[1]);
 assert.ok(keys.length >= 40, 'expected the analyzer to use the shared locale dictionary');
 for (const key of new Set(keys)) {
   assert.equal(typeof en[key], 'string', 'missing English key: ' + key);
@@ -29,9 +29,9 @@ for (const key of new Set(keys)) {
   assert.ok(zh[key].trim(), 'empty Chinese key: ' + key);
 }
 const analyzer = player.slice(player.indexOf('/* ------------------------------------------------------------ M3U8 清单分析'), player.indexOf('/* ------------------------------------------------------------ 嵌入代码生成器'));
-assert.doesNotMatch(analyzer, /maSetStatus\\(\\s*['"][^'"]*[\\u4e00-\\u9fff]/, 'analyzer status messages must use translation keys');
-assert.doesNotMatch(analyzer, /maChip\\(\\s*['"][^'"]*[\\u4e00-\\u9fff]/, 'analyzer chips must use translation keys');
-assert.doesNotMatch(analyzer, /maSection\\(\\s*['"][^'"]*[\\u4e00-\\u9fff]/, 'analyzer sections must use translation keys');
+assert.doesNotMatch(analyzer, /maSetStatus\(\s*['"][^'"]*[\u4e00-\u9fff]/, 'analyzer status messages must use translation keys');
+assert.doesNotMatch(analyzer, /maChip\(\s*['"][^'"]*[\u4e00-\u9fff]/, 'analyzer chips must use translation keys');
+assert.doesNotMatch(analyzer, /maSection\(\s*['"][^'"]*[\u4e00-\u9fff]/, 'analyzer sections must use translation keys');
 
 function runLocale(languages, storedLocale) {
   let toggleHandler = null;
