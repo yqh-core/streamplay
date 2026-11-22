@@ -1215,7 +1215,7 @@
 
     function maT(key, fallback, values) {
         var value = window.DD_I18N && typeof window.DD_I18N.t === 'function' ? window.DD_I18N.t(key) : fallback;
-        return String(value).replace(/\\{([a-zA-Z0-9_]+)\\}/g, function (_, name) {
+        return String(value).replace(/\{([a-zA-Z0-9_]+)\}/g, function (_, name) {
             return values && values[name] !== undefined ? String(values[name]) : '{' + name + '}';
         });
     }
