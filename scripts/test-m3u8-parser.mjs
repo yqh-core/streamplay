@@ -12,7 +12,7 @@ const master = parseManifest([
   '#EXTM3U',
   '#EXT-X-VERSION:7',
   '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="English",URI="audio/en.m3u8"',
-  '#EXT-X-STREAM-INF:BANDWIDTH=1280000,RESOLUTION=1280x720',
+  '#EXT-X-STREAM-INF:BANDWIDTH=1280000,RESOLUTION=1280x720,CODECS="avc1.640028,mp4a.40.2"',
   'video/720p.m3u8'
 ].join('\n'), 'https://cdn.example.test/master.m3u8');
 assert.equal(master.isMaster, true);
@@ -20,6 +20,7 @@ assert.equal(master.version, '7');
 assert.equal(master.media.length, 1);
 assert.equal(master.variants.length, 1);
 assert.equal(master.variants[0].BANDWIDTH, '1280000');
+assert.equal(master.variants[0].CODECS, 'avc1.640028,mp4a.40.2', 'quoted comma-bearing CODECS attribute must remain intact');
 assert.equal(master.variants[0].uri, 'https://cdn.example.test/video/720p.m3u8');
 
 const vod = parseManifest([
