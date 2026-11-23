@@ -123,9 +123,20 @@ jobs:
           if (!home.body.includes('Paste an m3u8 / HLS or mp4 URL and hit play')) throw new Error('English StreamPlay hero description missing from source HTML');
           if (!home.body.includes('content="StreamPlay"')) throw new Error('English Open Graph site name missing');
 
-          const visibleHtml = home.body.replace(/<script\b[\s\S]*?<\/script>/gi, '').replace(/<style\b[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+          // The shared shell exposes one intentional bilingual language-switch control on English pages.
+          // Permit only its exact, accessible "中文" label; all other visible CJK source text remains a failure.
+          const languageToggle = home.body.match(/<button\b(?=[^>]*\bid=["']dd-lang-toggle["'])[^>]*>[\s\S]*?<\/button>/i);
+          if (!languageToggle) throw new Error('English homepage is missing its language switch control');
+          const languageToggleTag = languageToggle[0].match(/<button\b[^>]*>/i)?.[0] || '';
+          const languageToggleText = languageToggle[0].replace(/<[^>]*>/g, '').trim();
+          if (languageToggleText !== '中文' ||
+              !/\baria-label=["']Switch language["']/i.test(languageToggleTag) ||
+              !/\btitle=["']Switch language["']/i.test(languageToggleTag)) {
+            throw new Error('Language switch control must retain its exact accessible English label');
+          }
+          const visibleHtml = home.body.replace(languageToggle[0], '').replace(/<script\b[\s\S]*?<\/script>/gi, '').replace(/<style\b[\s\S]*?<\/style>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
           const cjkCount = (visibleHtml.match(/[\u3400-\u9fff]/g) || []).length;
-          if (cjkCount > 0) throw new Error('English homepage source HTML contains ' + cjkCount + ' CJK characters outside scripts, styles and comments');
+          if (cjkCount > 0) throw new Error('English homepage source HTML contains ' + cjkCount + ' CJK characters outside scripts, styles, comments and the approved language switch');
           if (!home.body.includes('Are my stream URLs uploaded or stored?')) throw new Error('English privacy FAQ missing from source HTML');
           if (!home.body.includes('How do I inspect available renditions and audio tracks')) throw new Error('English M3U8 analyzer FAQ missing from source HTML');
 
