@@ -10,7 +10,7 @@
   "topnav.faq": "常见问题",
   "topnav.about": "关于",
   "h1.title": "StreamPlay 流影",
-  "hero.subtitle": "粘贴 m3u8 / HLS 或 mp4 地址，点击播放即可观看",
+  "hero.subtitle": "播放 HLS / MP4，分析清单、诊断播放问题并生成嵌入代码",
   "placeholder.urlInput": "粘贴 m3u8 / HLS / mp4 播放地址",
   "btn.play": "播放",
   "trust.text": "隐私说明：本站不存储任何视频文件，播放内容直接来自你输入链接所属的第三方源站。",
@@ -69,5 +69,6 @@
   "ma.fetching": "正在获取清单…",
   "ma.notM3u8": "内容不是 M3U8 清单（缺少 #EXTM3U 头）——可能是 HTML 错误页或媒体文件",
   "ma.analysisFailed": "分析失败：{error}",
-  "ma.analysisComplete": "分析完成"
+  "ma.analysisComplete": "分析完成",
+  "h1.eyebrow": "M3U8 / HLS 工作台"
 }
