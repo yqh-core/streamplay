@@ -119,7 +119,7 @@ jobs:
             throw new Error('Production GA4 consent script is missing, misconfigured or not consent-gated');
           }
 
-          if (!home.body.includes('>StreamPlay</h1>')) throw new Error('English StreamPlay H1 missing from source HTML');
+          if (!home.body.includes('>M3U8 &amp; HLS Player</h1>')) throw new Error('English M3U8 & HLS Player H1 missing from source HTML');
           if (!home.body.includes('Paste an m3u8 / HLS or mp4 URL and hit play')) throw new Error('English StreamPlay hero description missing from source HTML');
           if (!home.body.includes('content="StreamPlay"')) throw new Error('English Open Graph site name missing');
 
