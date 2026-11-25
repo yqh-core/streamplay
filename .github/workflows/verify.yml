@@ -29,9 +29,6 @@ jobs:
       - name: Mobile cross-site navigation scroll affordance regression
         run: node --test tests/shell-mobile-nav.test.mjs
 
-      - name: Mobile cross-site navigation scroll affordance regression
-        run: node --test tests/shell-mobile-nav.test.mjs
-
       - name: M3U8 analyzer EN/ZH runtime regression
         run: node scripts/test-m3u8-i18n-runtime.mjs
 
