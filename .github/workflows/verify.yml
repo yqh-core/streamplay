@@ -26,6 +26,9 @@ jobs:
       - name: 校验 locale 配平（G2）
         run: node scripts/check-locales.mjs
 
+      - name: Mobile cross-site navigation scroll affordance regression
+        run: node --test tests/shell-mobile-nav.test.mjs
+
       - name: M3U8 analyzer EN/ZH runtime regression
         run: node scripts/test-m3u8-i18n-runtime.mjs
 
