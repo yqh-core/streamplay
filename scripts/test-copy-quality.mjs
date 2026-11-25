@@ -40,3 +40,11 @@ assert.equal((visibleText.match(/step-by-step checklist/g) || []).length, 1);
 assert.ok(!visibleText.includes('step-by-step browser checklist'));
 
 console.log('[copy-quality] PASS: one guide link, no repeated instruction, visible FAQ and FAQPage answer match');
+
+
+const hero = html.slice(html.indexOf('<div class="stream-hero">'), html.indexOf('</div>\\n    </main>'));
+assert.ok(hero.includes('id="url"'), 'first screen must expose the stream URL input');
+assert.ok(hero.includes('id="play-btn"'), 'first screen must expose the primary Play action');
+assert.ok(!hero.includes('A sample stream is prefilled.'), 'remove repeated instructions that restate the prefilled URL and Play action');
+assert.ok(hero.includes('class="demo-bar utility-bar"'), 'secondary tools must be grouped separately from sample streams');
+assert.ok(hero.includes('>Analyze playlist</a>') && hero.includes('>Build embed</a>') && hero.includes('>Fix playback</a>'), 'secondary tool labels must be short and scannable');
