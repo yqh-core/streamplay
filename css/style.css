@@ -1640,3 +1640,155 @@ html[data-theme="dark"] .main .form button:hover { background: var(--dd-primary)
     .emb-grid { grid-template-columns: minmax(0, 1fr); }
     .emb-preview-wrap iframe { height: 200px; }
 }
+
+
+/* ----------------------------------------------------------------
+   StreamPlay desktop workbench: URL/task controls beside the player.
+   Keep the player-first dark visual identity; stack naturally on mobile.
+----------------------------------------------------------------- */
+.main {
+    max-width: 1320px;
+}
+.stream-hero {
+    display: grid;
+    grid-template-columns: minmax(310px, .78fr) minmax(0, 1.22fr);
+    align-items: start;
+    gap: clamp(18px, 2.4vw, 32px);
+    width: 100%;
+    margin: 8px auto 28px;
+}
+.stream-hero-copy {
+    min-width: 0;
+    padding: clamp(22px, 2.8vw, 34px);
+    border: 1px solid color-mix(in srgb, var(--dd-primary) 20%, var(--border));
+    border-radius: 20px;
+    background:
+      radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--dd-primary) 12%, transparent), transparent 62%),
+      var(--dd-surface);
+    box-shadow: 0 16px 42px rgba(2, 6, 23, .10);
+}
+.stream-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0 14px;
+    padding: 6px 10px;
+    border: 1px solid color-mix(in srgb, var(--dd-primary) 35%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--dd-primary) 9%, var(--dd-surface));
+    color: var(--dd-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+.stream-hero-copy > h1 {
+    margin: 4px 0 12px;
+    text-align: left;
+    font-size: clamp(2rem, 3.1vw, 3rem);
+    line-height: 1.04;
+    letter-spacing: -.035em;
+    background: linear-gradient(100deg, var(--dd-text) 18%, var(--dd-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--dd-primary);
+}
+.stream-hero-copy > .subtitle {
+    margin: 0 0 22px;
+    text-align: left;
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 42ch;
+}
+.stream-hero-copy .hint {
+    margin: 10px 0 16px;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.stream-hero-copy .demo-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 0;
+}
+.stream-hero-copy .demo-label {
+    width: 100%;
+    margin-bottom: 1px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+.stream-hero-copy .demo-btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+}
+.stream-hero-stage {
+    min-width: 0;
+    padding-top: 8px;
+}
+.stream-hero-stage .player-shell {
+    margin-bottom: 8px;
+    box-shadow: 0 24px 60px rgba(2, 6, 23, .24);
+}
+.stream-hero-stage .player-wrap {
+    min-height: 260px;
+}
+.stream-hero-stage .kbd-hint {
+    margin: 10px 2px 0;
+    text-align: left;
+}
+.main > :not(.stream-hero):not([role="dialog"]) {
+    width: 100%;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.stream-hero-copy > .form {
+    margin-bottom: 8px;
+}
+.stream-hero-copy > .form input {
+    min-width: 0;
+}
+.stream-hero-copy > .tip {
+    margin-top: 8px;
+}
+@media (max-width: 940px) {
+    .main { max-width: 900px; }
+    .stream-hero {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+    }
+    .stream-hero-copy {
+        padding: clamp(20px, 4vw, 30px);
+    }
+    .stream-hero-copy > h1,
+    .stream-hero-copy > .subtitle {
+        text-align: center;
+    }
+    .stream-eyebrow {
+        display: flex;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .stream-hero-stage { padding-top: 0; }
+    .stream-hero-stage .kbd-hint { text-align: center; }
+}
+@media (max-width: 520px) {
+    .stream-hero-copy { padding: 18px 14px; border-radius: 15px; }
+    .stream-hero-copy > h1 { font-size: clamp(1.8rem, 8vw, 2.25rem); }
+    .stream-hero-copy .form button { width: 82px; }
+    .stream-hero-stage .player-wrap { min-height: 190px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .stream-hero-copy > h1,
+    .stream-hero-copy > .subtitle,
+    .stream-hero-copy > .form,
+    .stream-hero-copy > .demo-bar,
+    .stream-hero-stage > .now-playing,
+    .stream-hero-stage > .player-shell {
+        animation: none !important;
+        transition: none !important;
+    }
+}

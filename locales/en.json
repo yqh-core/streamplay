@@ -9,15 +9,15 @@
   "topnav.docs": "HLS Docs",
   "topnav.faq": "FAQ",
   "topnav.about": "About",
-  "h1.title": "StreamPlay",
-  "hero.subtitle": "Paste an m3u8 / HLS or mp4 URL and hit play",
+  "h1.title": "M3U8 & HLS Player",
+  "hero.subtitle": "Play a stream, inspect playlists, diagnose playback errors and build embeds",
   "placeholder.urlInput": "Paste an m3u8 / HLS / mp4 URL",
   "btn.play": "Play",
   "trust.text": "Privacy: we do not store any video files — playback streams straight from the third-party origin of the URL you enter.",
   "aria.themeToggle": "Toggle dark mode",
   "aria.langToggle": "Switch language",
-  "seo.title": "Online M3U8 & HLS Player — Playlist Analyzer, Diagnostics & Embed Builder",
-  "seo.description": "Play compatible M3U8 / HLS live and on-demand streams or MP4 URLs in your browser. Inspect playlists, diagnose CORS and codec issues, and generate iframe embeds — no plugin or installation required.",
+  "seo.title": "M3U8 & HLS Player — Analyze, Diagnose & Embed",
+  "seo.description": "Play M3U8 / HLS streams or MP4 URLs in your browser. Analyze playlists, diagnose CORS and codec issues, and create iframe embeds without installing a plugin.",
   "ma.type": "Type",
   "ma.vod": "VOD",
   "ma.live": "LIVE",
@@ -69,5 +69,6 @@
   "ma.fetching": "Fetching playlist…",
   "ma.notM3u8": "This is not an M3U8 playlist (missing #EXTM3U header). It may be an HTML error page or a media file.",
   "ma.analysisFailed": "Analysis failed: {error}",
-  "ma.analysisComplete": "Analysis complete"
+  "ma.analysisComplete": "Analysis complete",
+  "h1.eyebrow": "M3U8 / HLS WORKBENCH"
 }
