@@ -150,10 +150,6 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
             </button>
         </div>
 
-        <p class="hint">
-            A sample stream is prefilled. <strong>Select the Play button</strong> (or press Enter) to start playback. To play your own video, replace the URL with your M3U8 link and select Play.
-        </p>
-
         <!-- ② 示例流快捷按钮：没有地址时一键体验 -->
         <div class="demo-bar">
             <span class="demo-label">No stream URL? Try one of these:</span>
@@ -165,11 +161,11 @@ else{h.removeAttribute('data-theme');h.setAttribute('data-dd-auto','');}
         </div>
 
         <!-- ②-b 差异能力入口：纯 HTML 锚点直达（零 JS 零测量），复用 demo-btn 既有样式 -->
-        <div class="demo-bar">
-            <span class="demo-label">More than playback:</span>
-            <a class="demo-btn" href="#analyzer" style="text-decoration:none">🧾 Analyze an M3U8 playlist</a>
-            <a class="demo-btn" href="#embed" style="text-decoration:none">🧩 Generate an embed</a>
-            <a class="demo-btn" href="/guides/" style="text-decoration:none">🩺 Troubleshoot playback</a>
+        <div class="demo-bar utility-bar">
+            <span class="demo-label">Tools:</span>
+            <a class="demo-btn" href="#analyzer" style="text-decoration:none">Analyze playlist</a>
+            <a class="demo-btn" href="#embed" style="text-decoration:none">Build embed</a>
+            <a class="demo-btn" href="/guides/" style="text-decoration:none">Fix playback</a>
         </div>
 
         <div class="tip" id="tip" role="status" aria-live="polite"></div>
