@@ -1792,3 +1792,29 @@ html[data-theme="dark"] .main .form button:hover { background: var(--dd-primary)
         transition: none !important;
     }
 }
+
+
+/* 2026-11-25 first-use polish: keep the URL + Play task dominant, with clear secondary actions. */
+.stream-hero-copy .demo-btn {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.stream-hero-copy .utility-bar {
+    gap: 7px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.stream-hero-copy .utility-bar .demo-label {
+    width: auto;
+    margin: 0 4px 0 0;
+}
+
+@media (max-width: 520px) {
+    .stream-hero-copy .demo-bar { gap: 6px; margin-top: 10px; }
+    .stream-hero-copy .demo-btn { min-height: 40px; padding: 7px 9px; font-size: 12px; }
+    .stream-hero-copy .utility-bar { margin-top: 10px; padding-top: 10px; }
+}
