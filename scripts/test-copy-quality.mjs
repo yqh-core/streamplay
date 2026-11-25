@@ -23,10 +23,11 @@ const visibleText = answerHtml
   .replace(/\s+/g, ' ')
   .trim();
 
-const jsonLdScript = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
-assert.ok(jsonLdScript, 'FAQPage JSON-LD must exist');
-const jsonLd = JSON.parse(jsonLdScript[1]);
-const question = jsonLd.mainEntity.find(
+const jsonLdScripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)]
+  .map((match) => JSON.parse(match[1]));
+const faqPage = jsonLdScripts.find((item) => item['@type'] === 'FAQPage');
+assert.ok(faqPage, 'FAQPage JSON-LD must exist');
+const question = faqPage.mainEntity?.find(
   (item) => item.name === 'Why does a stream fail to load or keep buffering?',
 );
 assert.ok(question, 'FAQPage JSON-LD must include the playback troubleshooting question');
